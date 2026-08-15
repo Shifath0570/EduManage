@@ -24,7 +24,7 @@ export default function LoginPage() {
       if (res?.error) {
         setError(res.error.message || "Invalid credentials.");
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
     } catch (err: any) {
       setError(err?.message || "An unexpected error occurred.");
@@ -124,7 +124,7 @@ export default function LoginPage() {
         <p className="mt-6 text-center text-xs text-slate-400">
           Don&apos;t have an account?{" "}
           <Link
-            href="/signup"
+            href="/auth/Signup"
             className="font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
           >
             Sign up

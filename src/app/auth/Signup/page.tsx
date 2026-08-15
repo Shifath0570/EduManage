@@ -36,7 +36,7 @@ export default function SignUpPage() {
       if (res?.error) {
         setError(res.error.message || "Failed to create account.");
       } else {
-        router.push("/dashboard");
+        router.push("/");
       }
     } catch (err) {
       setError(err.message || "An unexpected error occurred.");
@@ -239,7 +239,7 @@ export default function SignUpPage() {
         <p className="mt-6 text-center text-xs text-slate-400">
           Already have an account?{" "}
           <Link
-            href="/login"
+            href="/auth/Login"
             className="font-semibold text-cyan-400 transition-colors hover:text-cyan-300"
           >
             Log in
