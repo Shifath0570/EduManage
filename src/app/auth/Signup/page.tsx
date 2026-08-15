@@ -39,7 +39,9 @@ export default function SignUpPage() {
         router.push("/");
       }
     } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+      const errorMessage =
+        err instanceof Error ? err.message : "An unexpected error occurred.";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -68,7 +70,7 @@ export default function SignUpPage() {
         )}
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
-          {/* Enhanced Interactive Role Selection */}
+          {/* Role Selection */}
           <div>
             <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-slate-400">
               I am joining as
@@ -249,3 +251,5 @@ export default function SignUpPage() {
     </main>
   );
 }
+
+

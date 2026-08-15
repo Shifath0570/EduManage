@@ -4,7 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Avatar, Chip, Button, Spinner } from "@heroui/react";
+import { Avatar, AvatarImage, AvatarFallback, Chip, Button, Spinner } from "@heroui/react";
 import {
   Home,
   BookOpen,
@@ -97,16 +97,16 @@ export default function DashboardSidebar() {
       <div className="p-4">
         {isPending ? (
           <div className="flex h-16 items-center justify-center rounded-xl bg-slate-900/60 border border-slate-800/60">
-            <Spinner size="sm" color="cyan" />
+            <Spinner size="sm" color="accent" />
           </div>
         ) : (
           <div className="flex items-center gap-3 rounded-xl border border-slate-800/60 bg-slate-900/40 p-3 backdrop-blur-md">
-            <Avatar
-              isBordered
-              className="h-10 w-10 ring-cyan-400/40 shrink-0"
-              name={user?.name || "User"}
-              src={user?.image || undefined}
-            />
+            <Avatar className="h-10 w-10 ring-2 ring-cyan-400/40 shrink-0">
+              {user?.image && <AvatarImage src={user.image} alt={user?.name || "User"} />}
+              <AvatarFallback className="bg-slate-800 text-slate-200 text-xs font-semibold">
+                {user?.name?.charAt(0).toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex flex-col min-w-0 flex-1">
               <span className="truncate text-sm font-semibold text-slate-200">
                 {user?.name || "User"}
@@ -114,7 +114,7 @@ export default function DashboardSidebar() {
               <div className="mt-1">
                 <Chip
                   size="sm"
-                  variant="bordered"
+                  variant="soft"
                   className={`h-5 capitalize text-[10px] font-semibold px-2 border ${roleStyleMap[currentRole]}`}
                 >
                   {currentRole}
@@ -159,19 +159,16 @@ export default function DashboardSidebar() {
       <div className="border-t border-slate-800/80 p-3">
         <Button
           fullWidth
-          variant="flat"
-          color="danger"
-          startContent={<LogOut className="h-4 w-4" />}
-          className="justify-start border border-rose-500/20 bg-rose-950/30 text-rose-400 hover:bg-rose-900/50 hover:text-rose-200"
+          variant="danger-soft"
+          className="flex gap-2 justify-start border border-rose-500/20 text-rose-400 hover:bg-rose-900/50 hover:text-rose-200"
           onPress={handleLogout}
         >
+          <LogOut className="h-4 w-4" />
           Sign Out
         </Button>
       </div>
     </aside>
   );
 }
-
-
 
 
