@@ -6,10 +6,10 @@ const Hero = () => {
         <div className="bg-[url('/images/Schools.png')] bg-cover bg-center bg-no-repeat">
             {/* Overlay */}
             <div className="bg-[#0B386C]/80">
-                <div className="container mx-auto flex flex-col justify-center bg-none lg:bg-[url('/images/Students.png')] bg-[length:800px_auto] bg-no-repeat bg-right-bottom min-h-[600px]">
+                <div className="container mx-auto flex flex-col justify-center  bg-none lg:bg-[url('/images/Students.png')] bg-[length:800px_auto] bg-no-repeat bg-right-bottom min-h-[600px]  px-4">
                     {/* Text */}
-                    <div className="max-w-[700px]">
-                        <h1 className="font-bold text-5xl text-white py-4">Empowering Education Through Smart Management</h1>
+                    <div className="max-w-[700px] ">
+                        <h1 className="font-bold text-5xl text-white  leading-snug">Empowering Education Through Smart Management</h1>
                         <p className="text-white text-xl py-4 max-w-[600px]">EduManage is a complet school management platform that simplifies administration, enhances learing, and connects students, teachers, and parents in one place</p>
 
                     </div>
