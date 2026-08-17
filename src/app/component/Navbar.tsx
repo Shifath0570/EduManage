@@ -57,41 +57,23 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 w-full bg-[#03204c] text-white border-b border-blue-900/40 shadow-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         
-        {/* Left Section: Mobile Toggle & Logo Branding */}
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-700/50 bg-blue-900/40 text-blue-200 hover:bg-blue-800/60 lg:hidden"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              {isMenuOpen ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              )}
-            </svg>
-          </button>
+        {/* Left Section: Brand Logo (Visible on all device sizes) */}
+        <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
+          <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-sm">
+            <Shield className="h-8 w-8 text-blue-400 fill-blue-500 absolute" />
+            <BookOpen className="h-4 w-4 text-white relative z-10 stroke-[2.5]" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-xl font-bold leading-none tracking-tight text-white">
+              EduManage
+            </span>
+            <span className="text-[10px] font-medium leading-tight text-blue-200/80">
+              School Management Platform
+            </span>
+          </div>
+        </Link>
 
-          {/* EduManage Brand Shield Logo */}
-          <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
-            <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-sm">
-              <Shield className="h-8 w-8 text-blue-400 fill-blue-500 absolute" />
-              <BookOpen className="h-4 w-4 text-white relative z-10 stroke-[2.5]" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xl font-bold leading-none tracking-tight text-white">
-                EduManage
-              </span>
-              <span className="text-[10px] font-medium leading-tight text-blue-200/80">
-                School Management Platform
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Middle Section: Clean Desktop Navigation with Active Underline */}
+        {/* Middle Section: Desktop Navigation */}
         <nav className="hidden items-center gap-8 lg:flex">
           {navItems.map((item) => {
             const isActive = pathname === item.href;
@@ -106,7 +88,6 @@ export default function Navbar() {
                 }`}
               >
                 {item.label}
-                {/* Underline Indicator matching the image design */}
                 {isActive && (
                   <span className="absolute bottom-0 left-0 h-[2px] w-full rounded-full bg-blue-400" />
                 )}
@@ -115,52 +96,69 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Section: Auth State / Actions */}
+        {/* Right Section */}
         <div className="flex items-center gap-3">
-          {isPending ? (
-            <div className="flex h-9 w-9 items-center justify-center text-white">
-              <Spinner size="sm" color="current" />
-            </div>
-          ) : isAuthenticated && user ? (
-            <div className="flex items-center gap-3">
-              <Link href="/profile" className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-blue-900/50">
-                <Avatar className="h-8 w-8 ring-2 ring-blue-400/50" size="sm">
-                  {user.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
-                  <AvatarFallback className="bg-blue-900 text-xs font-semibold text-white">
-                    {userInitial}
-                  </AvatarFallback>
-                </Avatar>
-                <span className="hidden text-sm font-semibold text-white sm:inline-block">
-                  {user.name || user.email?.split("@")[0]}
-                </span>
-              </Link>
+          {/* Desktop Right Actions (Auth / Buttons) */}
+          <div className="hidden lg:flex items-center gap-3">
+            {isPending ? (
+              <div className="flex h-9 w-9 items-center justify-center text-white">
+                <Spinner size="sm" color="current" />
+              </div>
+            ) : isAuthenticated && user ? (
+              <div className="flex items-center gap-3">
+                <Link href="/profile" className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-blue-900/50">
+                  <Avatar className="h-8 w-8 ring-2 ring-blue-400/50" size="sm">
+                    {user.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
+                    <AvatarFallback className="bg-blue-900 text-xs font-semibold text-white">
+                      {userInitial}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-sm font-semibold text-white">
+                    {user.name || user.email?.split("@")[0]}
+                  </span>
+                </Link>
 
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="flex h-9 items-center justify-center rounded-lg border border-rose-400/30 bg-rose-500/20 px-4 text-sm font-semibold text-rose-200 hover:bg-rose-500/30 transition-colors"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              {/* Outlined Dark Blue Login Button */}
-              <Link
-                href="/auth/Login"
-                className="flex h-9 items-center justify-center rounded-lg border border-blue-400/40 bg-transparent px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-900/50"
-              >
-                Login
-              </Link>
-              {/* Solid White Sign Up Button */}
-              <Link
-                href="/auth/Signup"
-                className="flex h-9 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-[#03204c] shadow transition-transform hover:bg-blue-50 active:scale-95"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex h-9 items-center justify-center rounded-lg border border-rose-400/30 bg-rose-500/20 px-4 text-sm font-semibold text-rose-200 hover:bg-rose-500/30 transition-colors"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Link
+                  href="/auth/Login"
+                  className="flex h-9 items-center justify-center rounded-lg border border-blue-400/40 bg-transparent px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-900/50"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/auth/Signup"
+                  className="flex h-9 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-[#03204c] shadow transition-transform hover:bg-blue-50 active:scale-95"
+                >
+                  Sign Up
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Right Toggle Menu Button */}
+          <button
+            type="button"
+            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-blue-700/50 bg-blue-900/40 text-blue-200 hover:bg-blue-800/60 lg:hidden"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+          >
+            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              {isMenuOpen ? (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -188,18 +186,19 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-blue-900/60" />
 
+            {/* Mobile Auth Options Inside Drawer */}
             {isAuthenticated ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 px-4 py-2">
                   <Avatar size="sm" className="h-8 w-8">
-                    {user.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
+                    {user?.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
                     <AvatarFallback className="bg-blue-900 text-xs font-semibold text-white">
                       {userInitial}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col truncate">
-                    <span className="text-sm font-semibold text-white">{user.name || "User"}</span>
-                    <span className="truncate text-xs text-blue-200/70">{user.email}</span>
+                    <span className="text-sm font-semibold text-white">{user?.name || "User"}</span>
+                    <span className="truncate text-xs text-blue-200/70">{user?.email}</span>
                   </div>
                 </div>
 
@@ -235,5 +234,6 @@ export default function Navbar() {
     </header>
   );
 }
+
 
 
