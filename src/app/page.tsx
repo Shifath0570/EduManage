@@ -1,12 +1,13 @@
-import Image from "next/image";
 import Hero from "./component/Hero";
 import StatisticsSection from "./component/StatisticsSection";
+import QuestionsSection from "./component/QuestionsSection";
 
 export default function Home() {
   return (
     <div>
-      <Hero/>
-      <StatisticsSection></StatisticsSection>
+      <Hero />
+      <StatisticsSection />
+      <QuestionsSection />
     </div>
   );
 }
