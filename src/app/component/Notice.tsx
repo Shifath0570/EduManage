@@ -45,6 +45,8 @@ const notice: NoticeItem[] = [
 
 ];
 
+
+
 const Notice: React.FC = () => {
     return (
         <div className="container mx-auto p-6">
@@ -108,31 +110,8 @@ const Notice: React.FC = () => {
                                 <Link href="#" className="text-blue-500 hover:text-blue-600 transition">Read More →</Link>
                             </div>
                         </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
                     </div>
-
                 </div>
-
-
-
             </div>
         </div>
     );
