@@ -1,9 +1,11 @@
-import Image from "next/image";
+import AboutSchool from "./component/AboutSchool";
+
+
 
 export default function Home() {
   return (
     <div>
-      
+      <AboutSchool/>
     </div>
   );
 }
