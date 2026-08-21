@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 
 export default function QuestionsSection() {
@@ -111,7 +110,7 @@ export default function QuestionsSection() {
       </div>
 
       {/* Content Container */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-between gap-8 md:flex-row md:items-center">
+      <div className="relative z-10 container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-between gap-8 md:flex-row md:items-center">
         {/* Left Content */}
         <div className="text-center md:text-left">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white leading-tight">
@@ -151,3 +150,9 @@ export default function QuestionsSection() {
     </section>
   );
 }
+
+
+
+
+
+
