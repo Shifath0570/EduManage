@@ -15,33 +15,33 @@ interface StudentMark {
     marks: string;
 }
 
-// const students: Student[] = [
-//     {
-//         id: 1,
-//         name: "Rahim",
-//         roll: "01",
-//     },
-//     {
-//         id: 2,
-//         name: "Karim",
-//         roll: "02",
-//     },
-//     {
-//         id: 3,
-//         name: "Hasan",
-//         roll: "03",
-//     },
-//     {
-//         id: 4,
-//         name: "Ahmed",
-//         roll: "04",
-//     },
-//     {
-//         id: 5,
-//         name: "Sakib",
-//         roll: "05",
-//     },
-// ];
+const students: Student[] = [
+    {
+        id: 1,
+        name: "Rahim",
+        roll: "01",
+    },
+    {
+        id: 2,
+        name: "Karim",
+        roll: "02",
+    },
+    {
+        id: 3,
+        name: "Hasan",
+        roll: "03",
+    },
+    {
+        id: 4,
+        name: "Ahmed",
+        roll: "04",
+    },
+    {
+        id: 5,
+        name: "Sakib",
+        roll: "05",
+    },
+];
 
 const  EnterResult = () => {
     const [selectedExam, setSelectedExam] = useState("");
