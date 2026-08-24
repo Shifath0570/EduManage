@@ -37,7 +37,7 @@ export default function SignUpPage() {
       if (res?.error) {
         setError(res.error.message || "Failed to create account.");
       } else {
-        router.push("/");
+        router.push("/admin/createUsers");
       }
     } catch (err) {
       const errorMessage =
