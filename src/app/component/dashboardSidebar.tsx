@@ -17,11 +17,8 @@ import {
   CreditCard,
   LogOut,
   Shield,
-<<<<<<< HEAD
   LucideScrollText,
-=======
   SquarePlus,
->>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 } from "lucide-react";
 
 import { useSession, signOut } from "../lib/auth-client";
@@ -37,13 +34,6 @@ type UserRole = "student" | "teacher" | "admin";
 
 const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <Home className="w-5 h-5" /> },
-<<<<<<< HEAD
-  { id: "assigned-classes", href: "/teacher/assigned_classes", label: "Assigned Classes", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "assigned-subjects", href: "/teacher/assigned_subjects", label: "Assigned Subjects", icon: <Plus className="w-5 h-5" /> },
-  { id: "students", href: "/teacher/students", label: "Students", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "attendance", href: "/teacher/attendance", label: "Attendance History", icon: <Compass className="w-5 h-5" /> },
-  { id: "manage-notices", href: "/teacher/notices", label: "Manage Notices", icon: <LucideScrollText className="w-5 h-5" /> },
-=======
   { id: "manageStudents", href: "/teacher/manageStudents", label: "Manage Students", icon: <Clock className="w-5 h-5" /> },
   { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <BookOpen className="w-5 h-5" /> },
   { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
@@ -53,7 +43,6 @@ const teacherNavItems: NavItem[] = [
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Resuls", icon: <Bookmark className="w-5 h-5" /> },
   { id: "createNotice", href: "/teacher/createNotice", label: "Create Notice", icon: <Bookmark className="w-5 h-5" /> },
   { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <Bookmark className="w-5 h-5" /> },
->>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 ];
 
 
@@ -67,13 +56,6 @@ const studentNavItems: NavItem[] = [
 ];
 
 const adminNavItems: NavItem[] = [
-<<<<<<< HEAD
-  { id: "home", href: "/admin", label: "Dashboard Home", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: "manage-students", href: "/admin/manage_students", label: "Manage Students", icon: <User className="w-5 h-5" /> },
-  { id: "manage-teachers", href: "/admin/manage_teachers", label: "Manage Teachers", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "manage-subjects", href: "/admin/manage_subjects", label: "Manage Subjects", icon: <CreditCard className="w-5 h-5" /> },
-
-=======
   { id: "overview", href: "/admin", label: "Overview", icon: <Home className="w-5 h-5" /> },
   { id: "createStudent", href: "/admin/createStudent/student", label: "Create Student", icon: <BookOpen className="w-5 h-5" /> },
   { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <BookOpen className="w-5 h-5" /> },
@@ -88,7 +70,6 @@ const adminNavItems: NavItem[] = [
   { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
   { id: "viewResuls", href: "/admin/viewResuls", label: "View Resuls", icon: <Compass className="w-5 h-5" /> },
   { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
->>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
