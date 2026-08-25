@@ -17,6 +17,7 @@ import {
   CreditCard,
   LogOut,
   Shield,
+  LucideScrollText,
 } from "lucide-react";
 
 import { useSession, signOut } from "../lib/auth-client";
@@ -36,6 +37,7 @@ const teacherNavItems: NavItem[] = [
   { id: "assigned-subjects", href: "/teacher/assigned_subjects", label: "Assigned Subjects", icon: <Plus className="w-5 h-5" /> },
   { id: "students", href: "/teacher/students", label: "Students", icon: <Bookmark className="w-5 h-5" /> },
   { id: "attendance", href: "/teacher/attendance", label: "Attendance History", icon: <Compass className="w-5 h-5" /> },
+  { id: "manage-notices", href: "/teacher/notices", label: "Manage Notices", icon: <LucideScrollText className="w-5 h-5" /> },
 ];
 
 const studentNavItems: NavItem[] = [
@@ -51,6 +53,7 @@ const adminNavItems: NavItem[] = [
   { id: "manage-students", href: "/admin/manage_students", label: "Manage Students", icon: <User className="w-5 h-5" /> },
   { id: "manage-teachers", href: "/admin/manage_teachers", label: "Manage Teachers", icon: <BookOpen className="w-5 h-5" /> },
   { id: "manage-subjects", href: "/admin/manage_subjects", label: "Manage Subjects", icon: <CreditCard className="w-5 h-5" /> },
+
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
