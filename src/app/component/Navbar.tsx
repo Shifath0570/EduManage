@@ -55,9 +55,9 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 w-full bg-[#03204c] text-white border-b border-blue-900/40 shadow-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
         
-        {/* Left Section: Brand Logo (Visible on all device sizes) */}
+        {/* Left Section: Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-sm">
             <Shield className="h-8 w-8 text-blue-400 fill-blue-500 absolute" />
@@ -98,7 +98,7 @@ export default function Navbar() {
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
-          {/* Desktop Right Actions (Auth / Buttons) */}
+          {/* Desktop Right Actions */}
           <div className="hidden lg:flex items-center gap-3">
             {isPending ? (
               <div className="flex h-9 w-9 items-center justify-center text-white">
@@ -127,20 +127,12 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <Link
-                  href="/auth/Login"
-                  className="flex h-9 items-center justify-center rounded-lg border border-blue-400/40 bg-transparent px-5 text-sm font-semibold text-white transition-colors hover:bg-blue-900/50"
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/Signup"
-                  className="flex h-9 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-[#03204c] shadow transition-transform hover:bg-blue-50 active:scale-95"
-                >
-                  Sign Up
-                </Link>
-              </div>
+              <Link
+                href="/auth/Login"
+                className="flex h-9 items-center justify-center rounded-lg bg-white px-5 text-sm font-semibold text-[#03204c] shadow transition-transform hover:bg-blue-50 active:scale-95"
+              >
+                Login
+              </Link>
             )}
           </div>
 
@@ -186,7 +178,7 @@ export default function Navbar() {
 
             <div className="my-2 border-t border-blue-900/60" />
 
-            {/* Mobile Auth Options Inside Drawer */}
+            {/* Mobile Auth Options */}
             {isAuthenticated ? (
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-3 px-4 py-2">
@@ -211,20 +203,13 @@ export default function Navbar() {
                 </button>
               </div>
             ) : (
-              <div className="flex flex-col gap-2 pt-1">
+              <div className="pt-1">
                 <Link
                   href="/auth/Login"
-                  className="flex h-10 w-full items-center justify-center rounded-lg border border-blue-400/40 bg-transparent text-sm font-semibold text-white"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Login
-                </Link>
-                <Link
-                  href="/auth/Signup"
                   className="flex h-10 w-full items-center justify-center rounded-lg bg-white text-sm font-semibold text-[#03204c]"
                   onClick={() => setIsMenuOpen(false)}
                 >
-                  Sign Up
+                  Login
                 </Link>
               </div>
             )}

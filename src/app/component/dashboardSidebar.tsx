@@ -17,7 +17,11 @@ import {
   CreditCard,
   LogOut,
   Shield,
+<<<<<<< HEAD
   LucideScrollText,
+=======
+  SquarePlus,
+>>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 } from "lucide-react";
 
 import { useSession, signOut } from "../lib/auth-client";
@@ -33,27 +37,58 @@ type UserRole = "student" | "teacher" | "admin";
 
 const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <Home className="w-5 h-5" /> },
+<<<<<<< HEAD
   { id: "assigned-classes", href: "/teacher/assigned_classes", label: "Assigned Classes", icon: <BookOpen className="w-5 h-5" /> },
   { id: "assigned-subjects", href: "/teacher/assigned_subjects", label: "Assigned Subjects", icon: <Plus className="w-5 h-5" /> },
   { id: "students", href: "/teacher/students", label: "Students", icon: <Bookmark className="w-5 h-5" /> },
   { id: "attendance", href: "/teacher/attendance", label: "Attendance History", icon: <Compass className="w-5 h-5" /> },
   { id: "manage-notices", href: "/teacher/notices", label: "Manage Notices", icon: <LucideScrollText className="w-5 h-5" /> },
+=======
+  { id: "manageStudents", href: "/teacher/manageStudents", label: "Manage Students", icon: <Clock className="w-5 h-5" /> },
+  { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <BookOpen className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
+  { id: "createAssingment", href: "/teacher/createAssingment", label: "Create Assingment", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },  
+  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/teacher/viewResuls", label: "View Resuls", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "createNotice", href: "/teacher/createNotice", label: "Create Notice", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <Bookmark className="w-5 h-5" /> },
+>>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 ];
 
+
 const studentNavItems: NavItem[] = [
-  { id: "overview", href: "/student", label: "Overview", icon: <Home className="w-5 h-5" /> },
-  { id: "class-info", href: "/student/class_information", label: "Class Info", icon: <Clock className="w-5 h-5" /> },
-  { id: "subjects", href: "/student/subjects", label: "Enrolled Subjects", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "profile", href: "/student/profile", label: "Profile Management", icon: <User className="w-5 h-5" /> },
-  { id: "attendance", href: "/student/attendance", label: "Attendance Record", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "overview", href: "/student", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
+  { id: "submitAssingment", href: "/student/submitAssingment", label: "Submit Assingment", icon: <BookOpen className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/student/viewResuls", label: "View Resuls", icon: <CreditCard className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/student/viewNotice", label: "View Notice", icon: <CreditCard className="w-5 h-5" /> },
+
 ];
 
 const adminNavItems: NavItem[] = [
+<<<<<<< HEAD
   { id: "home", href: "/admin", label: "Dashboard Home", icon: <LayoutDashboard className="w-5 h-5" /> },
   { id: "manage-students", href: "/admin/manage_students", label: "Manage Students", icon: <User className="w-5 h-5" /> },
   { id: "manage-teachers", href: "/admin/manage_teachers", label: "Manage Teachers", icon: <BookOpen className="w-5 h-5" /> },
   { id: "manage-subjects", href: "/admin/manage_subjects", label: "Manage Subjects", icon: <CreditCard className="w-5 h-5" /> },
 
+=======
+  { id: "overview", href: "/admin", label: "Overview", icon: <Home className="w-5 h-5" /> },
+  { id: "createStudent", href: "/admin/createStudent/student", label: "Create Student", icon: <BookOpen className="w-5 h-5" /> },
+  { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <BookOpen className="w-5 h-5" /> },
+  { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Plus className="w-5 h-5" /> },
+  { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "manageClasses", href: "/admin/manageClasses", label: "Manage Classes", icon: <Compass className="w-5 h-5" /> },
+  { id: "manageSubjects", href: "/admin/manageSubjects", label: "Manage Subjects", icon: <Compass className="w-5 h-5" /> },
+  { id: "takeAttendance", href: "/admin/takeAttendance", label: "Take Attendance", icon: <Compass className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <Compass className="w-5 h-5" /> },
+  { id: "createAssingment", href: "/admin/createAssingment", label: "Create Assingment", icon: <Compass className="w-5 h-5" /> },
+  { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <Compass className="w-5 h-5" /> },
+  { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/admin/viewResuls", label: "View Resuls", icon: <Compass className="w-5 h-5" /> },
+  { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
+>>>>>>> 0ec5bca6fcd1f7ede15b0af549861870bff79553
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
@@ -146,11 +181,10 @@ export default function DashboardSidebar() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${
-                isActive
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
                   ? "border border-[#03204c]/20 bg-[#03204c]/10 text-[#03204c] shadow-xs font-semibold"
                   : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-              }`}
+                }`}
             >
               <span className={isActive ? "text-[#03204c]" : "text-slate-400"}>
                 {item.icon}
