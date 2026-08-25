@@ -1,0 +1,84 @@
+{
+  "success": true,
+  "data": [
+    {
+      "teacherId": 1,
+      "name": "Rahim",
+      "email": "rahim@example.com",
+      "phone": "01711-222333",
+      "subjects": [
+        "Mathematics"
+      ],
+      "className": "10",
+      "section": "A",
+      "studentCount": 40,
+      "status": "Active"
+    },
+    {
+      "teacherId": 2,
+      "name": "Nusrat Jahan",
+      "email": "nusrat@example.com",
+      "phone": "01722-333444",
+      "subjects": [
+        "English",
+        "Language"
+      ],
+      "className": "9",
+      "section": "B",
+      "studentCount": 35,
+      "status": "Active"
+    },
+    {
+      "teacherId": 3,
+      "name": "Ariful Islam",
+      "email": "ariful@example.com",
+      "phone": "01733-444555",
+      "subjects": [
+        "Physics"
+      ],
+      "className": "11",
+      "section": "A",
+      "studentCount": 35,
+      "status": "Active"
+    },
+    {
+      "teacherId": 4,
+      "name": "Shamima Akter",
+      "email": "shamima@example.com",
+      "phone": "01744-555666",
+      "subjects": [
+        "Biology"
+      ],
+      "className": "10",
+      "section": "B",
+      "studentCount": 32,
+      "status": "Active"
+    },
+    {
+      "teacherId": 5,
+      "name": "Hasan Mahmud",
+      "email": "hasan@example.com",
+      "phone": "01755-666777",
+      "subjects": [
+        "Chemistry"
+      ],
+      "className": "12",
+      "section": "A",
+      "studentCount": 45,
+      "status": "Active"
+    },
+    {
+      "teacherId": 6,
+      "name": "Mizanur Rahman",
+      "email": "mizan@example.com",
+      "phone": "01766-777888",
+      "subjects": [
+        "ICT"
+      ],
+      "className": "9",
+      "section": "A",
+      "studentCount": 30,
+      "status": "Inactive"
+    }
+  ]
+}

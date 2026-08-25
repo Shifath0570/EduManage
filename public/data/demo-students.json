@@ -1,0 +1,68 @@
+{
+  "success": true,
+  "data": [
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d1",
+      "roll": "101",
+      "name": "Arafat Hossain",
+      "email": "arafat@example.com",
+      "class": "Class 8",
+      "section": "Section A",
+      "status": "Active"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d2",
+      "roll": "102",
+      "name": "Meherun Tisha",
+      "email": "tisha@example.com",
+      "class": "Class 8",
+      "section": "Section B",
+      "status": "Active"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d3",
+      "roll": "103",
+      "name": "Riadul Islam",
+      "email": "riad@example.com",
+      "class": "Class 9",
+      "section": "Section A",
+      "status": "Inactive"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d4",
+      "roll": "104",
+      "name": "Sadia Nahar",
+      "email": "sadia@example.com",
+      "class": "Class 9",
+      "section": "Section B",
+      "status": "Active"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d5",
+      "roll": "105",
+      "name": "Hasan Rahman",
+      "email": "hasan@example.com",
+      "class": "Class 10",
+      "section": "Section A",
+      "status": "Active"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d6",
+      "roll": "106",
+      "name": "Jannatul Ferdous",
+      "email": "jannatul@example.com",
+      "class": "Class 10",
+      "section": "Section B",
+      "status": "Inactive"
+    },
+    {
+      "_id": "64f1a2b3c4d5e6f7a8b9c0d7",
+      "roll": "107",
+      "name": "Mohammad Sami",
+      "email": "sami@example.com",
+      "class": "Class 7",
+      "section": "Section A",
+      "status": "Active"
+    }
+  ]
+}
