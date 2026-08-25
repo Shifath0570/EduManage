@@ -6,7 +6,7 @@ import {Testimonials} from "./component/Testimonials";
 import Hero from "./component/Hero";
 import { AboutSchool } from "./component/AboutSchool";
 import { FeaturedSection } from "./component/FeaturedSection";
-import { NoticeAndBlog } from "./component/Notice";
+import Notice from "./component/Notice";
 
 
 export default function Home() {
@@ -16,7 +16,7 @@ export default function Home() {
       <AboutSchool></AboutSchool>
       <FeaturedSection></FeaturedSection>
       <StatisticsSection />
-      <NoticeAndBlog></NoticeAndBlog>
+      <Notice></Notice>
       <WhyChooseUs/>
       <Testimonials/>
       <QuestionsSection />
