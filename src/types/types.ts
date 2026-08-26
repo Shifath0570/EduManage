@@ -14,22 +14,24 @@ export interface Content {
 
 // Define the type for a notice item
 export interface NoticeItem {
-    _id: string;
-    title: string;
-    issuedDate: string;
-    status?: string;
-    isActive?: boolean;
-    content?: {
-        subject: string;
-        summary: string;
-        fullText: string;
-    };
-    issuedBy?: {
-        name: string;
-        designation: string;
-        email: string;
-        contactNumber: string;
-    };
+  _id: string;
+  title: string;
+  issuedDate: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  isActive?: boolean;
+  content?: {
+    subject: string;
+    summary: string;
+    fullText: string;
+  };
+  issuedBy?: {
+    name: string;
+    designation: string;
+    email: string;
+    contactNumber: string;
+  };
 }
 
 

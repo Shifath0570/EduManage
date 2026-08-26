@@ -9,7 +9,6 @@ import { FeaturedSection } from "./component/FeaturedSection";
 import Notice from "./component/Notice";
 
 
-
 export default function Home() {
   return (
     <div>
@@ -17,7 +16,7 @@ export default function Home() {
       <AboutSchool></AboutSchool>
       <FeaturedSection></FeaturedSection>
       <StatisticsSection />
-      <Notice/>
+      <Notice></Notice>
       <WhyChooseUs/>
       <Testimonials/>
       <QuestionsSection />
