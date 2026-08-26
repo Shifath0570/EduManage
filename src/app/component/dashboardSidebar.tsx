@@ -19,6 +19,7 @@ import {
   Shield,
   LucideScrollText,
   SquarePlus,
+  PencilLine,
 } from "lucide-react";
 
 import { useSession, signOut } from "../lib/auth-client";
@@ -39,7 +40,7 @@ const teacherNavItems: NavItem[] = [
   { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
   { id: "createAssingment", href: "/teacher/createAssingment", label: "Create Assingment", icon: <Bookmark className="w-5 h-5" /> },
   { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },  
-  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <PencilLine className="w-5 h-5" /> }, 
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Resuls", icon: <Bookmark className="w-5 h-5" /> },
   { id: "createNotice", href: "/teacher/createNotice", label: "Create Notice", icon: <Bookmark className="w-5 h-5" /> },
   { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <Bookmark className="w-5 h-5" /> },
@@ -191,5 +192,3 @@ export default function DashboardSidebar() {
     </aside>
   );
 }
-
-
