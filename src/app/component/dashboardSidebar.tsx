@@ -21,8 +21,9 @@ import {
   SquarePlus,
   PencilLine,
 } from "lucide-react";
+import { signOut, useSession } from "../lib/auth-client";
 
-import { useSession, signOut } from "../lib/auth-client";
+
 
 export interface NavItem {
   id: string;
