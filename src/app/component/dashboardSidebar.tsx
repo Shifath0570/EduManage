@@ -20,10 +20,9 @@ import {
   SquarePlus,
   PencilLine,
 } from "lucide-react";
-
-import { useSession, signOut } from "../lib/auth-client";
-import { MdOutlineRemoveRedEye } from "react-icons/md";
+import { signOut, useSession } from "../lib/auth-client";
 import { LuNotebook } from "react-icons/lu";
+
 
 export interface NavItem {
   id: string;
