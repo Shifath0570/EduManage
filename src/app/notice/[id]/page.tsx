@@ -13,8 +13,7 @@ export default async function Page({ params }: PageProps) {
   const { id } = await params;
   const notice: NoticeItem | null = await getNoticeById(id);
 
-  console.log("Id:", id);
-  console.log("Notice:", notice);
+
 
   if (!notice) {
     return (
