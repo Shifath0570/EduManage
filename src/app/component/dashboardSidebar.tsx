@@ -17,12 +17,11 @@ import {
   CreditCard,
   LogOut,
   Shield,
-  LucideScrollText,
   SquarePlus,
   PencilLine,
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
-
+import { LuNotebook } from "react-icons/lu";
 
 
 export interface NavItem {
@@ -43,8 +42,7 @@ const teacherNavItems: NavItem[] = [
   { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },  
   { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <PencilLine className="w-5 h-5" /> }, 
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Resuls", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "createNotice", href: "/teacher/createNotice", label: "Create Notice", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <Bookmark className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <LuNotebook className="w-5 h-5" /> },
 ];
 
 
@@ -53,7 +51,7 @@ const studentNavItems: NavItem[] = [
   { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
   { id: "submitAssingment", href: "/student/submitAssingment", label: "Submit Assingment", icon: <BookOpen className="w-5 h-5" /> },
   { id: "viewResuls", href: "/student/viewResuls", label: "View Resuls", icon: <CreditCard className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/student/viewNotice", label: "View Notice", icon: <CreditCard className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/student/viewNotice", label: "View Notice", icon: <LuNotebook className="w-5 h-5" /> },
 
 ];
 
@@ -71,7 +69,7 @@ const adminNavItems: NavItem[] = [
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <Compass className="w-5 h-5" /> },
   { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
   { id: "viewResuls", href: "/admin/viewResuls", label: "View Resuls", icon: <Compass className="w-5 h-5" /> },
-  { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <LuNotebook className="w-5 h-5" /> },
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
