@@ -314,7 +314,7 @@ const Page = () => {
 
         // Redirect after 2 seconds
         setTimeout(() => {
-          router.push('/notices');
+          router.push('/notice');
         }, 2000);
         
       } else {
