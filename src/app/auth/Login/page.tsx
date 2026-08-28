@@ -91,12 +91,12 @@ export default function LoginPage(): React.ReactElement {
               <label className="block text-xs font-semibold uppercase tracking-wider text-slate-600">
                 Password
               </label>
-              <Link
+              {/* <Link
                 href="/forgot-password"
                 className="text-xs font-semibold text-blue-600 transition-colors hover:text-blue-800"
               >
                 Forgot?
-              </Link>
+              </Link> */}
             </div>
             <div className="relative">
               <input
@@ -126,16 +126,6 @@ export default function LoginPage(): React.ReactElement {
             {loading ? "Signing in..." : "Sign In"}
           </button>
         </form>
-
-        <p className="mt-6 text-center text-xs text-slate-500">
-          Don&apos;t have an account?{" "}
-          <Link
-            href="/auth/Signup"
-            className="font-semibold text-blue-600 transition-colors hover:text-blue-800"
-          >
-            Sign up
-          </Link>
-        </p>
       </div>
     </main>
   );
