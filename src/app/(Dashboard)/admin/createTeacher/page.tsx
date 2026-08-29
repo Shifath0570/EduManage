@@ -5,7 +5,8 @@ import React, { useState, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Card } from "@heroui/react";
-import { ArrowLeft, Upload, Plus, ChevronDown } from "lucide-react";
+import { ArrowLeft, Upload, Plus, ChevronDown, Check } from "lucide-react";
+import { useSession } from "@/app/lib/auth-client";
 
 interface TeacherFormData {
   fullName: string;
@@ -37,6 +38,11 @@ export default function AddTeacherPage(): React.ReactElement {
   const router = useRouter();
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
+  const [photoName, setPhotoName] = useState<string>("");
+
+  const { data: session, isPending } = useSession();
+  const user = session?.user
+  // console.log(user)
 
   const [formData, setFormData] = useState<TeacherFormData>({
     fullName: "",
@@ -67,22 +73,49 @@ export default function AddTeacherPage(): React.ReactElement {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>): void => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError("File size must be less than 2MB");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result as string;
+      setFormData((prev) => ({ ...prev, profilePhoto: base64String }));
+      setPhotoName(file.name);
+      setError("");
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
+    // Structured payload containing form data and metadata
+    const payload = {
+      userId: user?.id,
+      ...formData,
+      experienceYears: formData.experienceYears
+        ? Number(formData.experienceYears)
+        : undefined,
+      submittedAt: new Date().toISOString(),
+      status: "Active",
+    };
+
     try {
       const res = await fetch("/api/teachers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...formData,
-          experienceYears: formData.experienceYears
-            ? Number(formData.experienceYears)
-            : undefined,
-        }),
+        body: JSON.stringify({ payload }),
       });
+
+      console.log(payload)
 
       if (!res.ok) {
         const data: ApiErrorResponse = await res.json();
@@ -258,13 +291,30 @@ export default function AddTeacherPage(): React.ReactElement {
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Profile Photo
                 </label>
-                <div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-slate-300 transition-colors bg-slate-50/50">
-                  <Upload className="mx-auto h-6 w-6 text-blue-600 mb-1" />
-                  <p className="text-xs font-semibold text-slate-700">Upload photo</p>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
-                    JPG, PNG up to 2MB
-                  </p>
-                </div>
+                <label className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-slate-300 transition-colors bg-slate-50/50 block relative">
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  {photoName ? (
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold">
+                      <Check className="h-4 w-4" />
+                      <span className="truncate max-w-[150px]">{photoName}</span>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="mx-auto h-6 w-6 text-blue-600 mb-1" />
+                      <p className="text-xs font-semibold text-slate-700">
+                        Upload photo
+                      </p>
+                      <p className="text-[10px] text-slate-400 mt-0.5">
+                        JPG, PNG up to 2MB
+                      </p>
+                    </>
+                  )}
+                </label>
               </div>
 
               <div className="space-y-4">
@@ -501,5 +551,6 @@ export default function AddTeacherPage(): React.ReactElement {
     </div>
   );
 }
+
 
 

@@ -4,6 +4,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
 import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
+import { useSession } from "@/app/lib/auth-client";
 
 interface StudentFormData {
   name: string;
@@ -42,6 +43,9 @@ export default function CreateStudent() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
 
+  const { data: session, isPending } = useSession();
+  const user = session?.user;
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -66,12 +70,24 @@ export default function CreateStudent() {
     e.preventDefault();
     setLoading(true);
 
+    // Construct the complete payload sent to the backend endpoint
+    const payload = {
+      userId: user?.id,
+      ...formData,
+      createdBy: user?.id ?? null,
+      creatorEmail: user?.email ?? null,
+      metadata: {
+        submittedAt: new Date().toISOString(),
+      },
+    };
+
     try {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
+      console.log(payload)
 
       const data: { error?: string } = await res.json();
 
@@ -158,7 +174,7 @@ export default function CreateStudent() {
                 placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-[#081838] focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
 
@@ -344,15 +360,17 @@ export default function CreateStudent() {
             </Button>
             <Button
               type="submit"
-              isDisabled={loading}
+              isDisabled={loading || isPending}
               className="bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />
               ) : (
-                <Plus className="h-4 w-4 mr-1 inline" />
+                <>
+                  <Plus className="h-4 w-4 mr-1 inline" />
+                  Create Student
+                </>
               )}
-              Create Student
             </Button>
           </div>
         </form>
@@ -360,9 +378,6 @@ export default function CreateStudent() {
     </div>
   );
 }
-
-
-
 
 
 

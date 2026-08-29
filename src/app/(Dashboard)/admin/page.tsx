@@ -15,7 +15,7 @@ const admin = () => {
     }
 
     const user = session.user;
-    console.log("User:", user);
+    // console.log("User:", user);
     return (
         <div>
             <h2>this is admin</h2>
