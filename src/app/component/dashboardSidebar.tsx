@@ -13,16 +13,13 @@ import {
   Compass,
   Clock,
   User,
-  LayoutDashboard,
-  CreditCard,
-  LogOut,
   Shield,
   SquarePlus,
   PencilLine,
+  LogOut,
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
 import { LuNotebook } from "react-icons/lu";
-
 
 export interface NavItem {
   id: string;
@@ -31,7 +28,7 @@ export interface NavItem {
   icon: React.ReactNode;
 }
 
-type UserRole = "student" | "teacher" | "admin";
+type UserRole = "teacher" | "admin";
 
 const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <Home className="w-5 h-5" /> },
@@ -45,19 +42,9 @@ const teacherNavItems: NavItem[] = [
   { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <LuNotebook className="w-5 h-5" /> },
 ];
 
-
-const studentNavItems: NavItem[] = [
-  { id: "overview", href: "/student", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
-  { id: "submitAssingment", href: "/student/submitAssingment", label: "Submit Assingment", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "viewResuls", href: "/student/viewResuls", label: "View Resuls", icon: <CreditCard className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/student/viewNotice", label: "View Notice", icon: <LuNotebook className="w-5 h-5" /> },
-
-];
-
 const adminNavItems: NavItem[] = [
   { id: "overview", href: "/admin", label: "Overview", icon: <Home className="w-5 h-5" /> },
-  { id: "createStudent", href: "/admin/createStudent/student", label: "Create Student", icon: <BookOpen className="w-5 h-5" /> },
+  { id: "createStudent", href: "/admin/createStudent", label: "Create Student", icon: <BookOpen className="w-5 h-5" /> },
   { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <BookOpen className="w-5 h-5" /> },
   { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Plus className="w-5 h-5" /> },
   { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Bookmark className="w-5 h-5" /> },
@@ -73,16 +60,13 @@ const adminNavItems: NavItem[] = [
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
-  student: studentNavItems,
   teacher: teacherNavItems,
   admin: adminNavItems,
 };
 
-// Refined Light Theme Role Badges
 const roleStyleMap: Record<UserRole, string> = {
   admin: "bg-purple-100 text-purple-700 border-purple-200",
   teacher: "bg-blue-100 text-blue-700 border-blue-200",
-  student: "bg-[#03204c]/10 text-[#03204c] border-[#03204c]/20",
 };
 
 export default function DashboardSidebar() {
@@ -90,8 +74,8 @@ export default function DashboardSidebar() {
   const { data: session, isPending } = useSession();
   const user = session?.user as { name?: string; email?: string; image?: string; role?: UserRole } | undefined;
 
-  const currentRole: UserRole = (user?.role && user.role in navLinkMap) ? user.role : "student";
-  const navItems = navLinkMap[currentRole];
+  const currentRole: UserRole = user?.role === "admin" ? "admin" : "teacher";
+  const navItems = navLinkMap[currentRole] || [];
 
   const handleLogout = async () => {
     await signOut();
@@ -100,16 +84,16 @@ export default function DashboardSidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white text-slate-800 shadow-sm">
       {/* Sidebar Header / Brand */}
-      <div className="flex h-16 items-center gap-3 px-6 border-b border-slate-100">
+      <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-6">
         <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md">
-          <Shield className="h-7 w-7 text-blue-400 fill-blue-500 absolute" />
-          <BookOpen className="h-4 w-4 text-white relative z-10 stroke-[2.5]" />
+          <Shield className="absolute h-7 w-7 fill-blue-500 text-blue-400" />
+          <BookOpen className="relative z-10 h-4 w-4 stroke-[2.5] text-white" />
         </div>
         <div className="flex flex-col">
           <span className="text-base font-bold tracking-tight text-[#03204c]">
             EduManage
           </span>
-          <span className="text-[10px] uppercase font-semibold text-slate-400 tracking-wider">
+          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
             Portal
           </span>
         </div>
@@ -118,26 +102,25 @@ export default function DashboardSidebar() {
       {/* User Info Card */}
       <div className="p-4">
         {isPending ? (
-          <div className="flex h-16 items-center justify-center rounded-xl bg-slate-50 border border-slate-200">
+          <div className="flex h-16 items-center justify-center rounded-xl border border-slate-200 bg-slate-50">
             <Spinner size="sm" color="accent" />
           </div>
         ) : (
           <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/70 p-3 shadow-xs">
-            <Avatar className="h-10 w-10 ring-2 ring-[#03204c]/20 shrink-0">
+            <Avatar className="h-10 w-10 shrink-0 ring-2 ring-[#03204c]/20">
               {user?.image && <AvatarImage src={user.image} alt={user?.name || "User"} />}
-              <AvatarFallback className="bg-[#03204c] text-white text-xs font-semibold">
+              <AvatarFallback className="bg-[#03204c] text-xs font-semibold text-white">
                 {user?.name?.charAt(0).toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col min-w-0 flex-1">
+            <div className="flex min-w-0 flex-1 flex-col">
               <span className="truncate text-sm font-semibold text-slate-900">
                 {user?.name || "User"}
               </span>
               <div className="mt-1">
                 <Chip
                   size="sm"
-                  variant="soft"
-                  className={`h-5 capitalize text-[10px] font-bold px-2 border ${roleStyleMap[currentRole]}`}
+                  className={`h-5 border px-2 text-[10px] font-bold capitalize ${roleStyleMap[currentRole] || "border-slate-200 bg-slate-100 text-slate-700"}`}
                 >
                   {currentRole}
                 </Chip>
@@ -162,10 +145,11 @@ export default function DashboardSidebar() {
             <Link
               key={item.id}
               href={item.href}
-              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${isActive
-                  ? "border border-[#03204c]/20 bg-[#03204c]/10 text-[#03204c] shadow-xs font-semibold"
+              className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${
+                isActive
+                  ? "border border-[#03204c]/20 bg-[#03204c]/10 font-semibold text-[#03204c] shadow-xs"
                   : "text-slate-600 hover:bg-slate-100/80 hover:text-slate-900"
-                }`}
+              }`}
             >
               <span className={isActive ? "text-[#03204c]" : "text-slate-400"}>
                 {item.icon}
@@ -180,8 +164,7 @@ export default function DashboardSidebar() {
       <div className="border-t border-slate-100 p-3">
         <Button
           fullWidth
-          variant="danger-soft"
-          className="flex gap-2 justify-start border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-100 hover:text-rose-700 font-medium"
+          className="flex justify-start gap-2 border border-rose-200 bg-rose-50 font-medium text-rose-600 hover:bg-rose-100 hover:text-rose-700"
           onPress={handleLogout}
         >
           <LogOut className="h-4 w-4" />

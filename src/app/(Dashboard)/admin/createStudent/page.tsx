@@ -43,9 +43,6 @@ export default function CreateStudent() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
 
-  const { data: session, isPending } = useSession();
-  const user = session?.user;
-
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -72,17 +69,15 @@ export default function CreateStudent() {
 
     // Construct the complete payload sent to the backend endpoint
     const payload = {
-      userId: user?.id,
       ...formData,
-      createdBy: user?.id ?? null,
-      creatorEmail: user?.email ?? null,
       metadata: {
         submittedAt: new Date().toISOString(),
       },
     };
 
     try {
-      const res = await fetch("/api/students", {
+      const apiURL = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiURL}/api/students`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
@@ -360,7 +355,7 @@ export default function CreateStudent() {
             </Button>
             <Button
               type="submit"
-              isDisabled={loading || isPending}
+              // isDisabled={loading || isPending}
               className="bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
             >
               {loading ? (
