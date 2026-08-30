@@ -138,7 +138,9 @@ const Page = () => {
           throw new Error("API URL is not configured");
         }
 
-        const response = await fetch(`${apiUrl}api/notices/${id}`);
+        const response = await fetch(`${apiUrl}/api/notices/${id}`);
+        
+
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -148,6 +150,8 @@ const Page = () => {
         }
 
         const result: ApiResponse = await response.json();
+
+
 
         if (result.success && result.data) {
           const data = result.data;
@@ -292,7 +296,7 @@ const Page = () => {
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       // ✅ PUT REQUEST TO UPDATE NOTICE
-      const response = await fetch(`${apiUrl}api/notices/${id}`, {
+      const response = await fetch(`${apiUrl}/api/notices/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -355,7 +359,7 @@ const Page = () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!apiUrl) return;
 
-      const response = await fetch(`${apiUrl}api/notices/${id}`);
+      const response = await fetch(`${apiUrl}/api/notices/${id}`);
 
       if (response.ok) {
         const result: ApiResponse = await response.json();
