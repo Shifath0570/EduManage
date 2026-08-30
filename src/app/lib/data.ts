@@ -6,7 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:5000";
 
 export async function getNotices(): Promise<NoticeItem[]> {
   try {
-    const response = await fetch(`${API_URL}/api/notices`, {
+    const response = await fetch(`${API_URL}api/notices`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
@@ -27,7 +27,7 @@ export async function getNotices(): Promise<NoticeItem[]> {
 
 export async function getNoticeById(id: string): Promise<NoticeItem | null> {
   try {
-    const response = await fetch(`${API_URL}/api/notices/${id}`, {
+    const response = await fetch(`${API_URL}api/notices/${id}`, {
       next: { revalidate: 60 },
       headers: {
         "Content-Type": "application/json",
