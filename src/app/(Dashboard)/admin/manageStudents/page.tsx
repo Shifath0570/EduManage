@@ -1,9 +1,10 @@
+
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { 
   Eye, Edit3, UserCheck, ToggleLeft, ToggleRight, 
-  Trash2, Search, Filter, RotateCcw, Plus 
+  Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight 
 } from "lucide-react";
 
 interface Student {
@@ -21,13 +22,23 @@ const getInitials = (name: string) => {
 };
 
 const getAvatarBg = (index: number) => {
-  const colors = ["bg-blue-100 text-blue-600", "bg-purple-100 text-purple-600", "bg-green-100 text-green-600", "bg-amber-100 text-amber-600", "bg-rose-100 text-rose-600"];
+  const colors = [
+    "bg-blue-100 text-blue-600", 
+    "bg-purple-100 text-purple-600", 
+    "bg-green-100 text-green-600", 
+    "bg-amber-100 text-amber-600", 
+    "bg-rose-100 text-rose-600"
+  ];
   return colors[index % colors.length];
 };
 
 export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination states (Default 10 students per page)
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   useEffect(() => {
     async function fetchStudents() {
@@ -45,6 +56,26 @@ export default function ManageStudents() {
     }
     fetchStudents();
   }, []);
+
+  // Calculate pagination bounds
+  const totalStudents = students.length;
+  const totalPages = Math.ceil(totalStudents / itemsPerPage) || 1;
+
+  // Slice current page data
+  const currentStudents = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    return students.slice(startIndex, startIndex + itemsPerPage);
+  }, [students, currentPage, itemsPerPage]);
+
+  // Display counters (Showing X to Y of Z)
+  const startItemIndex = totalStudents === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const endItemIndex = Math.min(currentPage * itemsPerPage, totalStudents);
+
+  const handlePageChange = (page: number) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+    }
+  };
 
   return (
     <div className="p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
@@ -105,61 +136,118 @@ export default function ManageStudents() {
                 <tr>
                   <td colSpan={6} className="text-center py-8 text-slate-400">Loading student data...</td>
                 </tr>
+              ) : currentStudents.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-8 text-slate-400">No students found.</td>
+                </tr>
               ) : (
-                students.map((student, idx) => (
-                  <tr key={student._id} className="hover:bg-slate-50/60 transition">
-                    <td className="py-3 px-4 text-center text-slate-500">{idx + 1}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(idx)}`}>
-                          {getInitials(student.name)}
-                        </div>
-                        <div>
-                          <div className="font-semibold text-slate-800">{student.name}</div>
-                          <div className="text-xs text-slate-400">
-                            Roll: {student.roll} | {student.email}
+                currentStudents.map((student, idx) => {
+                  const overallIndex = (currentPage - 1) * itemsPerPage + idx;
+                  return (
+                    <tr key={student._id} className="hover:bg-slate-50/60 transition">
+                      <td className="py-3 px-4 text-center text-slate-500">{overallIndex + 1}</td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(overallIndex)}`}>
+                            {getInitials(student.name)}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-800">{student.name}</div>
+                            <div className="text-xs text-slate-400">
+                              Roll: {student.roll} | {student.email}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">{student.className}</td>
-                    <td className="py-3 px-4 text-slate-600">{student.section}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                        student.status === "Active" 
-                          ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50" 
-                          : "bg-rose-50 text-rose-500 border border-rose-200/50"
-                      }`}>
-                        {student.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center justify-center gap-1">
-                        <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></button>
-                        <button className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-md border border-purple-100"><Edit3 size={15} /></button>
-                        <button className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md border border-amber-100"><UserCheck size={15} /></button>
-                        <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md border border-emerald-100">
-                          {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
-                        </button>
-                        <button className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md border border-rose-100"><Trash2 size={15} /></button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">{student.className}</td>
+                      <td className="py-3 px-4 text-slate-600">{student.section}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          student.status === "Active" 
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50" 
+                            : "bg-rose-50 text-rose-500 border border-rose-200/50"
+                        }`}>
+                          {student.status}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></button>
+                          <button className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-md border border-purple-100"><Edit3 size={15} /></button>
+                          <button className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md border border-amber-100"><UserCheck size={15} /></button>
+                          <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md border border-emerald-100">
+                            {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
+                          </button>
+                          <button className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md border border-rose-100"><Trash2 size={15} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="p-4 flex items-center justify-between border-t border-slate-100 text-xs text-slate-500">
-          <div>Showing 1 to {students.length} of 25 students</div>
+        {/* Dynamic Pagination Footer */}
+        <div className="p-4 flex flex-wrap gap-3 items-center justify-between border-t border-slate-100 text-xs text-slate-500">
+          <div className="flex items-center gap-4">
+            <div>
+              Showing <span className="font-semibold text-slate-700">{startItemIndex}</span> to{" "}
+              <span className="font-semibold text-slate-700">{endItemIndex}</span> of{" "}
+              <span className="font-semibold text-slate-700">{totalStudents}</span> students
+            </div>
+
+            {/* Items Per Page Selector */}
+            <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
+              <span>Per page:</span>
+              <select
+                value={itemsPerPage}
+                onChange={(e) => {
+                  setItemsPerPage(Number(e.target.value));
+                  setCurrentPage(1); // Reset to page 1 on limit change
+                }}
+                className="bg-slate-50 border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+              >
+                <option value={5}>5</option>
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Page Buttons Controls */}
           <div className="flex gap-1 items-center">
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">Previous</button>
-            <button className="px-3 py-1.5 bg-slate-900 text-white rounded-md font-medium">1</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">2</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">3</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">Next</button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1 || loading}
+              className="px-2.5 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition"
+            >
+              <ChevronLeft size={14} /> Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+              <button
+                key={page}
+                onClick={() => handlePageChange(page)}
+                className={`px-3 py-1.5 rounded-md font-medium transition ${
+                  currentPage === page
+                    ? "bg-slate-900 text-white"
+                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
+
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === totalPages || loading}
+              className="px-2.5 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition"
+            >
+              Next <ChevronRight size={14} />
+            </button>
           </div>
         </div>
       </div>
@@ -187,8 +275,5 @@ export default function ManageStudents() {
     </div>
   );
 }
-
-
-
 
 
