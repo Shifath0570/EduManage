@@ -10,11 +10,13 @@ const NoticeAction = ({ notice }: { notice: any }) => {
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
+
+
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/notices/${notice._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notices/${notice._id}`,
         {
           method: "DELETE",
           headers: {
@@ -47,7 +49,6 @@ const NoticeAction = ({ notice }: { notice: any }) => {
   return (
     <>
       <div className="flex items-center gap-3 rounded-full bg-blue-50 px-4 py-2">
-        {/* Edit Notice */}
         {/* Edit Notice - Pass data via query params */}
         <Link
           href={`/admin/updateNotice/${notice._id}`}
