@@ -20,6 +20,7 @@ import {
   LucideScrollText,
   SquarePlus,
   PencilLine,
+  Eye,
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
 
@@ -70,7 +71,7 @@ const adminNavItems: NavItem[] = [
   { id: "createAssingment", href: "/admin/createAssingment", label: "Create Assingment", icon: <Compass className="w-5 h-5" /> },
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },
   { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
-  { id: "viewResuls", href: "/admin/viewResuls", label: "View Resuls", icon: <Compass className="w-5 h-5" /> },
+  { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Eye className="w-5 h-5" /> },  
   { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
 ];
 
