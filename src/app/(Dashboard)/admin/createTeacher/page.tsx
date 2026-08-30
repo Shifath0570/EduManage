@@ -138,11 +138,11 @@ export default function AddTeacherPage(): React.ReactElement {
     "w-full h-10 px-3 py-2 text-sm bg-transparent rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:outline-none transition-colors text-slate-700 placeholder:text-slate-400";
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6">
+    <div className="w-full max-w-5xl mx-auto space-y-6">
       {/* Back Link */}
-      <div className="mb-4">
+      <div className="mb-2">
         <Link
-          href="/admin/teachers"
+          href="/admin/manageTeachers"
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -150,22 +150,22 @@ export default function AddTeacherPage(): React.ReactElement {
         </Link>
       </div>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-[#081838]">
+      <div className="mb-4">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#081838]">
           Teacher Information
         </h1>
-        <p className="text-sm text-slate-500">Add a new teacher to the system.</p>
+        <p className="text-sm text-slate-500 mt-1">Add a new teacher to the system.</p>
       </div>
 
       {error && (
-        <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600">
+        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600">
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information Card */}
-        <Card className="p-6 shadow-sm border border-slate-100 bg-white rounded-2xl">
+        <Card className="p-4 sm:p-6 shadow-sm border border-slate-100 bg-white rounded-2xl">
           <div className="space-y-6">
             <h2 className="text-base font-semibold text-[#081838]">
               Personal Information
