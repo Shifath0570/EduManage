@@ -14,7 +14,7 @@ const NoticeAction = ({ notice }: { notice: any }) => {
     setIsDeleting(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}api/notices/${notice._id}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/notices/${notice._id}`,
         {
           method: "DELETE",
           headers: {
