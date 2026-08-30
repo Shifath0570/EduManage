@@ -4,7 +4,6 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
 import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
-import { useSession } from "@/app/lib/auth-client";
 
 interface StudentFormData {
   name: string;
@@ -43,6 +42,7 @@ export default function CreateStudent() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
 
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -79,12 +79,15 @@ export default function CreateStudent() {
       const apiURL = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${apiURL}/api/students`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json"},
         body: JSON.stringify(payload),
       });
       console.log(payload)
 
-      const data: { error?: string } = await res.json();
+      const data = await res.json();
+
+      // const data: { error?: string } = await res.json();
 
       if (!res.ok) {
         throw new Error(data.error || "Failed to submit student form.");
