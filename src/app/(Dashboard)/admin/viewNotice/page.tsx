@@ -23,7 +23,7 @@ const page = async () => {
                     </div>
 
 
-                    <div className="flex items-center gap-4 rounded-full bg-blue-50 px-4 py-2">
+                    <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 rounded-2xl sm:rounded-full bg-blue-50 px-4 py-2">
                         {/* Live Indicator with Notice Count */}
                         <div className="flex items-center gap-2">
                             <span className="relative flex h-3 w-3">
@@ -35,7 +35,7 @@ const page = async () => {
                             </span>
                         </div>
                         {/* Divider */}
-                        <div className="h-6 w-px bg-blue-200" />
+                        <div className="hidden sm:block h-6 w-px bg-blue-200" />
 
                         {/* Create Notice Button */}
                         <Link
@@ -55,17 +55,17 @@ const page = async () => {
                 <ul className="divide-y divide-gray-100">
                     {notices.map((notice: NoticeItem) => (
                         <li key={notice._id}>
-                            <div className="flex items-center justify-between gap-4 sm:gap-5 p-4 sm:p-5 hover:bg-gray-50 transition duration-150 ease-in-out">
-                                <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
+                            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-5 p-4 sm:p-5 hover:bg-gray-50 transition duration-150 ease-in-out">
+                                <div className="flex items-center gap-3 sm:gap-5 min-w-0 flex-1">
                                     <span className="flex-shrink-0 text-blue-500 text-2xl sm:text-3xl">
                                         <HiSpeakerphone />
                                     </span>
-                                    <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate">
+                                    <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 break-words">
                                         {notice.title}
                                     </p>
                                 </div>
 
-                                <div className="flex-shrink-0 ml-4">
+                                <div className="flex-shrink-0 self-end sm:self-center">
                                     <NoticeAction notice={notice} />
                                 </div>
                             </div>
