@@ -46,14 +46,14 @@ export default function ManageStudents() {
   }, []);
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+    <div className="w-full max-w-7xl mx-auto space-y-6 font-sans text-slate-800">
       {/* Header */}
-      <div className="flex justify-between items-start mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manage Students</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Manage Students</h1>
           <p className="text-sm text-slate-500 mt-1">View, add, edit and manage all students.</p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition">
+        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition shrink-0">
           <Plus size={16} /> Add Student
         </button>
       </div>
@@ -61,7 +61,7 @@ export default function ManageStudents() {
       {/* Main Container */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         {/* Search & Filter Controls */}
-        <div className="p-4 flex flex-wrap gap-3 items-center justify-between border-b border-slate-100">
+        <div className="p-4 flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between border-b border-slate-100">
           <div className="relative flex-1 min-w-[280px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
@@ -151,9 +151,9 @@ export default function ManageStudents() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="p-4 flex items-center justify-between border-t border-slate-100 text-xs text-slate-500">
+        <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-xs text-slate-500">
           <div>Showing 1 to {students.length} of 25 students</div>
-          <div className="flex gap-1 items-center">
+          <div className="flex gap-1 items-center flex-wrap justify-center">
             <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">Previous</button>
             <button className="px-3 py-1.5 bg-slate-900 text-white rounded-md font-medium">1</button>
             <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">2</button>
@@ -164,7 +164,7 @@ export default function ManageStudents() {
       </div>
 
       {/* Legend Footer */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {[
           { icon: Eye, label: "View Details", desc: "See student full details", color: "text-blue-600 bg-blue-50" },
           { icon: Edit3, label: "Edit Student", desc: "Edit student information", color: "text-purple-600 bg-purple-50" },
