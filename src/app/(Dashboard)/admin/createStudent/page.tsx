@@ -4,6 +4,7 @@
 import React, { useState, ChangeEvent, FormEvent } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
 import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface StudentFormData {
   name: string;
@@ -14,9 +15,10 @@ interface StudentFormData {
   address: string;
   guardianName: string;
   guardianPhone: string;
-  class: string;
+  className: string;
   section: string;
   studentId: string;
+  roll: string;
   admissionDate: string;
   profileImage: string;
 }
@@ -30,18 +32,20 @@ const initialFormData: StudentFormData = {
   address: "",
   guardianName: "",
   guardianPhone: "",
-  class: "",
+  className: "",
   section: "",
   studentId: "",
+  roll: "",
   admissionDate: "",
   profileImage: "",
 };
 
 export default function CreateStudent() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
-
+  const router = useRouter();
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -50,16 +54,45 @@ export default function CreateStudent() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result as string;
-        setAvatarPreview(base64String);
-        setFormData((prev) => ({ ...prev, profileImage: base64String }));
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    // Show temporary local preview while uploading
+    const localPreviewUrl = URL.createObjectURL(file);
+    setAvatarPreview(localPreviewUrl);
+    setUploadingImage(true);
+
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+      if (!apiKey) {
+        throw new Error("ImgBB API key is missing from environment variables.");
+      }
+
+      const body = new FormData();
+      body.append("image", file);
+
+      const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+        method: "POST",
+        body: body,
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const imageUrl = data.data.url;
+        setAvatarPreview(imageUrl);
+        setFormData((prev) => ({ ...prev, profileImage: imageUrl }));
+      } else {
+        throw new Error(data.error?.message || "Failed to upload image to ImgBB.");
+      }
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Image upload failed.";
+      alert(errorMessage);
+      setAvatarPreview(formData.profileImage || null);
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -67,7 +100,6 @@ export default function CreateStudent() {
     e.preventDefault();
     setLoading(true);
 
-    // Construct the complete payload sent to the backend endpoint
     const payload = {
       ...formData,
       metadata: {
@@ -80,20 +112,19 @@ export default function CreateStudent() {
       const res = await fetch(`${apiURL}/api/students`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"},
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(payload),
       });
-      console.log(payload)
 
       const data = await res.json();
-
-      // const data: { error?: string } = await res.json();
 
       if (!res.ok) {
         throw new Error(data.error || "Failed to submit student form.");
       }
 
       alert("Student created successfully!");
+      router.push("/admin/manageStudents");
       setFormData(initialFormData);
       setAvatarPreview(null);
     } catch (err) {
@@ -134,12 +165,22 @@ export default function CreateStudent() {
                 Upload Profile Picture
               </span>
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-purple-50 px-4 py-2 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100">
-                <Upload className="h-4 w-4" />
-                Choose Image
+                {uploadingImage ? (
+                  <>
+                    <Spinner size="sm" color="current" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-4 w-4" />
+                    Choose Image
+                  </>
+                )}
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
+                  disabled={uploadingImage}
                   className="hidden"
                 />
               </label>
@@ -281,8 +322,8 @@ export default function CreateStudent() {
               <div className="relative">
                 <select
                   required
-                  name="class"
-                  value={formData.class}
+                  name="className"
+                  value={formData.className}
                   onChange={handleInputChange}
                   className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
@@ -333,6 +374,21 @@ export default function CreateStudent() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
+                Roll Number <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="text"
+                name="roll"
+                placeholder="Enter roll number"
+                value={formData.roll}
+                onChange={handleInputChange}
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
                 Admission Date <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -358,7 +414,7 @@ export default function CreateStudent() {
             </Button>
             <Button
               type="submit"
-              // isDisabled={loading || isPending}
+              isDisabled={loading || uploadingImage}
               className="bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
             >
               {loading ? (
@@ -376,6 +432,4 @@ export default function CreateStudent() {
     </div>
   );
 }
-
-
 

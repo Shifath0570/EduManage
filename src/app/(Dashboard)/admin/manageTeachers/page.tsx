@@ -24,6 +24,7 @@ export default function ManageTeachersPage() {
   useEffect(() => {
     async function fetchTeachers() {
       try {
+        const apiURL = process.env.NEXT_PUBLIC_API_URL;
         // const res = await fetch('/api/teachers');
         const res = await fetch('/data/demoTeachers.json');
         const json = await res.json();

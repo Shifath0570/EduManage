@@ -923,11 +923,10 @@ const Page = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      const response = await fetch(`${apiUrl}api/notices`, {
+      const response = await fetch(`${apiUrl}/api/notices`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
         },
         credentials: "include",
         body: JSON.stringify(payload),
