@@ -1,4 +1,3 @@
-
 "use client";
 
 import React from "react";
@@ -18,6 +17,7 @@ import {
   PencilLine,
   Eye,
   LogOut,
+  X,
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
 import { LuNotebook } from "react-icons/lu";
@@ -29,7 +29,7 @@ export interface NavItem {
   icon: React.ReactNode;
 }
 
-type UserRole = "teacher" | "admin";
+export type UserRole = "teacher" | "admin" | "student";
 
 const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <Home className="w-5 h-5" /> },
@@ -51,7 +51,6 @@ const adminNavItems: NavItem[] = [
   { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Bookmark className="w-5 h-5" /> },
   { id: "manageClasses", href: "/admin/manageClasses", label: "Manage Classes", icon: <Compass className="w-5 h-5" /> },
   { id: "manageSubjects", href: "/admin/manageSubjects", label: "Manage Subjects", icon: <Compass className="w-5 h-5" /> },
-  { id: "takeAttendance", href: "/admin/takeAttendance", label: "Take Attendance", icon: <Compass className="w-5 h-5" /> },
   { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <Compass className="w-5 h-5" /> },
   { id: "createAssingment", href: "/admin/createAssingment", label: "Create Assingment", icon: <Compass className="w-5 h-5" /> },
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },
@@ -61,44 +60,69 @@ const adminNavItems: NavItem[] = [
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <LuNotebook className="w-5 h-5" /> },
 ];
 
+const studentNavItems: NavItem[] = [
+  { id: "overview", href: "/student", label: "Overview", icon: <Home className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
+];
+
 const navLinkMap: Record<UserRole, NavItem[]> = {
   teacher: teacherNavItems,
   admin: adminNavItems,
+  student: studentNavItems,
 };
 
 const roleStyleMap: Record<UserRole, string> = {
   admin: "bg-purple-100 text-purple-700 border-purple-200",
   teacher: "bg-blue-100 text-blue-700 border-blue-200",
+  student: "bg-emerald-100 text-emerald-700 border-emerald-200",
 };
 
-export default function DashboardSidebar() {
+interface DashboardSidebarProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const pathname = usePathname();
   const { data: session, isPending } = useSession();
   const user = session?.user as { name?: string; email?: string; image?: string; role?: UserRole } | undefined;
 
-  const currentRole: UserRole = user?.role === "admin" ? "admin" : "teacher";
+  const currentRole: UserRole = user?.role === "admin" ? "admin" : user?.role === "student" ? "student" : "teacher";
   const navItems = navLinkMap[currentRole] || [];
 
   const handleLogout = async () => {
     await signOut();
   };
 
-  return (
-    <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white text-slate-800 shadow-sm">
+  const content = (
+    <div className="flex h-full w-full flex-col bg-white text-slate-800">
       {/* Sidebar Header / Brand */}
-      <div className="flex h-16 items-center gap-3 border-b border-slate-100 px-6">
-        <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md">
-          <Shield className="absolute h-7 w-7 fill-blue-500 text-blue-400" />
-          <BookOpen className="relative z-10 h-4 w-4 stroke-[2.5] text-white" />
+      <div className="flex h-16 items-center justify-between border-b border-slate-100 px-6">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md">
+            <Shield className="absolute h-7 w-7 fill-blue-500 text-blue-400" />
+            <BookOpen className="relative z-10 h-4 w-4 stroke-[2.5] text-white" />
+          </div>
+          <div className="flex flex-col">
+            <span className="text-base font-bold tracking-tight text-[#03204c]">
+              EduManage
+            </span>
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+              Portal
+            </span>
+          </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-base font-bold tracking-tight text-[#03204c]">
-            EduManage
-          </span>
-          <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
-            Portal
-          </span>
-        </div>
+
+        {/* Mobile Close Button */}
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            aria-label="Close Sidebar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* User Info Card */}
@@ -147,6 +171,9 @@ export default function DashboardSidebar() {
             <Link
               key={item.id}
               href={item.href}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
               className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "border border-[#03204c]/20 bg-[#03204c]/10 font-semibold text-[#03204c] shadow-xs"
@@ -173,6 +200,24 @@ export default function DashboardSidebar() {
           Sign Out
         </Button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Persistent Sidebar */}
+      <aside className="hidden md:flex h-screen w-64 shrink-0 sticky top-0 flex-col border-r border-slate-200 bg-white shadow-sm z-20">
+        {content}
+      </aside>
+
+      {/* Mobile Drawer (Slide-in) */}
+      <div
+        className={`fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] transform bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {content}
+      </div>
+    </>
   );
 }
