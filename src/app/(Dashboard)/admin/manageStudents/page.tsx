@@ -11,7 +11,7 @@ interface Student {
   roll: string;
   name: string;
   email: string;
-  class: string;
+  className: string;
   section: string;
   status: "Active" | "Inactive";
 }
@@ -32,8 +32,9 @@ export default function ManageStudents() {
   useEffect(() => {
     async function fetchStudents() {
       try {
-        // const response = await fetch("/api/students");
-        const response = await fetch("/data/demo-students.json");
+        const apiURL = process.env.NEXT_PUBLIC_API_URL;
+        const response = await fetch(`${apiURL}/api/students`);
+        // const response = await fetch("/data/demo-students.json");
         const result = await response.json();
         if (result.success) setStudents(result.data);
       } catch (err) {
@@ -121,7 +122,7 @@ export default function ManageStudents() {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-slate-600">{student.class}</td>
+                    <td className="py-3 px-4 text-slate-600">{student.className}</td>
                     <td className="py-3 px-4 text-slate-600">{student.section}</td>
                     <td className="py-3 px-4">
                       <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
