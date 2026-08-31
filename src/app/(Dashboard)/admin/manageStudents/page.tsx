@@ -45,7 +45,6 @@ export default function ManageStudents() {
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL;
         const response = await fetch(`${apiURL}/api/students`);
-        // const response = await fetch("/data/demo-students.json");
         const result = await response.json();
         if (result.success) setStudents(result.data);
       } catch (err) {
@@ -75,6 +74,37 @@ export default function ManageStudents() {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
     }
+  };
+
+  /**
+   * Generates page numbers array with ellipsis (...)
+   * Examples:
+   * [1, 2, 3, 4, 5] (when totalPages <= 5)
+   * [1, 2, 3, '...', 10] (when at start)
+   * [1, '...', 4, 5, 6, '...', 10] (when in middle)
+   * [1, '...', 8, 9, 10] (when near end)
+   */
+  const getPaginationRange = () => {
+    const delta = 1; // Number of pages to show around the current page
+    const range: (number | string)[] = [];
+
+    for (let i = 1; i <= totalPages; i++) {
+      if (
+        i === 1 || // Always show first page
+        i === totalPages || // Always show last page
+        (i >= currentPage - delta && i <= currentPage + delta) // Show sibling pages
+      ) {
+        range.push(i);
+      } else if (
+        (i === currentPage - delta - 1 && i > 1) ||
+        (i === currentPage + delta + 1 && i < totalPages)
+      ) {
+        range.push("...");
+      }
+    }
+
+    // Filter duplicate consecutive ellipses
+    return range.filter((item, index, array) => item !== array[index - 1]);
   };
 
   return (
@@ -205,7 +235,7 @@ export default function ManageStudents() {
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
-                  setCurrentPage(1); // Reset to page 1 on limit change
+                  setCurrentPage(1);
                 }}
                 className="bg-slate-50 border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
               >
@@ -217,7 +247,7 @@ export default function ManageStudents() {
             </div>
           </div>
 
-          {/* Page Buttons Controls */}
+          {/* Page Buttons Controls with Ellipsis */}
           <div className="flex gap-1 items-center">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -227,19 +257,29 @@ export default function ManageStudents() {
               <ChevronLeft size={14} /> Previous
             </button>
 
-            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
-                key={page}
-                onClick={() => handlePageChange(page)}
-                className={`px-3 py-1.5 rounded-md font-medium transition ${
-                  currentPage === page
-                    ? "bg-slate-900 text-white"
-                    : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {page}
-              </button>
-            ))}
+            {getPaginationRange().map((item, index) => {
+              if (item === "...") {
+                return (
+                  <span key={`ellipsis-${index}`} className="px-2 py-1.5 text-slate-400 font-medium">
+                    ...
+                  </span>
+                );
+              }
+
+              return (
+                <button
+                  key={item}
+                  onClick={() => handlePageChange(Number(item))}
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    currentPage === item
+                      ? "bg-slate-900 text-white"
+                      : "border border-slate-200 text-slate-600 hover:bg-slate-50"
+                  }`}
+                >
+                  {item}
+                </button>
+              );
+            })}
 
             <button
               onClick={() => handlePageChange(currentPage + 1)}
