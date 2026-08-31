@@ -379,6 +379,8 @@
 
 import { useEffect, useState, useMemo } from 'react';
 import { Search, Eye, Edit, UserCheck, BookOpen, ToggleLeft, ToggleRight, Plus, RotateCcw, Users, X } from 'lucide-react';
+import { Button } from '@heroui/react';
+import Link from 'next/link';
 
 interface Teacher {
   _id: string;
@@ -660,57 +662,46 @@ export default function ManageTeachersPage() {
                       </td>
                       <td className="py-4 px-2 text-right">
                         <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            onClick={() => {
-                              setSelectedTeacher(teacher);
-                              setActiveModal('view');
-                            }}
-                            className="p-1.5 text-blue-600 bg-blue-50 rounded-md hover:bg-blue-100 transition"
-                            title="View Teacher"
-                          >
-                            <Eye size={16} />
-                          </button>
-                          <button
+                          <Link href={`/admin/manageTeachers/${teacher._id}`}>
+                            <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></Button>
+                          </Link>
+                          <Button
                             onClick={() => {
                               setSelectedTeacher(teacher);
                               setActiveModal('edit');
                             }}
                             className="p-1.5 text-indigo-600 bg-indigo-50 rounded-md hover:bg-indigo-100 transition"
-                            title="Edit Teacher"
                           >
                             <Edit size={16} />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => {
                               setSelectedTeacher(teacher);
                               setActiveModal('assignSubject');
                             }}
                             className="p-1.5 text-amber-600 bg-amber-50 rounded-md hover:bg-amber-100 transition"
-                            title="Assign Subject"
                           >
                             <UserCheck size={16} />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => {
                               setSelectedTeacher(teacher);
                               setActiveModal('assignClass');
                             }}
                             className="p-1.5 text-emerald-600 bg-emerald-50 rounded-md hover:bg-emerald-100 transition"
-                            title="Assign Class/Section"
                           >
                             <BookOpen size={16} />
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             onClick={() => handleToggleStatus(teacher)}
                             className="p-1.5 bg-slate-100 rounded-md hover:bg-slate-200 transition"
-                            title="Toggle Status"
                           >
                             {teacher.status === 'Active' ? (
                               <ToggleRight size={18} className="text-emerald-600" />
                             ) : (
                               <ToggleLeft size={18} className="text-slate-400" />
                             )}
-                          </button>
+                          </Button>
                         </div>
                       </td>
                     </tr>

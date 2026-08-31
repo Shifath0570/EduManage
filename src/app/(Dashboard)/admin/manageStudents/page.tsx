@@ -2,10 +2,13 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { 
-  Eye, Edit3, UserCheck, ToggleLeft, ToggleRight, 
-  Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight 
+import {
+  Eye, Edit3, UserCheck, ToggleLeft, ToggleRight,
+  Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight
 } from "lucide-react";
+import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
+import { Button } from "@heroui/react";
+import Link from "next/link";
 
 interface Student {
   _id: string;
@@ -23,10 +26,10 @@ const getInitials = (name: string) => {
 
 const getAvatarBg = (index: number) => {
   const colors = [
-    "bg-blue-100 text-blue-600", 
-    "bg-purple-100 text-purple-600", 
-    "bg-green-100 text-green-600", 
-    "bg-amber-100 text-amber-600", 
+    "bg-blue-100 text-blue-600",
+    "bg-purple-100 text-purple-600",
+    "bg-green-100 text-green-600",
+    "bg-amber-100 text-amber-600",
     "bg-rose-100 text-rose-600"
   ];
   return colors[index % colors.length];
@@ -76,14 +79,6 @@ export default function ManageStudents() {
     }
   };
 
-  /**
-   * Generates page numbers array with ellipsis (...)
-   * Examples:
-   * [1, 2, 3, 4, 5] (when totalPages <= 5)
-   * [1, 2, 3, '...', 10] (when at start)
-   * [1, '...', 4, 5, 6, '...', 10] (when in middle)
-   * [1, '...', 8, 9, 10] (when near end)
-   */
   const getPaginationRange = () => {
     const delta = 1; // Number of pages to show around the current page
     const range: (number | string)[] = [];
@@ -192,23 +187,24 @@ export default function ManageStudents() {
                       <td className="py-3 px-4 text-slate-600">{student.className}</td>
                       <td className="py-3 px-4 text-slate-600">{student.section}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          student.status === "Active" 
-                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50" 
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${student.status === "Active"
+                            ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50"
                             : "bg-rose-50 text-rose-500 border border-rose-200/50"
-                        }`}>
+                          }`}>
                           {student.status}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1">
-                          <button className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></button>
-                          <button className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-md border border-purple-100"><Edit3 size={15} /></button>
-                          <button className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-md border border-amber-100"><UserCheck size={15} /></button>
-                          <button className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-md border border-emerald-100">
+                          <Link href={`/admin/manageStudents/${student._id}`}>
+                            <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></Button>
+                          </Link>
+                          <Button className="p-1.5 text-purple-600 bg-white hover:bg-purple-50 rounded-md border border-purple-100"><Edit3 size={15} /></Button>
+                          <Button className="p-1.5 text-amber-600 bg-white hover:bg-amber-50 rounded-md border border-amber-100"><UserCheck size={15} /></Button>
+                          <Button className="p-1.5 text-emerald-600 bg-white hover:bg-emerald-50 rounded-md border border-emerald-100">
                             {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
-                          </button>
-                          <button className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-md border border-rose-100"><Trash2 size={15} /></button>
+                          </Button>
+                          <StudentDeleteAction studentId={student._id} studentName={student.name}></StudentDeleteAction>
                         </div>
                       </td>
                     </tr>
@@ -270,11 +266,10 @@ export default function ManageStudents() {
                 <button
                   key={item}
                   onClick={() => handlePageChange(Number(item))}
-                  className={`px-3 py-1.5 rounded-md font-medium transition ${
-                    currentPage === item
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${currentPage === item
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {item}
                 </button>
