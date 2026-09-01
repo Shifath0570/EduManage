@@ -166,7 +166,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/students/edit/${studentIdParam}`}
+            href={`/admin/manageStudents/edit/${studentIdParam}`}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
           >
             <Edit size={16} /> Edit Profile

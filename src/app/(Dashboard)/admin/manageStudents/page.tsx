@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import {
-  Eye, Edit3, UserCheck, ToggleLeft, ToggleRight,
+  Eye, ToggleLeft, ToggleRight,
   Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
@@ -108,7 +108,7 @@ export default function ManageStudents() {
       <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Manage Students</h1>
-          <p className="text-sm text-slate-500 mt-1">View, add, edit and manage all students.</p>
+          <p className="text-sm text-slate-500 mt-1">View, add, and manage all students.</p>
         </div>
         <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition">
           <Plus size={16} /> Add Student
@@ -199,8 +199,6 @@ export default function ManageStudents() {
                           <Link href={`/admin/manageStudents/${student._id}`}>
                             <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></Button>
                           </Link>
-                          <Button className="p-1.5 text-purple-600 bg-white hover:bg-purple-50 rounded-md border border-purple-100"><Edit3 size={15} /></Button>
-                          <Button className="p-1.5 text-amber-600 bg-white hover:bg-amber-50 rounded-md border border-amber-100"><UserCheck size={15} /></Button>
                           <Button className="p-1.5 text-emerald-600 bg-white hover:bg-emerald-50 rounded-md border border-emerald-100">
                             {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
                           </Button>
@@ -288,11 +286,9 @@ export default function ManageStudents() {
       </div>
 
       {/* Legend Footer */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-6">
         {[
           { icon: Eye, label: "View Details", desc: "See student full details", color: "text-blue-600 bg-blue-50" },
-          { icon: Edit3, label: "Edit Student", desc: "Edit student information", color: "text-purple-600 bg-purple-50" },
-          { icon: UserCheck, label: "Assign Class/Section", desc: "Assign to class & section", color: "text-amber-600 bg-amber-50" },
           { icon: ToggleRight, label: "Activate/Deactivate", desc: "Change student status", color: "text-emerald-600 bg-emerald-50" },
           { icon: Trash2, label: "Remove Student", desc: "Delete student record", color: "text-rose-500 bg-rose-50" },
         ].map((item, idx) => (
@@ -310,5 +306,3 @@ export default function ManageStudents() {
     </div>
   );
 }
-
-
