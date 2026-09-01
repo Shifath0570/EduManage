@@ -1,10 +1,148 @@
 
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent, useMemo } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
 import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+// NCTB Subjects Dataset structured with explicit class + stream keys
+const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
+  class_1: ["Bangla", "English", "Mathematics"],
+  class_2: ["Bangla", "English", "Mathematics"],
+  class_3: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_4: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_5: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_6: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_7: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_8: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_9_science: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Higher Mathematics"
+  ],
+  class_9_businessStudies: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Accounting",
+    "Business Entrepreneurship",
+    "Finance and Banking",
+    "General Science"
+  ],
+  class_9_humanities: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "History of Bangladesh and World Civilization",
+    "Geography and Environment",
+    "Civics and Citizenship",
+    "Economics"
+  ],
+  class_10_science: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Higher Mathematics"
+  ],
+  class_10_businessStudies: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Accounting",
+    "Business Entrepreneurship",
+    "Finance and Banking",
+    "General Science"
+  ],
+  class_10_humanities: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "History of Bangladesh and World Civilization",
+    "Geography and Environment",
+    "Civics and Citizenship",
+    "Economics"
+  ]
+};
 
 interface StudentFormData {
   name: string;
@@ -21,6 +159,7 @@ interface StudentFormData {
   roll: string;
   admissionDate: string;
   profileImage: string;
+  stream?: string;
 }
 
 const initialFormData: StudentFormData = {
@@ -38,6 +177,7 @@ const initialFormData: StudentFormData = {
   roll: "",
   admissionDate: "",
   profileImage: "",
+  stream: "",
 };
 
 export default function CreateStudent() {
@@ -47,18 +187,40 @@ export default function CreateStudent() {
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
   const router = useRouter();
 
+  // Directly derive subjects from CLASS_SUBJECTS_MAP using className key
+  const computedSubjects = useMemo(() => {
+    if (!formData.className) return [];
+    return CLASS_SUBJECTS_MAP[formData.className] || [];
+  }, [formData.className]);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    setFormData((prev) => {
+      const updated = { ...prev, [name]: value };
+      
+      // Auto-populate stream property when a class with stream is chosen
+      if (name === "className") {
+        if (value.includes("science")) {
+          updated.stream = "science";
+        } else if (value.includes("businessStudies")) {
+          updated.stream = "businessStudies";
+        } else if (value.includes("humanities")) {
+          updated.stream = "humanities";
+        } else {
+          updated.stream = "";
+        }
+      }
+      return updated;
+    });
   };
 
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Show temporary local preview while uploading
     const localPreviewUrl = URL.createObjectURL(file);
     setAvatarPreview(localPreviewUrl);
     setUploadingImage(true);
@@ -102,6 +264,7 @@ export default function CreateStudent() {
 
     const payload = {
       ...formData,
+      subjects: computedSubjects,
       metadata: {
         submittedAt: new Date().toISOString(),
       },
@@ -331,6 +494,17 @@ export default function CreateStudent() {
                   <option value="class_1">Class 1</option>
                   <option value="class_2">Class 2</option>
                   <option value="class_3">Class 3</option>
+                  <option value="class_4">Class 4</option>
+                  <option value="class_5">Class 5</option>
+                  <option value="class_6">Class 6</option>
+                  <option value="class_7">Class 7</option>
+                  <option value="class_8">Class 8</option>
+                  <option value="class_9_science">Class 9 (Science)</option>
+                  <option value="class_9_businessStudies">Class 9 (Business Studies)</option>
+                  <option value="class_9_humanities">Class 9 (Humanities)</option>
+                  <option value="class_10_science">Class 10 (Science)</option>
+                  <option value="class_10_businessStudies">Class 10 (Business Studies)</option>
+                  <option value="class_10_humanities">Class 10 (Humanities)</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -404,6 +578,25 @@ export default function CreateStudent() {
               </div>
             </div>
           </div>
+
+          {/* Assigned Subjects Preview */}
+          {computedSubjects.length > 0 && (
+            <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+              <h3 className="text-xs font-semibold text-slate-700 mb-2">
+                Auto-assigned Subjects ({computedSubjects.length})
+              </h3>
+              <div className="flex flex-wrap gap-1.5">
+                {computedSubjects.map((subject, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-block rounded-lg bg-purple-50 border border-purple-200/60 px-2.5 py-1 text-xs font-medium text-purple-700"
+                  >
+                    {subject}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
 
           <div className="mt-8 flex items-center justify-end gap-3 pt-4">
             <Button

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, use } from 'react';
@@ -15,11 +16,16 @@ import {
   GraduationCap,
   Loader2,
   AlertTriangle,
-  RotateCcw
+  RotateCcw,
+  Calendar,
+  MapPin,
+  IdCard,
+  BookMarked
 } from 'lucide-react';
 
 interface Student {
   _id?: string;
+  studentId?: string;
   name: string;
   roll: string;
   email: string;
@@ -31,6 +37,10 @@ interface Student {
   gender: 'male' | 'female' | 'other';
   guardianName: string;
   guardianPhone: string;
+  dateOfBirth?: string;
+  admissionDate?: string;
+  address?: string;
+  subjects?: string[];
 }
 
 interface PageProps {
@@ -39,7 +49,7 @@ interface PageProps {
 
 export default function StudentDetailsPage({ params }: PageProps) {
   const resolvedParams = use(params);
-  const studentId = resolvedParams.id;
+  const studentIdParam = resolvedParams.id;
 
   const [student, setStudent] = useState<Student | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
@@ -47,7 +57,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
   const [imgError, setImgError] = useState<boolean>(false);
 
   useEffect(() => {
-    if (!studentId) return;
+    if (!studentIdParam) return;
 
     const fetchStudentDetails = async () => {
       setLoading(true);
@@ -55,7 +65,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
 
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiURL}/api/students/${studentId}`, {
+        const res = await fetch(`${apiURL}/api/students/${studentIdParam}`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
@@ -72,18 +82,28 @@ export default function StudentDetailsPage({ params }: PageProps) {
       } catch (err: any) {
         console.error('Error fetching student details:', err);
         setError(err.message || 'An unexpected error occurred while fetching details.');
-      }  {
+      } finally {
         setLoading(false);
       }
     };
 
     fetchStudentDetails();
-  }, [studentId]);
+  }, [studentIdParam]);
 
   // Helper to display class names cleanly (e.g., class_1 -> Class 1)
   const formatClassName = (name?: string) => {
     if (!name) return '-';
     return name.replace('_', ' ').replace(/\b\w/g, (l) => l.toUpperCase());
+  };
+
+  // Helper to format date strings cleanly
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
   };
 
   // Loading State
@@ -138,13 +158,15 @@ export default function StudentDetailsPage({ params }: PageProps) {
           </Link>
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Student Profile</h1>
-            <p className="text-xs sm:text-sm text-slate-500">Detailed information for Roll #{student.roll}</p>
+            <p className="text-xs sm:text-sm text-slate-500">
+              Detailed information for {student.studentId || `Roll #${student.roll}`}
+            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-2">
           <Link
-            href={`/students/edit/${studentId}`}
+            href={`/students/edit/${studentIdParam}`}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm"
           >
             <Edit size={16} /> Edit Profile
@@ -154,7 +176,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
 
       {/* Profile Details Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Avatar & Quick Info */}
+        {/* Left Column: Avatar & Personal Info */}
         <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col items-center text-center">
           <div className="relative w-32 h-32 rounded-full overflow-hidden bg-slate-100 border-4 border-slate-50 shadow-inner mb-4">
             {!imgError && student.profileImage ? (
@@ -172,7 +194,14 @@ export default function StudentDetailsPage({ params }: PageProps) {
           </div>
 
           <h2 className="text-xl font-bold text-slate-900">{student.name}</h2>
-          <p className="text-xs text-slate-500 font-mono mt-0.5">Roll: {student.roll}</p>
+          
+          {student.studentId && (
+            <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md mt-1">
+              <IdCard size={12} /> {student.studentId}
+            </span>
+          )}
+
+          <p className="text-xs text-slate-500 font-mono mt-1">Roll: {student.roll}</p>
 
           <div className="mt-3 flex items-center gap-2">
             <span
@@ -191,7 +220,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
 
           <div className="w-full border-t border-slate-100 my-6"></div>
 
-          {/* Quick Contact Info */}
+          {/* Quick Contact & Personal Details */}
           <div className="w-full space-y-3 text-left text-sm">
             <div className="flex items-center gap-3 text-slate-600">
               <Mail size={16} className="text-slate-400 shrink-0" />
@@ -200,6 +229,14 @@ export default function StudentDetailsPage({ params }: PageProps) {
             <div className="flex items-center gap-3 text-slate-600">
               <Phone size={16} className="text-slate-400 shrink-0" />
               <span>{student.phone}</span>
+            </div>
+            <div className="flex items-center gap-3 text-slate-600">
+              <Calendar size={16} className="text-slate-400 shrink-0" />
+              <span>DOB: {formatDate(student.dateOfBirth)}</span>
+            </div>
+            <div className="flex items-start gap-3 text-slate-600">
+              <MapPin size={16} className="text-slate-400 shrink-0 mt-0.5" />
+              <span>{student.address || '-'}</span>
             </div>
           </div>
         </div>
@@ -211,7 +248,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
             <h3 className="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
               <GraduationCap className="text-indigo-600" size={20} /> Academic Details
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
                   <BookOpen size={14} /> Class
@@ -234,7 +271,35 @@ export default function StudentDetailsPage({ params }: PageProps) {
                 </div>
                 <div className="text-sm font-bold text-slate-800">{student.roll}</div>
               </div>
+
+              <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
+                  <Calendar size={14} /> Admission Date
+                </div>
+                <div className="text-sm font-bold text-slate-800">
+                  {formatDate(student.admissionDate)}
+                </div>
+              </div>
             </div>
+
+            {/* Enrolled Subjects */}
+            {student.subjects && student.subjects.length > 0 && (
+              <div className="mt-5 pt-5 border-t border-slate-100">
+                <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-3">
+                  <BookMarked size={14} className="text-indigo-600" /> Enrolled Subjects
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {student.subjects.map((subject, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1.5 bg-indigo-50/50 text-indigo-700 border border-indigo-100 rounded-lg text-xs font-medium"
+                    >
+                      {subject}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Guardian Information */}
@@ -263,3 +328,10 @@ export default function StudentDetailsPage({ params }: PageProps) {
     </div>
   );
 }
+
+
+
+
+
+
+
