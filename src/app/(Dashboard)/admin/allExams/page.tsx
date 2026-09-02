@@ -26,6 +26,7 @@ interface ExamItem {
   examName: string;
   examType: string;
   className: string;
+  section?: string;
   subject: string;
   totalMarks: number;
   passMarks: number;
@@ -343,7 +344,9 @@ export default function AllExamList() {
                         {exam.examType || "Mid Term"}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="font-semibold text-slate-800">{exam.className}</span>
+                        <span className="font-semibold text-slate-800">
+                          {exam.className}{exam.section ? ` (Sec ${exam.section})` : ""}
+                        </span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-600">
                         {exam.subject || "All Subjects"}
@@ -472,8 +475,10 @@ export default function AllExamList() {
                   <p className="font-bold text-slate-800">{viewExam.examName}</p>
                 </div>
                 <div>
-                  <span className="text-xs text-slate-400 font-medium">Target Class</span>
-                  <p className="font-bold text-slate-800">{viewExam.className}</p>
+                  <span className="text-xs text-slate-400 font-medium">Target Class & Section</span>
+                  <p className="font-bold text-slate-800">
+                    {viewExam.className}{viewExam.section ? ` (Section ${viewExam.section})` : ""}
+                  </p>
                 </div>
               </div>
 
