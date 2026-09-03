@@ -20,6 +20,7 @@ interface ExamFormData {
   examName: string;
   examType: string;
   className: string;
+  section: string;
   subject: string;
   totalMarks: number;
   passMarks: number;
@@ -32,6 +33,7 @@ const initialFormData: ExamFormData = {
   examName: "",
   examType: "Mid Term",
   className: "",
+  section: "A",
   subject: "All Subjects",
   totalMarks: 100,
   passMarks: 40,
@@ -39,6 +41,8 @@ const initialFormData: ExamFormData = {
   status: "Active",
   description: ""
 };
+
+const sectionOptions = ["A", "B", "C", "D"];
 
 const classOptions = [
   { label: "Class 1", value: "Class 1" },
@@ -100,6 +104,11 @@ export default function AdminCreateExam() {
       return;
     }
 
+    if (!formData.section) {
+      setFeedback({ type: "error", message: "Please select a target Section." });
+      return;
+    }
+
     if (!formData.examDate) {
       setFeedback({ type: "error", message: "Please select an Exam Date." });
       return;
@@ -129,7 +138,7 @@ export default function AdminCreateExam() {
 
       setFeedback({
         type: "success",
-        message: `Exam "${data.data.examName}" created successfully for ${data.data.className}!`
+        message: `Exam "${data.data.examName}" created successfully for ${data.data.className} (Section ${data.data.section || formData.section})!`
       });
 
       setFormData(initialFormData);
@@ -246,6 +255,29 @@ export default function AdminCreateExam() {
                   {classOptions.map((cls) => (
                     <option key={cls.value} value={cls.value}>
                       {cls.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
+
+            {/* Target Section */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Target Section <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <select
+                  required
+                  name="section"
+                  value={formData.section}
+                  onChange={handleInputChange}
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                >
+                  {sectionOptions.map((sec) => (
+                    <option key={sec} value={sec}>
+                      Section {sec}
                     </option>
                   ))}
                 </select>

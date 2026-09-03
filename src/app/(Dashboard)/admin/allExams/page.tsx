@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { AlertDialog, Button } from "@heroui/react";
 import {
   Award,
   Plus,
@@ -18,14 +19,17 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
-  BookOpen
+  BookOpen,
+  Loader2
 } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ExamItem {
   _id: string;
   examName: string;
   examType: string;
   className: string;
+  section?: string;
   subject: string;
   totalMarks: number;
   passMarks: number;
@@ -56,6 +60,11 @@ export default function AllExamList() {
 
   // Selected Exam for View Modal
   const [viewExam, setViewExam] = useState<ExamItem | null>(null);
+
+  // Selected Exam for HeroUI AlertDialog Delete Confirmation
+  const [deleteExamTarget, setDeleteExamTarget] = useState<ExamItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState<boolean>(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -88,12 +97,23 @@ export default function AllExamList() {
     fetchExams();
   }, [API_BASE]);
 
-  // Handle Exam Deletion
-  const handleDeleteExam = async (id: string, examName: string) => {
-    const confirmDelete = confirm(`Are you sure you want to delete "${examName}"? This action cannot be undone.`);
-    if (!confirmDelete) return;
+  // Open HeroUI Alert Dialog for Exam Deletion
+  const handleOpenDeleteDialog = (exam: ExamItem) => {
+    setDeleteExamTarget(exam);
+    setDeleteError(null);
+  };
 
+  // Handle Confirmed Exam Deletion
+  const handleConfirmDelete = async () => {
+    if (!deleteExamTarget) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
     setActionFeedback(null);
+
+    const id = deleteExamTarget._id;
+    const examName = deleteExamTarget.examName;
+
     try {
       const res = await fetch(`${API_BASE}/api/exams/${id}`, {
         method: "DELETE"
@@ -104,6 +124,8 @@ export default function AllExamList() {
         throw new Error(data.message || "Failed to delete exam.");
       }
 
+      toast.success(`Exam "${examName}" deleted successfully!`);
+
       setActionFeedback({
         type: "success",
         message: `Exam "${examName}" deleted successfully.`
@@ -112,11 +134,17 @@ export default function AllExamList() {
       // Update local state instantly
       setExams((prev) => prev.filter((item) => item._id !== id));
       if (viewExam?._id === id) setViewExam(null);
+      setDeleteExamTarget(null);
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to delete exam.";
+      toast.error(errorMsg);
+      setDeleteError(errorMsg);
       setActionFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to delete exam."
+        message: errorMsg
       });
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -183,6 +211,8 @@ export default function AllExamList() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+      <Toaster position="top-right" reverseOrder={false} />
+
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
@@ -343,7 +373,9 @@ export default function AllExamList() {
                         {exam.examType || "Mid Term"}
                       </td>
                       <td className="py-3.5 px-4">
-                        <span className="font-semibold text-slate-800">{exam.className}</span>
+                        <span className="font-semibold text-slate-800">
+                          {exam.className}{exam.section ? ` (Sec ${exam.section})` : ""}
+                        </span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-600">
                         {exam.subject || "All Subjects"}
@@ -380,7 +412,7 @@ export default function AllExamList() {
                           </button>
                           <button
                             title="Delete Exam"
-                            onClick={() => handleDeleteExam(exam._id, exam.examName)}
+                            onClick={() => handleOpenDeleteDialog(exam)}
                             className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-100 transition"
                           >
                             <Trash2 size={15} />
@@ -472,8 +504,10 @@ export default function AllExamList() {
                   <p className="font-bold text-slate-800">{viewExam.examName}</p>
                 </div>
                 <div>
-                  <span className="text-xs text-slate-400 font-medium">Target Class</span>
-                  <p className="font-bold text-slate-800">{viewExam.className}</p>
+                  <span className="text-xs text-slate-400 font-medium">Target Class & Section</span>
+                  <p className="font-bold text-slate-800">
+                    {viewExam.className}{viewExam.section ? ` (Section ${viewExam.section})` : ""}
+                  </p>
                 </div>
               </div>
 
@@ -526,6 +560,85 @@ export default function AllExamList() {
           </div>
         </div>
       )}
+
+      {/* HeroUI Alert Dialog for Delete Confirmation */}
+      <AlertDialog
+        isOpen={Boolean(deleteExamTarget)}
+        onOpenChange={(open) => {
+          if (!open && !isDeleting) {
+            setDeleteExamTarget(null);
+            setDeleteError(null);
+          }
+        }}
+      >
+        <AlertDialog.Backdrop>
+          <AlertDialog.Container>
+            <AlertDialog.Dialog className="sm:max-w-[440px] rounded-2xl bg-white p-6 shadow-2xl border border-slate-200">
+              <AlertDialog.CloseTrigger />
+              <AlertDialog.Header>
+                <AlertDialog.Icon status="danger" />
+                <AlertDialog.Heading className="text-lg font-bold text-slate-900">
+                  Delete Examination?
+                </AlertDialog.Heading>
+              </AlertDialog.Header>
+
+              <AlertDialog.Body className="space-y-3 pt-2">
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Are you sure you want to delete{" "}
+                  <strong className="font-semibold text-slate-900">
+                    &quot;{deleteExamTarget?.examName}&quot;
+                  </strong>{" "}
+                  for{" "}
+                  <span className="font-medium text-slate-800">
+                    {deleteExamTarget?.className}
+                    {deleteExamTarget?.section ? ` (Section ${deleteExamTarget.section})` : ""}
+                  </span>
+                  ? This will permanently remove the exam schedule and its configuration. This action cannot be undone.
+                </p>
+
+                {deleteError && (
+                  <div className="rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs text-rose-700">
+                    {deleteError}
+                  </div>
+                )}
+              </AlertDialog.Body>
+
+              <AlertDialog.Footer className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                <Button
+                  slot="close"
+                  variant="tertiary"
+                  isDisabled={isDeleting}
+                  onClick={() => {
+                    setDeleteExamTarget(null);
+                    setDeleteError(null);
+                  }}
+                  className="rounded-xl px-4 py-2 text-xs font-semibold"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  variant="danger"
+                  isDisabled={isDeleting}
+                  onClick={handleConfirmDelete}
+                  className="flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-semibold bg-rose-600 hover:bg-rose-700 text-white"
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 size={14} />
+                      Delete Exam
+                    </>
+                  )}
+                </Button>
+              </AlertDialog.Footer>
+            </AlertDialog.Dialog>
+          </AlertDialog.Container>
+        </AlertDialog.Backdrop>
+      </AlertDialog>
     </div>
   );
 }

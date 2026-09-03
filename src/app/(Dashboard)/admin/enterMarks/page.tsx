@@ -14,6 +14,8 @@ interface ExamOption {
   _id?: string;
   examName: string;
   className: string;
+  section?: string;
+  subject?: string;
 }
 
 interface StudentItem {
@@ -75,6 +77,11 @@ export default function AdminEnterMarks() {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+  // Identify current selected Exam object
+  const currentExam = React.useMemo(() => {
+    return exams.find((ex) => ex.examName === selectedExam || ex._id === selectedExam) || null;
+  }, [exams, selectedExam]);
+
   // Load Exams from API on mount
   useEffect(() => {
     async function fetchExams() {
@@ -84,38 +91,62 @@ export default function AdminEnterMarks() {
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
-          setSelectedExam(data.data[0].examName);
-          if (data.data[0].className) {
-            setSelectedClass(data.data[0].className);
+          const firstExam = data.data[0];
+          setSelectedExam(firstExam.examName);
+          if (firstExam.className) {
+            setSelectedClass(firstExam.className);
+          }
+          setSelectedSection(firstExam.section ? firstExam.section.toUpperCase().replace('SECTION', '').trim() : "A");
+          if (firstExam.subject && firstExam.subject !== "All Subjects") {
+            setSelectedSubject(firstExam.subject);
+          } else {
+            setSelectedSubject("Mathematics");
           }
         } else {
           // Fallback default exam options if none in DB yet
           const defaults: ExamOption[] = [
-            { examName: "Mid Term Examination 2026", className: "Class 10" },
-            { examName: "Final Examination 2026", className: "Class 10" },
-            { examName: "Class Test 1", className: "Class 5" }
+            { examName: "Mid Term Examination 2026", className: "Class 10", section: "A", subject: "Mathematics" },
+            { examName: "Final Examination 2026", className: "Class 10", section: "A", subject: "All Subjects" },
+            { examName: "Class Test 1", className: "Class 5", section: "B", subject: "English" }
           ];
           setExams(defaults);
           setSelectedExam(defaults[0].examName);
           setSelectedClass(defaults[0].className);
+          setSelectedSection(defaults[0].section || "A");
+          setSelectedSubject(defaults[0].subject || "Mathematics");
         }
       } catch (err) {
         console.error("Error fetching exams:", err);
         const defaults: ExamOption[] = [
-          { examName: "Mid Term Examination 2026", className: "Class 10" },
-          { examName: "Final Examination 2026", className: "Class 10" }
+          { examName: "Mid Term Examination 2026", className: "Class 10", section: "A", subject: "Mathematics" },
+          { examName: "Final Examination 2026", className: "Class 10", section: "A", subject: "All Subjects" }
         ];
         setExams(defaults);
         setSelectedExam(defaults[0].examName);
+        setSelectedClass(defaults[0].className);
+        setSelectedSection(defaults[0].section || "A");
+        setSelectedSubject(defaults[0].subject || "Mathematics");
       } finally {
         setLoadingExams(false);
       }
     }
 
     fetchExams();
-    setSelectedSection("A");
-    setSelectedSubject("Mathematics");
   }, [API_BASE]);
+
+  // Constrain Class, Section, and Subject whenever the selected Exam changes
+  useEffect(() => {
+    if (currentExam) {
+      if (currentExam.className) {
+        setSelectedClass(currentExam.className);
+      }
+      setSelectedSection(currentExam.section ? currentExam.section.toUpperCase().replace('SECTION', '').trim() : "A");
+
+      if (currentExam.subject && currentExam.subject !== "All Subjects") {
+        setSelectedSubject(currentExam.subject);
+      }
+    }
+  }, [currentExam]);
 
   // Load students for selected Class & Section, and prefill marks if already entered
   useEffect(() => {
@@ -246,6 +277,7 @@ export default function AdminEnterMarks() {
 
     try {
       const payload = {
+        examId: currentExam?._id,
         className: selectedClass,
         section: selectedSection,
         exam: selectedExam,
@@ -301,7 +333,7 @@ export default function AdminEnterMarks() {
               </h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Select examination criteria to enter and update student marks.
+              Select examination to enter and update marks. Target Class and Section are automatically locked to the Exam.
             </p>
           </div>
         </div>
@@ -327,7 +359,7 @@ export default function AdminEnterMarks() {
                 >
                   {exams.map((ex, idx) => (
                     <option key={idx} value={ex.examName}>
-                      {ex.examName}
+                      {ex.examName} ({ex.className} - Sec {ex.section || 'A'})
                     </option>
                   ))}
                 </select>
@@ -335,68 +367,80 @@ export default function AdminEnterMarks() {
               </div>
             </div>
 
-            {/* Class Selector */}
+            {/* Target Class (Constrained by selected Exam) */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                Select Class <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedClass}
-                  onChange={(e) => setSelectedClass(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-                >
-                  <option value="" disabled>Select Class</option>
-                  {classOptions.map((cls) => (
-                    <option key={cls} value={cls}>
-                      {cls}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Target Class <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                  Exam Target
+                </span>
               </div>
+              <input
+                type="text"
+                disabled
+                readOnly
+                value={selectedClass || "Auto-set by Exam"}
+                className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
+              />
             </div>
 
-            {/* Section Selector */}
+            {/* Target Section (Constrained by selected Exam) */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                Select Section <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedSection}
-                  onChange={(e) => setSelectedSection(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-                >
-                  {sectionOptions.map((sec) => (
-                    <option key={sec} value={sec}>
-                      Section {sec}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Target Section <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
+                  Exam Target
+                </span>
               </div>
+              <input
+                type="text"
+                disabled
+                readOnly
+                value={selectedSection ? `Section ${selectedSection}` : "Auto-set by Exam"}
+                className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
+              />
             </div>
 
             {/* Subject Selector */}
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                Select Subject <span className="text-red-500">*</span>
-              </label>
-              <div className="relative">
-                <select
-                  value={selectedSubject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-                >
-                  {subjectOptions.map((subj) => (
-                    <option key={subj} value={subj}>
-                      {subj}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Select Subject <span className="text-red-500">*</span>
+                </label>
+                {currentExam?.subject && currentExam.subject !== "All Subjects" && (
+                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
+                    Exam Scope
+                  </span>
+                )}
               </div>
+              {currentExam?.subject && currentExam.subject !== "All Subjects" ? (
+                <input
+                  type="text"
+                  disabled
+                  readOnly
+                  value={selectedSubject}
+                  className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
+                />
+              ) : (
+                <div className="relative">
+                  <select
+                    value={selectedSubject}
+                    onChange={(e) => setSelectedSubject(e.target.value)}
+                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                  >
+                    {subjectOptions.map((subj) => (
+                      <option key={subj} value={subj}>
+                        {subj}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              )}
             </div>
           </div>
         </div>
