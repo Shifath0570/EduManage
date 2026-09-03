@@ -20,6 +20,7 @@ import {
   Clock,
   BookOpen
 } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 interface ExamItem {
   _id: string;
@@ -105,6 +106,8 @@ export default function AllExamList() {
         throw new Error(data.message || "Failed to delete exam.");
       }
 
+      toast.success(`Exam "${examName}" deleted successfully!`);
+
       setActionFeedback({
         type: "success",
         message: `Exam "${examName}" deleted successfully.`
@@ -114,9 +117,11 @@ export default function AllExamList() {
       setExams((prev) => prev.filter((item) => item._id !== id));
       if (viewExam?._id === id) setViewExam(null);
     } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "Failed to delete exam.";
+      toast.error(errorMsg);
       setActionFeedback({
         type: "error",
-        message: err instanceof Error ? err.message : "Failed to delete exam."
+        message: errorMsg
       });
     }
   };
@@ -184,6 +189,8 @@ export default function AllExamList() {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+      {/* <Toaster position="top-right" reverseOrder={false} /> */}
+
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
