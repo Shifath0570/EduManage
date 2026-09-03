@@ -133,7 +133,7 @@ export default function AddTeacherPage(): React.ReactElement {
     setError("");
 
     const payload = {
-      userId: user?.id,
+      teacherId: user?.id,
       ...formData,
       experienceYears: formData.experienceYears
         ? Number(formData.experienceYears)

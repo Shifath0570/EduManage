@@ -220,9 +220,8 @@ export default function ManageTeachersPage() {
                       </td>
                       <td className="py-4 px-2">
                         <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            teacher.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-                          }`}
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${teacher.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
+                            }`}
                         >
                           {teacher.status}
                         </span>
@@ -234,15 +233,17 @@ export default function ManageTeachersPage() {
                               <Eye size={15} />
                             </Button>
                           </Link>
-                          <Button
-                            onClick={() => {
-                              setSelectedTeacher(teacher);
-                              setActiveModal('assignSubject');
-                            }}
-                            className="p-1.5 text-amber-600 bg-amber-50 rounded-md hover:bg-amber-100 transition"
-                          >
-                            <UserCheck size={16} />
-                          </Button>
+                          <Link href={`/admin/manageTeachers/assing/${teacher._id}`}>
+                            <Button
+                              // onClick={() => {
+                              //   setSelectedTeacher(teacher);
+                              //   setActiveModal('assignSubject');
+                              // }}
+                              className="p-1.5 text-amber-600 bg-amber-50 rounded-md hover:bg-amber-100 transition"
+                            >
+                              <UserCheck size={16} />
+                            </Button>
+                          </Link>
                           <Button
                             onClick={() => handleToggleStatus(teacher)}
                             className="p-1.5 bg-slate-100 rounded-md hover:bg-slate-200 transition"
