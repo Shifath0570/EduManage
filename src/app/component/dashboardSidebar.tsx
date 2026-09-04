@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
 import { LuNotebook } from "react-icons/lu";
+import { RiAddCircleLine } from "react-icons/ri";
 
 export interface NavItem {
   id: string;
@@ -58,6 +59,7 @@ const adminNavItems: NavItem[] = [
   { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Eye className="w-5 h-5" /> },  
   { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <LuNotebook className="w-5 h-5" /> },
+  {id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <RiAddCircleLine className="w-5 h-5" />},
 ];
 
 const studentNavItems: NavItem[] = [
