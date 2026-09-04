@@ -94,7 +94,11 @@ export default function TeacherViewAttendance() {
     const [filterMonth, setFilterMonth] = useState<string>("");
     const [selectedSession, setSelectedSession] = useState<AttendanceSession | null>(null);
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ||
+        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+            ? "https://edu-manage-server-blush.vercel.app"
+            : "http://localhost:5000");
 
     const fetchAttendanceData = useCallback(async () => {
         setLoading(true);

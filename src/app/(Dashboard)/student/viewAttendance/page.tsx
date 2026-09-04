@@ -55,7 +55,11 @@ export default function StudentViewAttendance() {
     const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>("All");
     const [selectedMonthFilter, setSelectedMonthFilter] = useState<string>("");
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ||
+        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+            ? "https://edu-manage-server-blush.vercel.app"
+            : "http://localhost:5000");
 
     const fetchStudentAttendance = useCallback(async () => {
         if (!user?.email && !user?.name) {

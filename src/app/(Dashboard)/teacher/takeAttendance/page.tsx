@@ -72,7 +72,11 @@ export default function TeacherTakeAttendance() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ||
+        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+            ? "https://edu-manage-server-blush.vercel.app"
+            : "http://localhost:5000");
 
     // Dynamic subjects based on selected class
     const availableSubjects = SUBJECT_MAP[selectedClass] || [
