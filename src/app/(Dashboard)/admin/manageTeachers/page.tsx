@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
-import { Search, Eye, UserCheck, ToggleLeft, ToggleRight, Plus, RotateCcw, X } from 'lucide-react';
+import { Search, Eye, UserCheck, ToggleLeft, ToggleRight, RotateCcw, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@heroui/react';
 import Link from 'next/link';
 
@@ -16,11 +16,41 @@ interface Teacher {
   status: 'Active' | 'Inactive';
 }
 
+const ITEMS_PER_PAGE = 10;
+
 // Helper to reliably format subjects as a string array regardless of API payload shape
 const normalizeSubjects = (subjects: string[] | string | undefined | null): string[] => {
   if (Array.isArray(subjects)) return subjects;
   if (typeof subjects === 'string') return subjects.split(',').map((s) => s.trim()).filter(Boolean);
   return [];
+};
+
+// Helper function to generate pagination range with ellipsis (...)
+const getPaginationRange = (currentPage: number, totalPages: number) => {
+  const delta = 1;
+  const range: (number | string)[] = [];
+
+  for (
+    let i = Math.max(2, currentPage - delta);
+    i <= Math.min(totalPages - 1, currentPage + delta);
+    i++
+  ) {
+    range.push(i);
+  }
+
+  if (currentPage - delta > 2) {
+    range.unshift('...');
+  }
+  if (currentPage + delta < totalPages - 1) {
+    range.push('...');
+  }
+
+  range.unshift(1);
+  if (totalPages > 1) {
+    range.push(totalPages);
+  }
+
+  return range;
 };
 
 export default function ManageTeachersPage() {
@@ -30,6 +60,9 @@ export default function ManageTeachersPage() {
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedSubject, setSelectedSubject] = useState<string>('All');
+
+  // Pagination state
+  const [rawPage, setRawPage] = useState<number>(1);
 
   // Modal / Selection states
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
@@ -52,7 +85,6 @@ export default function ManageTeachersPage() {
     fetchTeachers();
   }, []);
 
-  // Safe extraction of dropdown options using normalizeSubjects
   const subjectsList = useMemo(() => {
     const set = new Set<string>();
     teachers.forEach((t) => {
@@ -62,7 +94,6 @@ export default function ManageTeachersPage() {
     return Array.from(set);
   }, [teachers]);
 
-  // Safe search and filtering implementation
   const filteredTeachers = useMemo(() => {
     return teachers.filter((teacher) => {
       const q = searchQuery.toLowerCase().trim();
@@ -79,9 +110,32 @@ export default function ManageTeachersPage() {
     });
   }, [teachers, searchQuery, selectedSubject]);
 
+  const totalPages = Math.ceil(filteredTeachers.length / ITEMS_PER_PAGE) || 1;
+  const currentPage = Math.min(Math.max(1, rawPage), totalPages);
+
+  const paginatedTeachers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredTeachers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredTeachers, currentPage]);
+
+  const paginationRange = useMemo(() => {
+    return getPaginationRange(currentPage, totalPages);
+  }, [currentPage, totalPages]);
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value);
+    setRawPage(1);
+  };
+
+  const handleSubjectChange = (value: string) => {
+    setSelectedSubject(value);
+    setRawPage(1);
+  };
+
   const handleResetFilters = () => {
     setSearchQuery('');
     setSelectedSubject('All');
+    setRawPage(1);
   };
 
   const handleToggleStatus = async (teacher: Teacher) => {
@@ -112,18 +166,12 @@ export default function ManageTeachersPage() {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 font-sans text-slate-800 p-4 sm:p-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="mx-auto w-[90%] px-6 py-10">
+      <div className="flex justify-between items-start mb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Manage Teachers</h1>
           <p className="text-sm text-slate-500 mt-1">View, add, and manage all teachers.</p>
         </div>
-        <button
-          onClick={() => setActiveModal('add')}
-          className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shrink-0 shadow-sm"
-        >
-          <Plus size={16} /> Add Teacher
-        </button>
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 sm:p-6 overflow-hidden">
@@ -133,7 +181,7 @@ export default function ManageTeachersPage() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               placeholder="Search by name, email, phone..."
               className="w-full pl-10 pr-4 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
@@ -141,7 +189,7 @@ export default function ManageTeachersPage() {
           <div className="flex items-center gap-2.5 flex-wrap">
             <select
               value={selectedSubject}
-              onChange={(e) => setSelectedSubject(e.target.value)}
+              onChange={(e) => handleSubjectChange(e.target.value)}
               className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white text-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             >
               <option value="All">All Subjects</option>
@@ -171,97 +219,155 @@ export default function ManageTeachersPage() {
             No teachers found matching your criteria.
           </div>
         ) : (
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-sm min-w-[500px]">
-              <thead>
-                <tr className="border-b border-slate-200 text-slate-500 font-medium">
-                  <th className="pb-3 px-2">#</th>
-                  <th className="pb-3 px-2">Teacher Info</th>
-                  <th className="pb-3 px-2">Subject(s)</th>
-                  <th className="pb-3 px-2">Status</th>
-                  <th className="pb-3 px-2 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredTeachers.map((teacher, idx) => {
-                  const teacherSubjects = normalizeSubjects(teacher.subjectSpecialization);
-                  return (
-                    <tr key={teacher._id} className="hover:bg-slate-50/50 transition-colors">
-                      <td className="py-4 px-2 text-slate-500">{idx + 1}</td>
-                      <td className="py-4 px-2">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
-                            <img
-                              src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(teacher.fullName || 'default')}`}
-                              alt={teacher.fullName}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                          <div>
-                            <div className="font-semibold text-slate-900">{teacher.fullName}</div>
-                            <div className="text-xs text-slate-400">
-                              {teacher.email} | {teacher.phone}
+          <>
+            <div className="overflow-x-auto w-full">
+              <table className="w-full text-left text-sm min-w-[500px]">
+                <thead>
+                  <tr className="border-b border-slate-200 text-slate-500 font-medium">
+                    <th className="pb-3 px-2">#</th>
+                    <th className="pb-3 px-2">Teacher Info</th>
+                    <th className="pb-3 px-2">Subject(s)</th>
+                    <th className="pb-3 px-2">Status</th>
+                    <th className="pb-3 px-2 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {paginatedTeachers.map((teacher, idx) => {
+                    const teacherSubjects = normalizeSubjects(teacher.subjectSpecialization);
+                    const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                    return (
+                      <tr key={teacher._id} className="hover:bg-slate-50/50 transition-colors">
+                        <td className="py-4 px-2 text-slate-500">{globalIndex}</td>
+                        <td className="py-4 px-2">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
+                              <img
+                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+                                  teacher.fullName || 'default'
+                                )}`}
+                                alt={teacher.fullName}
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                            <div>
+                              <div className="font-semibold text-slate-900">{teacher.fullName}</div>
+                              <div className="text-xs text-slate-400">
+                                {teacher.email} | {teacher.phone}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-2">
-                        <div className="flex flex-wrap gap-1">
-                          {teacherSubjects.length > 0 ? (
-                            teacherSubjects.map((sub, i) => (
-                              <span key={i} className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-medium">
-                                {sub}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="text-xs text-slate-400">-</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-4 px-2">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${teacher.status === 'Active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-500'
-                            }`}
-                        >
-                          {teacher.status}
-                        </span>
-                      </td>
-                      <td className="py-4 px-2 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Link href={`/admin/manageTeachers/${teacher._id}`}>
-                            <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100">
-                              <Eye size={15} />
-                            </Button>
-                          </Link>
-                          <Link href={`/admin/manageTeachers/assing/${teacher._id}`}>
-                            <Button
-                              // onClick={() => {
-                              //   setSelectedTeacher(teacher);
-                              //   setActiveModal('assignSubject');
-                              // }}
-                              className="p-1.5 text-amber-600 bg-amber-50 rounded-md hover:bg-amber-100 transition"
-                            >
-                              <UserCheck size={16} />
-                            </Button>
-                          </Link>
-                          <Button
-                            onClick={() => handleToggleStatus(teacher)}
-                            className="p-1.5 bg-slate-100 rounded-md hover:bg-slate-200 transition"
-                          >
-                            {teacher.status === 'Active' ? (
-                              <ToggleRight size={18} className="text-emerald-600" />
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="flex flex-wrap gap-1">
+                            {teacherSubjects.length > 0 ? (
+                              teacherSubjects.map((sub, i) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded text-xs font-medium"
+                                >
+                                  {sub}
+                                </span>
+                              ))
                             ) : (
-                              <ToggleLeft size={18} className="text-slate-400" />
+                              <span className="text-xs text-slate-400">-</span>
                             )}
-                          </Button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${
+                              teacher.status === 'Active'
+                                ? 'bg-emerald-50 text-emerald-600'
+                                : 'bg-slate-100 text-slate-500'
+                            }`}
+                          >
+                            {teacher.status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Link href={`/admin/manageTeachers/${teacher._id}`}>
+                              <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100">
+                                <Eye size={15} />
+                              </Button>
+                            </Link>
+                            <Link href={`/admin/manageTeachers/assing/${teacher._id}`}>
+                              <Button className="p-1.5 text-amber-600 bg-amber-50 rounded-md hover:bg-amber-100 transition">
+                                <UserCheck size={16} />
+                              </Button>
+                            </Link>
+                            <Button
+                              onClick={() => handleToggleStatus(teacher)}
+                              className="p-1.5 bg-slate-100 rounded-md hover:bg-slate-200 transition"
+                            >
+                              {teacher.status === 'Active' ? (
+                                <ToggleRight size={18} className="text-emerald-600" />
+                              ) : (
+                                <ToggleLeft size={18} className="text-slate-400" />
+                              )}
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination controls */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 mt-4 border-t border-slate-100 text-sm text-slate-500">
+              <div>
+                Showing{' '}
+                <span className="font-semibold text-slate-700">
+                  {(currentPage - 1) * ITEMS_PER_PAGE + 1}
+                </span>{' '}
+                to{' '}
+                <span className="font-semibold text-slate-700">
+                  {Math.min(currentPage * ITEMS_PER_PAGE, filteredTeachers.length)}
+                </span>{' '}
+                of <span className="font-semibold text-slate-700">{filteredTeachers.length}</span> teachers
+              </div>
+
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setRawPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+
+                {paginationRange.map((item, index) =>
+                  item === '...' ? (
+                    <span key={`ellipsis-${index}`} className="px-2 py-1 text-slate-400 font-medium">
+                      ...
+                    </span>
+                  ) : (
+                    <button
+                      key={item}
+                      onClick={() => setRawPage(item as number)}
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+                        currentPage === item
+                          ? 'bg-indigo-600 text-white'
+                          : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  )
+                )}
+
+                <button
+                  onClick={() => setRawPage((prev) => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  className="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -291,9 +397,4 @@ export default function ManageTeachersPage() {
     </div>
   );
 }
-
-
-
-
-
 

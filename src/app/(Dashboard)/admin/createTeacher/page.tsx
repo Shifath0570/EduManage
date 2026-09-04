@@ -73,7 +73,6 @@ export default function AddTeacherPage(): React.ReactElement {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Helper function to handle ImgBB Upload
   const uploadToImgBB = async (file: File): Promise<string> => {
     const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
@@ -98,7 +97,6 @@ export default function AddTeacherPage(): React.ReactElement {
     return resData.data.url;
   };
 
-  // Image Upload Handler
   const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -155,7 +153,7 @@ export default function AddTeacherPage(): React.ReactElement {
         throw new Error(data.message || "Something went wrong");
       }
 
-      alert("Student created successfully!");
+      alert("Teacher created successfully!");
       router.push("/admin/manageTeachers");
     } catch (err: unknown) {
       const errorMessage =
@@ -170,40 +168,42 @@ export default function AddTeacherPage(): React.ReactElement {
     "w-full h-10 px-3 py-2 text-sm bg-transparent rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:outline-none transition-colors text-slate-700 placeholder:text-slate-400";
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className="mx-auto w-[90%] px-6 py-10">
       {/* Back Link */}
-      <div className="mb-2">
+      <div className="mb-4">
         <Link
           href="/admin/manageTeachers"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 transition-colors py-1"
         >
           <ArrowLeft className="h-4 w-4" />
           Back to Teachers
         </Link>
       </div>
 
-      <div className="mb-4">
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#081838]">
+      <div className="mb-6 sm:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#081838]">
           Teacher Information
         </h1>
-        <p className="text-sm text-slate-500 mt-1">Add a new teacher to the system.</p>
+        <p className="text-xs sm:text-sm text-slate-500 mt-1">
+          Add a new teacher to the system.
+        </p>
       </div>
 
       {error && (
-        <div className="mb-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-600">
+        <div className="mb-6 rounded-xl border border-rose-200 bg-rose-50 p-3.5 sm:p-4 text-xs sm:text-sm text-rose-600">
           {error}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
         {/* Personal Information Card */}
-        <Card className="p-4 sm:p-6 shadow-sm border border-slate-100 bg-white rounded-2xl">
+        <Card className="p-4 sm:p-6 lg:p-8 shadow-sm border border-slate-100 bg-white rounded-2xl">
           <div className="space-y-6">
-            <h2 className="text-base font-semibold text-[#081838]">
+            <h2 className="text-base sm:text-lg font-semibold text-[#081838]">
               Personal Information
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Full Name *
@@ -248,10 +248,7 @@ export default function AddTeacherPage(): React.ReactElement {
                   className={inputStyles}
                 />
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Date of Birth */}
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Date of Birth *
@@ -266,7 +263,6 @@ export default function AddTeacherPage(): React.ReactElement {
                 />
               </div>
 
-              {/* Gender */}
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Gender *
@@ -277,7 +273,7 @@ export default function AddTeacherPage(): React.ReactElement {
                     value={formData.gender}
                     onChange={handleChange}
                     required
-                    className={`${inputStyles} appearance-none`}
+                    className={`${inputStyles} appearance-none pr-8`}
                   >
                     <option value="" disabled>
                       Select gender
@@ -290,7 +286,6 @@ export default function AddTeacherPage(): React.ReactElement {
                 </div>
               </div>
 
-              {/* Blood Group */}
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Blood Group
@@ -300,7 +295,7 @@ export default function AddTeacherPage(): React.ReactElement {
                     name="bloodGroup"
                     value={formData.bloodGroup}
                     onChange={handleChange}
-                    className={`${inputStyles} appearance-none`}
+                    className={`${inputStyles} appearance-none pr-8`}
                   >
                     <option value="">Select blood group</option>
                     <option value="A+">A+</option>
@@ -317,13 +312,12 @@ export default function AddTeacherPage(): React.ReactElement {
               </div>
             </div>
 
-            {/* Profile Photo & Qualifications */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-              <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 items-start">
+              <div className="md:col-span-2 lg:col-span-1">
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Profile Photo
                 </label>
-                <label className="border-2 border-dashed border-slate-200 rounded-2xl p-6 text-center cursor-pointer hover:border-slate-300 transition-colors bg-slate-50/50 block relative">
+                <label className="border-2 border-dashed border-slate-200 rounded-2xl p-4 text-center cursor-pointer hover:border-slate-300 transition-colors bg-slate-50/50 block relative h-24 flex flex-col items-center justify-center">
                   <input
                     type="file"
                     accept="image/png, image/jpeg"
@@ -336,13 +330,13 @@ export default function AddTeacherPage(): React.ReactElement {
                       Uploading photo...
                     </p>
                   ) : photoName ? (
-                    <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold">
-                      <Check className="h-4 w-4" />
-                      <span className="truncate max-w-[150px]">{photoName}</span>
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold px-2 w-full">
+                      <Check className="h-4 w-4 shrink-0" />
+                      <span className="truncate max-w-[180px]">{photoName}</span>
                     </div>
                   ) : (
                     <>
-                      <Upload className="mx-auto h-6 w-6 text-blue-600 mb-1" />
+                      <Upload className="mx-auto h-5 w-5 text-blue-600 mb-1" />
                       <p className="text-xs font-semibold text-slate-700">
                         Upload photo
                       </p>
@@ -354,84 +348,76 @@ export default function AddTeacherPage(): React.ReactElement {
                 </label>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                    Qualifications *
-                  </label>
-                  <input
-                    type="text"
-                    name="qualifications"
-                    placeholder="Enter highest qualification"
-                    value={formData.qualifications}
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Qualifications *
+                </label>
+                <input
+                  type="text"
+                  name="qualifications"
+                  placeholder="Enter highest qualification"
+                  value={formData.qualifications}
+                  onChange={handleChange}
+                  required
+                  className={inputStyles}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Subject Specialization *
+                </label>
+                <div className="relative">
+                  <select
+                    name="subjectSpecialization"
+                    value={formData.subjectSpecialization}
                     onChange={handleChange}
                     required
-                    className={inputStyles}
-                  />
-                </div>
-
-                {/* Subject Specialization */}
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                    Subject Specialization *
-                  </label>
-                  <div className="relative">
-                    <select
-                      name="subjectSpecialization"
-                      value={formData.subjectSpecialization}
-                      onChange={handleChange}
-                      required
-                      className={`${inputStyles} appearance-none`}
-                    >
-                      <option value="" disabled>
-                        Select subject specialization
-                      </option>
-                      <option value="Mathematics">Mathematics</option>
-                      <option value="Physics">Physics</option>
-                      <option value="Chemistry">Chemistry</option>
-                      <option value="English">English</option>
-                      <option value="Computer Science">Computer Science</option>
-                    </select>
-                    <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
-                  </div>
+                    className={`${inputStyles} appearance-none pr-8`}
+                  >
+                    <option value="" disabled>
+                      Select subject specialization
+                    </option>
+                    <option value="Mathematics">Mathematics</option>
+                    <option value="Physics">Physics</option>
+                    <option value="Chemistry">Chemistry</option>
+                    <option value="English">English</option>
+                    <option value="Computer Science">Computer Science</option>
+                  </select>
+                  <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
                 </div>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                    Experience (Years)
-                  </label>
-                  <input
-                    type="number"
-                    name="experienceYears"
-                    placeholder="Enter years of experience"
-                    value={formData.experienceYears}
-                    onChange={handleChange}
-                    className={inputStyles}
-                  />
-                </div>
-
-                {/* Joining Date */}
-                <div>
-                  <label className="block text-xs font-medium text-slate-700 mb-1.5">
-                    Joining Date *
-                  </label>
-                  <input
-                    type="date"
-                    name="joiningDate"
-                    value={formData.joiningDate}
-                    onChange={handleChange}
-                    required
-                    className={inputStyles}
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Experience (Years)
+                </label>
+                <input
+                  type="number"
+                  name="experienceYears"
+                  placeholder="Enter years of experience"
+                  value={formData.experienceYears}
+                  onChange={handleChange}
+                  className={inputStyles}
+                />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div></div>
-              <div></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              <div>
+                <label className="block text-xs font-medium text-slate-700 mb-1.5">
+                  Joining Date *
+                </label>
+                <input
+                  type="date"
+                  name="joiningDate"
+                  value={formData.joiningDate}
+                  onChange={handleChange}
+                  required
+                  className={inputStyles}
+                />
+              </div>
+
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Employee ID
@@ -450,9 +436,9 @@ export default function AddTeacherPage(): React.ReactElement {
         </Card>
 
         {/* Contact & Address Information Card */}
-        <Card className="p-6 shadow-sm border border-slate-100 bg-white rounded-2xl">
+        <Card className="p-4 sm:p-6 lg:p-8 shadow-sm border border-slate-100 bg-white rounded-2xl">
           <div className="space-y-6">
-            <h2 className="text-base font-semibold text-[#081838]">
+            <h2 className="text-base sm:text-lg font-semibold text-[#081838]">
               Contact & Address Information
             </h2>
 
@@ -471,7 +457,7 @@ export default function AddTeacherPage(): React.ReactElement {
               />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   City *
@@ -518,7 +504,7 @@ export default function AddTeacherPage(): React.ReactElement {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
               <div>
                 <label className="block text-xs font-medium text-slate-700 mb-1.5">
                   Guardian Name *
@@ -567,19 +553,18 @@ export default function AddTeacherPage(): React.ReactElement {
         </Card>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
           <Button
             type="button"
             onPress={() => router.back()}
-            className="px-6 font-medium text-slate-700 bg-slate-100 hover:bg-slate-200"
+            className="w-full sm:w-auto px-6 font-medium text-slate-700 bg-slate-100 hover:bg-slate-200"
           >
             Cancel
           </Button>
           <Button
             type="submit"
-            // isLoading={loading}
             isDisabled={loading || uploadingPhoto}
-            className="px-6 font-medium text-white bg-[#5b21b6] hover:bg-[#4c1d95] inline-flex items-center justify-center gap-2"
+            className="w-full sm:w-auto px-6 font-medium text-white bg-[#5b21b6] hover:bg-[#4c1d95] inline-flex items-center justify-center gap-2"
           >
             {!loading && <Plus className="h-4 w-4" />}
             {loading ? "Adding..." : "Add Teacher"}
@@ -589,3 +574,8 @@ export default function AddTeacherPage(): React.ReactElement {
     </div>
   );
 }
+
+
+
+
+

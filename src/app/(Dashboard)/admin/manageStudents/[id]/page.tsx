@@ -74,14 +74,20 @@ export default function StudentDetailsPage({ params }: PageProps) {
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.message || `Failed to fetch student details (${res.status})`);
+          throw new Error(
+            errorData.message || `Failed to fetch student details (${res.status})`
+          );
         }
 
         const result = await res.json();
         setStudent(result.data || result);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching student details:', err);
-        setError(err.message || 'An unexpected error occurred while fetching details.');
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred while fetching details.');
+        }
       } finally {
         setLoading(false);
       }
@@ -125,7 +131,9 @@ export default function StudentDetailsPage({ params }: PageProps) {
         </div>
         <div>
           <h2 className="text-lg font-bold text-slate-900">Failed to Load Student</h2>
-          <p className="text-sm text-slate-500 mt-1">{error || 'Student information could not be found.'}</p>
+          <p className="text-sm text-slate-500 mt-1">
+            {error || 'Student information could not be found.'}
+          </p>
         </div>
         <div className="flex justify-center gap-3 pt-2">
           <Link
@@ -146,7 +154,7 @@ export default function StudentDetailsPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 font-sans text-slate-800 p-4 sm:p-6">
+    <div className="mx-auto w-[90%] px-6 py-10 space-y-6 font-sans text-slate-800">
       {/* Top Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
@@ -157,7 +165,9 @@ export default function StudentDetailsPage({ params }: PageProps) {
             <ArrowLeft size={18} />
           </Link>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Student Profile</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+              Student Profile
+            </h1>
             <p className="text-xs sm:text-sm text-slate-500">
               Detailed information for {student.studentId || `Roll #${student.roll}`}
             </p>
@@ -194,14 +204,16 @@ export default function StudentDetailsPage({ params }: PageProps) {
           </div>
 
           <h2 className="text-xl font-bold text-slate-900">{student.name}</h2>
-          
+
           {student.studentId && (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-md mt-1">
               <IdCard size={12} /> {student.studentId}
             </span>
           )}
 
-          <p className="text-xs text-slate-500 font-mono mt-1">Roll: {student.roll}</p>
+          <p className="text-xs text-slate-500 font-mono mt-1">
+            Roll: {student.roll}
+          </p>
 
           <div className="mt-3 flex items-center gap-2">
             <span
@@ -262,14 +274,18 @@ export default function StudentDetailsPage({ params }: PageProps) {
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
                   <Layers size={14} /> Section
                 </div>
-                <div className="text-sm font-bold text-slate-800">Section {student.section}</div>
+                <div className="text-sm font-bold text-slate-800">
+                  Section {student.section}
+                </div>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
                   <UserCheck size={14} /> Roll Number
                 </div>
-                <div className="text-sm font-bold text-slate-800">{student.roll}</div>
+                <div className="text-sm font-bold text-slate-800">
+                  {student.roll}
+                </div>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
@@ -312,14 +328,18 @@ export default function StudentDetailsPage({ params }: PageProps) {
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
                   <User size={14} /> Guardian Name
                 </div>
-                <div className="text-sm font-bold text-slate-800">{student.guardianName || '-'}</div>
+                <div className="text-sm font-bold text-slate-800">
+                  {student.guardianName || '-'}
+                </div>
               </div>
 
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-100">
                 <div className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-1">
                   <Phone size={14} /> Guardian Phone
                 </div>
-                <div className="text-sm font-bold text-slate-800">{student.guardianPhone || '-'}</div>
+                <div className="text-sm font-bold text-slate-800">
+                  {student.guardianPhone || '-'}
+                </div>
               </div>
             </div>
           </div>
@@ -328,9 +348,6 @@ export default function StudentDetailsPage({ params }: PageProps) {
     </div>
   );
 }
-
-
-
 
 
 

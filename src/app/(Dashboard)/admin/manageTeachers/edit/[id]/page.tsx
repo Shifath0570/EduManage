@@ -213,20 +213,11 @@ export default function EditTeacherPage(): React.ReactElement {
     }
   };
 
-//   if (fetching) {
-//     return (
-//       <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
-//         <Spinner size="lg" color="primary" />
-//         <p className="text-sm font-medium text-slate-500">Loading teacher details...</p>
-//       </div>
-//     );
-//   }
-
   const inputStyles =
     "w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20";
 
   return (
-    <div className="container mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto w-[90%] px-6 py-10">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-[#081838]">Edit Teacher Details</h1>
@@ -592,7 +583,7 @@ export default function EditTeacherPage(): React.ReactElement {
                 <Spinner size="sm" color="current" />
               ) : (
                 <>
-                  <Save className="mr-1 h-4 w-4 inline" /> Save Changes
+                  <Save className="mr-1 inline h-4 w-4" /> Save Changes
                 </>
               )}
             </Button>
@@ -602,3 +593,7 @@ export default function EditTeacherPage(): React.ReactElement {
     </div>
   );
 }
+
+
+
+

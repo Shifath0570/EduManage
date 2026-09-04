@@ -138,7 +138,7 @@ export default function CurrentAssignment(): React.ReactElement {
 
 
   return (
-    <div className="container mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto w-[90%] px-6 py-10">
 
       <Card className="border border-slate-200/80 bg-white p-6 shadow-xs rounded-2xl">
         <h2 className="mb-6 text-lg font-bold text-[#081838]">

@@ -226,7 +226,7 @@ const AssingSSC = () => {
   const availableSubjects = formData.classId ? CLASS_SUBJECTS_MAP[formData.classId] || [] : [];
 
   return (
-    <div>
+    <div className="mx-auto w-[90%] px-6">
       <Card className="border border-slate-100 bg-white p-8 shadow-xs rounded-2xl">
         <h2 className="mb-6 text-lg font-bold text-[#081838]">Assign Class & Subject</h2>
 

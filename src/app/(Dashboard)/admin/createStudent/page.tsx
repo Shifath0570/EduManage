@@ -6,7 +6,6 @@ import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner 
 import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-// NCTB Subjects Dataset structured with explicit class + stream keys
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
   class_1: ["Bangla", "English", "Mathematics"],
   class_2: ["Bangla", "English", "Mathematics"],
@@ -187,7 +186,6 @@ export default function CreateStudent() {
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
   const router = useRouter();
 
-  // Directly derive subjects from CLASS_SUBJECTS_MAP using className key
   const computedSubjects = useMemo(() => {
     if (!formData.className) return [];
     return CLASS_SUBJECTS_MAP[formData.className] || [];
@@ -201,7 +199,6 @@ export default function CreateStudent() {
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
       
-      // Auto-populate stream property when a class with stream is chosen
       if (name === "className") {
         if (value.includes("science")) {
           updated.stream = "science";
@@ -258,6 +255,10 @@ export default function CreateStudent() {
     }
   };
 
+  const handleCancel = () => {
+    router.push("/admin/manageStudents");
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -300,34 +301,39 @@ export default function CreateStudent() {
   };
 
   return (
-    <div className="container mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-[#081838]">
+    <div className="mx-auto w-[90%] px-6 py-10 max-w-7xl">
+      {/* Header section */}
+      <div className="mb-6 sm:mb-8 text-left">
+        <h1 className="text-2xl font-extrabold text-[#081838] sm:text-3xl">
           Create Student
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
           Add a new student to the system.
         </p>
       </div>
 
-      <Card className="border border-slate-100 bg-white p-8 shadow-xs rounded-2xl">
-        <CardHeader className="mb-6 p-0">
-          <h2 className="text-lg font-bold text-[#081838]">
+      {/* Main Form Container */}
+      <Card className="border border-slate-100 bg-white p-4 shadow-sm rounded-2xl sm:p-6 md:p-8">
+        <CardHeader className="mb-4 sm:mb-6 p-0">
+          <h2 className="text-base font-bold text-[#081838] sm:text-lg">
             Student Information
           </h2>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
-            <Avatar className="h-20 w-20 ring-2 ring-purple-500/20">
+          {/* Avatar & Upload Section */}
+          <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-start">
+            <Avatar className="h-20 w-20 ring-2 ring-purple-500/20 shrink-0">
               {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
-              <AvatarFallback>ST</AvatarFallback>
+              <AvatarFallback className="bg-purple-100 text-purple-700 font-bold">
+                ST
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center gap-2 sm:items-start">
               <span className="text-xs font-semibold text-slate-600">
                 Upload Profile Picture
               </span>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-purple-50 px-4 py-2 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100">
+              <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-50 px-4 py-2.5 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100 active:bg-purple-200">
                 {uploadingImage ? (
                   <>
                     <Spinner size="sm" color="current" />
@@ -350,8 +356,10 @@ export default function CreateStudent() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <div className="flex flex-col gap-2">
+          {/* Form Fields Grid */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
+            {/* Full Name */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Name <span className="text-red-500">*</span>
               </label>
@@ -366,7 +374,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Email */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Email
               </label>
@@ -380,13 +389,14 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Phone */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Phone <span className="text-red-500">*</span>
               </label>
               <input
                 required
-                type="text"
+                type="tel"
                 name="phone"
                 placeholder="Enter phone number"
                 value={formData.phone}
@@ -395,7 +405,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Date of Birth */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Date of Birth <span className="text-red-500">*</span>
               </label>
@@ -406,13 +417,14 @@ export default function CreateStudent() {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Gender */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Gender <span className="text-red-500">*</span>
               </label>
@@ -422,7 +434,7 @@ export default function CreateStudent() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
                   <option value="" disabled>Select gender</option>
                   <option value="male">Male</option>
@@ -433,7 +445,8 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Address */}
+            <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
               <label className="text-xs font-semibold text-slate-700">
                 Address <span className="text-red-500">*</span>
               </label>
@@ -448,7 +461,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Guardian Name */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Guardian Name <span className="text-red-500">*</span>
               </label>
@@ -463,13 +477,14 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Guardian Phone */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Guardian Phone <span className="text-red-500">*</span>
               </label>
               <input
                 required
-                type="text"
+                type="tel"
                 name="guardianPhone"
                 placeholder="Enter guardian phone number"
                 value={formData.guardianPhone}
@@ -478,7 +493,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Class Selection */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Class <span className="text-red-500">*</span>
               </label>
@@ -488,7 +504,7 @@ export default function CreateStudent() {
                   name="className"
                   value={formData.className}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
                   <option value="" disabled>Select class</option>
                   <option value="class_1">Class 1</option>
@@ -510,7 +526,8 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Section Selection */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Section <span className="text-red-500">*</span>
               </label>
@@ -520,7 +537,7 @@ export default function CreateStudent() {
                   name="section"
                   value={formData.section}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
                   <option value="" disabled>Select section</option>
                   <option value="a">Section A</option>
@@ -531,7 +548,8 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Student ID */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Student ID <span className="text-red-500">*</span>
               </label>
@@ -546,7 +564,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Roll Number */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Roll Number <span className="text-red-500">*</span>
               </label>
@@ -561,7 +580,8 @@ export default function CreateStudent() {
               />
             </div>
 
-            <div className="flex flex-col gap-2">
+            {/* Admission Date */}
+            <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Admission Date <span className="text-red-500">*</span>
               </label>
@@ -572,7 +592,7 @@ export default function CreateStudent() {
                   name="admissionDate"
                   value={formData.admissionDate}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -581,15 +601,15 @@ export default function CreateStudent() {
 
           {/* Assigned Subjects Preview */}
           {computedSubjects.length > 0 && (
-            <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
-              <h3 className="text-xs font-semibold text-slate-700 mb-2">
+            <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4">
+              <h3 className="mb-2 text-xs font-semibold text-slate-700">
                 Auto-assigned Subjects ({computedSubjects.length})
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {computedSubjects.map((subject, idx) => (
                   <span
                     key={idx}
-                    className="inline-block rounded-lg bg-purple-50 border border-purple-200/60 px-2.5 py-1 text-xs font-medium text-purple-700"
+                    className="inline-block rounded-lg border border-purple-200/60 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700"
                   >
                     {subject}
                   </span>
@@ -598,23 +618,25 @@ export default function CreateStudent() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-end gap-3 pt-4">
+          {/* Action Buttons */}
+          <div className="mt-8 flex flex-col-reverse justify-end gap-3 pt-4 sm:flex-row sm:items-center">
             <Button
               type="button"
-              className="bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200"
+              onClick={handleCancel}
+              className="w-full bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200 sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               isDisabled={loading || uploadingImage}
-              className="bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
+              className="w-full bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6] sm:w-auto"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-1 inline" />
+                  <Plus className="mr-1 inline h-4 w-4" />
                   Create Student
                 </>
               )}

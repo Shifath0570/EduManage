@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useEffect, useState, use } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft,
@@ -50,7 +51,7 @@ interface PageProps {
 }
 
 export default function TeacherDetailsPage({ params }: PageProps) {
-  const resolvedParams = use(params);
+  const resolvedParams = React.use(params);
   const teacherId = resolvedParams.id;
 
   const [teacher, setTeacher] = useState<Teacher | null>(null);
@@ -81,9 +82,13 @@ export default function TeacherDetailsPage({ params }: PageProps) {
 
         const result = await res.json();
         setTeacher(result.data || result);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error('Error fetching teacher details:', err);
-        setError(err.message || 'An unexpected error occurred while fetching details.');
+        if (err instanceof Error) {
+          setError(err.message);
+        } else {
+          setError('An unexpected error occurred while fetching details.');
+        }
       } finally {
         setLoading(false);
       }
@@ -144,7 +149,7 @@ export default function TeacherDetailsPage({ params }: PageProps) {
   }
 
   return (
-    <div className="w-full max-w-5xl mx-auto space-y-6 font-sans text-slate-800 p-4 sm:p-6">
+    <div className="mx-auto w-[90%] px-6 py-10 space-y-6 font-sans text-slate-800">
       {/* Top Navigation */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
@@ -329,3 +334,9 @@ export default function TeacherDetailsPage({ params }: PageProps) {
     </div>
   );
 }
+
+
+
+
+
+

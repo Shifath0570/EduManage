@@ -144,16 +144,13 @@ export default function ManageStudents() {
   };
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+    <div className="mx-auto w-[90%] px-6 py-10">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manage Students</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Manage Students</h1>
           <p className="text-sm text-slate-500 mt-1">View, add, and manage all students.</p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition">
-          <Plus size={16} /> Add Student
-        </button>
       </div>
 
       {/* Main Container */}

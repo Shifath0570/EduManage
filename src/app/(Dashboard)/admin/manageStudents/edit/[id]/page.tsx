@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, ChangeEvent, FormEvent, useMemo } from "react";
@@ -346,17 +347,8 @@ export default function EditStudent() {
     }
   };
 
-  // if (fetching) {
-  //   return (
-  //     <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
-  //       <Spinner size="lg" color="primary" />
-  //       <p className="text-sm font-medium text-slate-500">Loading student details...</p>
-  //     </div>
-  //   );
-  // }
-
   return (
-    <div className="container mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto w-[90%] px-6 py-10">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-3xl font-extrabold text-[#081838]">Edit Student Details</h1>
@@ -688,3 +680,10 @@ export default function EditStudent() {
     </div>
   );
 }
+
+
+
+
+
+
+
