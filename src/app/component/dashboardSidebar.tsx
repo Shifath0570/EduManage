@@ -281,7 +281,6 @@ const adminNavItems: NavItem[] = [
   { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
   { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> },
   { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Award className="w-5 h-5" /> },  
-  { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Megaphone className="w-5 h-5" /> },
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-5 h-5" /> },
   { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
 ];
