@@ -42,6 +42,7 @@ const CLASS_OPTIONS = [
 
 const SECTION_OPTIONS = ["A", "B", "C", "D"];
 
+// Dynamic curriculum subject mapping by educational class tier
 const SUBJECT_MAP: Record<string, string[]> = {
     "1": ["Bangla", "English", "Mathematics", "General Science", "Drawing"],
     "2": ["Bangla", "English", "Mathematics", "General Science", "Drawing"],
