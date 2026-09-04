@@ -55,6 +55,7 @@ const adminNavItems: NavItem[] = [
   { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <Compass className="w-5 h-5" /> },
   { id: "createAssingment", href: "/admin/createAssingment", label: "Create Assingment", icon: <Compass className="w-5 h-5" /> },
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },
+  { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <BookOpen className="w-5 h-5" /> },
   { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
   { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Eye className="w-5 h-5" /> },  
   { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },

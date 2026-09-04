@@ -1,583 +1,451 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, FormEvent, ChangeEvent } from "react";
+import { useRouter } from "next/navigation";
+import { Button, Card, CardHeader, Spinner } from "@heroui/react";
+import {
+  Calendar,
+  ChevronDown,
+  Plus,
+  BookOpen,
+  Award,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  Clock,
+  Layers
+} from "lucide-react";
 
 interface ExamFormData {
-  examTitle: string;
+  examName: string;
   examType: string;
-  subject: string;
   className: string;
   section: string;
-  academicYear: string;
+  subject: string;
+  totalMarks: number;
+  passMarks: number;
   examDate: string;
-  startTime: string;
-  duration: string;
-  room: string;
-  totalMarks: string;
-  passMarks: string;
-  instructions: string;
-  status: "draft" | "published";
+  status: string;
+  description: string;
 }
 
 const initialFormData: ExamFormData = {
-  examTitle: "",
-  examType: "",
-  subject: "",
+  examName: "",
+  examType: "Mid Term",
   className: "",
-  section: "",
-  academicYear: "",
-  examDate: "",
-  startTime: "",
-  duration: "",
-  room: "",
-  totalMarks: "",
-  passMarks: "",
-  instructions: "",
-  status: "draft",
+  section: "A",
+  subject: "All Subjects",
+  totalMarks: 100,
+  passMarks: 40,
+  examDate: new Date().toISOString().split("T")[0],
+  status: "Active",
+  description: ""
 };
 
-const CreateExam = () => {
-  const [formData, setFormData] =
-    useState<ExamFormData>(initialFormData);
+const sectionOptions = ["A", "B", "C", "D"];
 
+const classOptions = [
+  { label: "Class 1", value: "Class 1" },
+  { label: "Class 2", value: "Class 2" },
+  { label: "Class 3", value: "Class 3" },
+  { label: "Class 4", value: "Class 4" },
+  { label: "Class 5", value: "Class 5" },
+  { label: "Class 6", value: "Class 6" },
+  { label: "Class 7", value: "Class 7" },
+  { label: "Class 8", value: "Class 8" },
+  { label: "Class 9", value: "Class 9" },
+  { label: "Class 10", value: "Class 10" }
+];
+
+const subjectOptions = [
+  "All Subjects",
+  "Mathematics",
+  "English",
+  "Bangla",
+  "Science",
+  "Physics",
+  "Chemistry",
+  "Biology",
+  "ICT",
+  "Social Science",
+  "Accounting",
+  "General"
+];
+
+export default function AdminCreateExam() {
+  const router = useRouter();
+  const [formData, setFormData] = useState<ExamFormData>(initialFormData);
   const [loading, setLoading] = useState<boolean>(false);
+  const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
-  // =========================================================
-  // Backend API URL
-  // শুধু এখানে তোমার backend URL বসাবে
-  // =========================================================
-  const API_URL = "YOUR_BACKEND_API_URL";
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // =========================================================
-  // Handle Input Change
-  // =========================================================
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-
     setFormData((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === "totalMarks" || name === "passMarks" ? Number(value) : value
     }));
   };
 
-  // =========================================================
-  // Handle Form Submit
-  // =========================================================
-  const handleSubmit = async (
-    e: React.SyntheticEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setFeedback(null);
 
-    // Pass marks validation
-    if (
-      Number(formData.passMarks) >
-      Number(formData.totalMarks)
-    ) {
-      alert("Pass marks cannot be greater than total marks.");
+    if (!formData.examName.trim()) {
+      setFeedback({ type: "error", message: "Please enter an Exam Name." });
       return;
     }
 
+    if (!formData.className) {
+      setFeedback({ type: "error", message: "Please select a target Class." });
+      return;
+    }
+
+    if (!formData.section) {
+      setFeedback({ type: "error", message: "Please select a target Section." });
+      return;
+    }
+
+    if (!formData.examDate) {
+      setFeedback({ type: "error", message: "Please select an Exam Date." });
+      return;
+    }
+
+    if (formData.passMarks > formData.totalMarks) {
+      setFeedback({ type: "error", message: "Pass Marks cannot exceed Total Marks." });
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-
-      const examData = {
-        examTitle: formData.examTitle,
-        examType: formData.examType,
-        subject: formData.subject,
-        className: formData.className,
-        section: formData.section,
-        academicYear: Number(formData.academicYear),
-        examDate: formData.examDate,
-        startTime: formData.startTime,
-        duration: Number(formData.duration),
-        room: formData.room,
-        totalMarks: Number(formData.totalMarks),
-        passMarks: Number(formData.passMarks),
-        instructions: formData.instructions,
-        status: formData.status,
-      };
-
-      const response = await fetch(`${API_URL}/exams`, {
+      const res = await fetch(`${API_BASE}/api/exams`, {
         method: "POST",
-
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json"
         },
-
-        body: JSON.stringify(examData),
+        body: JSON.stringify(formData)
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to create exam");
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.message || "Failed to create exam record.");
       }
 
-      const data = await response.json();
+      setFeedback({
+        type: "success",
+        message: `Exam "${data.data.examName}" created successfully for ${data.data.className} (Section ${data.data.section || formData.section})!`
+      });
 
-      console.log("Exam Created Successfully:", data);
-
-      alert("Exam created successfully!");
-
-      // Reset form
       setFormData(initialFormData);
-    } catch (error) {
-      console.error("Create Exam Error:", error);
 
-      alert(
-        "Failed to create exam. Please check your backend connection."
-      );
+      // Smooth scroll to top of page to see success message
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : "An error occurred while creating the exam.";
+      setFeedback({ type: "error", message: errorMsg });
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================================================
-  // Reset Form
-  // =========================================================
-  const handleReset = () => {
-    setFormData(initialFormData);
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6 lg:p-8">
-      <div className="mx-auto max-w-5xl">
-
-        {/* ===================================================
-            Page Header
-        =================================================== */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">
-            Create New Exam
-          </h1>
-
-          <p className="mt-1 text-sm text-gray-500">
-            Create and schedule an examination for your students.
+    <div className="container mx-auto max-w-5xl px-4 py-8 md:px-6 font-sans">
+      {/* Page Header */}
+      <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+              <Award className="h-5 w-5" />
+            </span>
+            <h1 className="text-2xl md:text-3xl font-extrabold text-[#081838]">
+              Create Exam
+            </h1>
+          </div>
+          <p className="mt-1 text-sm text-slate-500">
+            Schedule a new examination session for classes and set mark configurations.
           </p>
         </div>
 
-        {/* ===================================================
-            Form
-        =================================================== */}
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-2xl bg-white p-5 shadow-sm md:p-8"
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => router.push("/admin/allExams")}
+            className="inline-flex items-center gap-2 rounded-xl bg-purple-50 px-4 py-2.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 transition border border-purple-200/60"
+          >
+            <BookOpen className="h-4 w-4 text-purple-600" />
+            View All Exams
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/enterMarks")}
+            className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+          >
+            <BookOpen className="h-4 w-4 text-slate-500" />
+            Go to Enter Marks
+          </button>
+        </div>
+      </div>
+
+      {/* Feedback Banner */}
+      {feedback && (
+        <div
+          className={`mb-6 flex items-center gap-3 rounded-2xl p-4 text-sm font-medium border shadow-xs ${
+            feedback.type === "success"
+              ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+              : "bg-rose-50 text-rose-800 border-rose-200"
+          }`}
         >
+          {feedback.type === "success" ? (
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
+          ) : (
+            <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
+          )}
+          <span className="flex-1">{feedback.message}</span>
+        </div>
+      )}
 
-          {/* =================================================
-              Exam Information
-          ================================================= */}
-          <section className="mb-8">
-            <h2 className="mb-5 border-b pb-3 text-lg font-semibold text-gray-800">
-              Exam Information
+      {/* Main Form Card */}
+      <Card className="border border-slate-200/80 bg-white p-6 md:p-8 shadow-xs rounded-2xl">
+        <CardHeader className="mb-6 p-0 border-b border-slate-100 pb-4">
+          <div className="flex items-center gap-2 text-slate-800">
+            <Layers className="h-5 w-5 text-[#6348eb]" />
+            <h2 className="text-lg font-bold text-[#081838]">
+              Examination Details & Configuration
             </h2>
+          </div>
+        </CardHeader>
 
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            {/* Exam Name */}
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Exam Title / Name <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="text"
+                name="examName"
+                placeholder="e.g. Mid Term Examination 2026, Final Assessment"
+                value={formData.examName}
+                onChange={handleInputChange}
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+              />
+            </div>
 
-              {/* Exam Title */}
-              <div className="md:col-span-2">
-                <label
-                  htmlFor="examTitle"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Exam Title{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="examTitle"
-                  name="examTitle"
-                  type="text"
-                  value={formData.examTitle}
-                  onChange={handleChange}
-                  placeholder="e.g. Mid Term Examination"
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* Exam Type */}
-              <div>
-                <label
-                  htmlFor="examType"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Exam Type{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
+            {/* Target Class */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Target Class <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
                 <select
-                  id="examType"
-                  name="examType"
-                  value={formData.examType}
-                  onChange={handleChange}
                   required
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="">Select Exam Type</option>
-                  <option value="class_test">
-                    Class Test
-                  </option>
-                  <option value="quiz">Quiz</option>
-                  <option value="midterm">
-                    Mid Term
-                  </option>
-                  <option value="final">
-                    Final Exam
-                  </option>
-                  <option value="model_test">
-                    Model Test
-                  </option>
-                </select>
-              </div>
-
-              {/* Subject */}
-              <div>
-                <label
-                  htmlFor="subject"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Subject{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <select
-                  id="subject"
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                >
-                  <option value="">Select Subject</option>
-                  <option value="bangla">Bangla</option>
-                  <option value="english">English</option>
-                  <option value="mathematics">
-                    Mathematics
-                  </option>
-                  <option value="science">Science</option>
-                  <option value="ict">ICT</option>
-                </select>
-              </div>
-
-              {/* Class */}
-              <div>
-                <label
-                  htmlFor="className"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Class{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <select
-                  id="className"
                   name="className"
                   value={formData.className}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  onChange={handleInputChange}
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
                 >
-                  <option value="">Select Class</option>
-                  <option value="6">Class 6</option>
-                  <option value="7">Class 7</option>
-                  <option value="8">Class 8</option>
-                  <option value="9">Class 9</option>
-                  <option value="10">Class 10</option>
-                  <option value="11">Class 11</option>
-                  <option value="12">Class 12</option>
+                  <option value="" disabled>Select target class</option>
+                  {classOptions.map((cls) => (
+                    <option key={cls.value} value={cls.value}>
+                      {cls.label}
+                    </option>
+                  ))}
                 </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
+            </div>
 
-              {/* Section */}
-              <div>
-                <label
-                  htmlFor="section"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Section{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
+            {/* Target Section */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Target Section <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
                 <select
-                  id="section"
+                  required
                   name="section"
                   value={formData.section}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  onChange={handleInputChange}
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
                 >
-                  <option value="">Select Section</option>
-                  <option value="A">Section A</option>
-                  <option value="B">Section B</option>
-                  <option value="C">Section C</option>
-                  <option value="D">Section D</option>
+                  {sectionOptions.map((sec) => (
+                    <option key={sec} value={sec}>
+                      Section {sec}
+                    </option>
+                  ))}
                 </select>
-              </div>
-
-              {/* Academic Year */}
-              <div>
-                <label
-                  htmlFor="academicYear"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Academic Year{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="academicYear"
-                  name="academicYear"
-                  type="number"
-                  value={formData.academicYear}
-                  onChange={handleChange}
-                  placeholder="2026"
-                  min="2000"
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
-          </section>
 
-          {/* =================================================
-              Exam Schedule
-          ================================================= */}
-          <section className="mb-8">
-            <h2 className="mb-5 border-b pb-3 text-lg font-semibold text-gray-800">
-              Exam Schedule
-            </h2>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
-
-              {/* Exam Date */}
-              <div>
-                <label
-                  htmlFor="examDate"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Exam Date{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="examDate"
-                  name="examDate"
-                  type="date"
-                  value={formData.examDate}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* Start Time */}
-              <div>
-                <label
-                  htmlFor="startTime"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Start Time{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="startTime"
-                  name="startTime"
-                  type="time"
-                  value={formData.startTime}
-                  onChange={handleChange}
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* Duration */}
-              <div>
-                <label
-                  htmlFor="duration"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Duration (Minutes){" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="duration"
-                  name="duration"
-                  type="number"
-                  value={formData.duration}
-                  onChange={handleChange}
-                  placeholder="120"
-                  min="1"
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* Room */}
-              <div>
-                <label
-                  htmlFor="room"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Room / Hall
-                </label>
-
-                <input
-                  id="room"
-                  name="room"
-                  type="text"
-                  value={formData.room}
-                  onChange={handleChange}
-                  placeholder="Room 201"
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================
-              Marks & Grading
-          ================================================= */}
-          <section className="mb-8">
-            <h2 className="mb-5 border-b pb-3 text-lg font-semibold text-gray-800">
-              Marks & Grading
-            </h2>
-
-            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-              {/* Total Marks */}
-              <div>
-                <label
-                  htmlFor="totalMarks"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Total Marks{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="totalMarks"
-                  name="totalMarks"
-                  type="number"
-                  value={formData.totalMarks}
-                  onChange={handleChange}
-                  placeholder="100"
-                  min="1"
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-
-              {/* Pass Marks */}
-              <div>
-                <label
-                  htmlFor="passMarks"
-                  className="mb-2 block text-sm font-medium text-gray-700"
-                >
-                  Pass Marks{" "}
-                  <span className="text-red-500">*</span>
-                </label>
-
-                <input
-                  id="passMarks"
-                  name="passMarks"
-                  type="number"
-                  value={formData.passMarks}
-                  onChange={handleChange}
-                  placeholder="40"
-                  min="1"
-                  required
-                  className="w-full rounded-lg border border-gray-300 px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* =================================================
-              Instructions
-          ================================================= */}
-          <section className="mb-8">
-            <h2 className="mb-5 border-b pb-3 text-lg font-semibold text-gray-800">
-              Instructions
-            </h2>
-
-            <textarea
-              id="instructions"
-              name="instructions"
-              value={formData.instructions}
-              onChange={handleChange}
-              rows={4}
-              placeholder="Write instructions for students..."
-              className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </section>
-
-          {/* =================================================
-              Publication
-          ================================================= */}
-          <section className="mb-8">
-            <h2 className="mb-5 border-b pb-3 text-lg font-semibold text-gray-800">
-              Publication
-            </h2>
-
-            <div className="max-w-md">
-              <label
-                htmlFor="status"
-                className="mb-2 block text-sm font-medium text-gray-700"
-              >
-                Exam Status
+            {/* Exam Type */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Exam Type <span className="text-red-500">*</span>
               </label>
-
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-              >
-                <option value="draft">
-                  Save as Draft
-                </option>
-
-                <option value="published">
-                  Publish Exam
-                </option>
-              </select>
+              <div className="relative">
+                <select
+                  required
+                  name="examType"
+                  value={formData.examType}
+                  onChange={handleInputChange}
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                >
+                  <option value="Mid Term">Mid Term Examination</option>
+                  <option value="Final">Final Examination</option>
+                  <option value="Class Test">Class Test</option>
+                  <option value="Quiz">Quiz</option>
+                  <option value="Other">Other Assessment</option>
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
             </div>
-          </section>
 
-          {/* =================================================
-              Buttons
-          ================================================= */}
-          <div className="flex flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:justify-end">
+            {/* Subject */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Subject Scope
+              </label>
+              <div className="relative">
+                <select
+                  name="subject"
+                  value={formData.subject}
+                  onChange={handleInputChange}
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                >
+                  {subjectOptions.map((subj) => (
+                    <option key={subj} value={subj}>
+                      {subj}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
 
-            {/* Reset */}
+            {/* Exam Date */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Exam Start Date <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  required
+                  type="date"
+                  name="examDate"
+                  value={formData.examDate}
+                  onChange={handleInputChange}
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                />
+                <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+              </div>
+            </div>
+
+            {/* Total Marks */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Total Marks <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="number"
+                min={1}
+                max={1000}
+                name="totalMarks"
+                value={formData.totalMarks}
+                onChange={handleInputChange}
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+              />
+            </div>
+
+            {/* Pass Marks */}
+            <div className="flex flex-col gap-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Pass Marks <span className="text-red-500">*</span>
+              </label>
+              <input
+                required
+                type="number"
+                min={0}
+                max={formData.totalMarks}
+                name="passMarks"
+                value={formData.passMarks}
+                onChange={handleInputChange}
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+              />
+            </div>
+
+            {/* Status */}
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Status
+              </label>
+              <div className="flex gap-4">
+                {(["Active", "Upcoming", "Completed"] as const).map((st) => (
+                  <label key={st} className="flex items-center gap-2 cursor-pointer text-xs font-medium text-slate-700">
+                    <input
+                      type="radio"
+                      name="status"
+                      value={st}
+                      checked={formData.status === st}
+                      onChange={handleInputChange}
+                      className="accent-[#6348eb]"
+                    />
+                    <span>{st}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <label className="text-xs font-semibold text-slate-700">
+                Description / Notes
+              </label>
+              <textarea
+                rows={3}
+                name="description"
+                placeholder="Add optional notes, exam rules, or room arrangements..."
+                value={formData.description}
+                onChange={handleInputChange}
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 resize-none"
+              />
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="mt-8 flex items-center justify-end gap-3 border-t border-slate-100 pt-5">
             <button
               type="button"
-              onClick={handleReset}
-              disabled={loading}
-              className="rounded-lg border border-gray-300 px-6 py-2.5 font-medium text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              onClick={() => setFormData(initialFormData)}
+              className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
             >
-              Reset
+              Reset Form
             </button>
-
-            {/* Submit */}
-            <button
+            <Button
               type="submit"
-              disabled={loading}
-              className="rounded-lg bg-blue-600 px-6 py-2.5 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+              isDisabled={loading}
+              className="bg-[#03204c] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
             >
-              {loading ? "Creating..." : "Create Exam"}
-            </button>
+              {loading ? (
+                <Spinner size="sm" color="current" />
+              ) : (
+                <>
+                  <Plus className="h-4 w-4 mr-1 inline" />
+                  Save Exam
+                </>
+              )}
+            </Button>
           </div>
         </form>
-      </div>
+      </Card>
     </div>
   );
-};
-
-export default CreateExam;
+}
