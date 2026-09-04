@@ -260,10 +260,8 @@ export type UserRole = "teacher" | "admin" | "student";
 
 const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: "manageStudents", href: "/teacher/manageStudents", label: "Manage Students", icon: <Users className="w-5 h-5" /> },
   { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <UserCheck className="w-5 h-5" /> },
   { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
-  { id: "createAssingment", href: "/teacher/createAssingment", label: "Create Assignment", icon: <FileCheck className="w-5 h-5" /> },
   { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },  
   { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> }, 
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Results", icon: <Award className="w-5 h-5" /> },

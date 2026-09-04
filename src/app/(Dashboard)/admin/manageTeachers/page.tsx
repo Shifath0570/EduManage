@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { Search, Eye, UserCheck, ToggleLeft, ToggleRight, RotateCcw, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useState, useMemo, ChangeEvent } from 'react';
+import { Search, Eye, UserCheck, ToggleLeft, ToggleRight, RotateCcw, X, ChevronLeft, ChevronRight, Camera, Upload } from 'lucide-react';
 import { Button } from '@heroui/react';
 import Link from 'next/link';
 
@@ -14,6 +14,8 @@ interface Teacher {
   phone: string;
   subjectSpecialization: string[] | string;
   status: 'Active' | 'Inactive';
+  avatarUrl?: string;
+  profilePhoto?: string; // Added to resolve the red line TypeScript error
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -64,7 +66,12 @@ export default function ManageTeachersPage() {
 
   // Modal / Selection states
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
-  const [activeModal, setActiveModal] = useState<'view' | 'assignSubject' | 'add' | null>(null);
+  const [activeModal, setActiveModal] = useState<'view' | 'assignSubject' | 'add' | 'updateImage' | null>(null);
+
+  // Image Upload state
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [isUploading, setIsUploading] = useState<boolean>(false);
 
   useEffect(() => {
     async function fetchTeachers() {
@@ -158,9 +165,58 @@ export default function ManageTeachersPage() {
     }
   };
 
+  const handleOpenImageModal = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setImagePreview(
+      teacher.profilePhoto ||
+      teacher.avatarUrl ||
+      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(teacher.fullName || 'default')}`
+    );
+    setImageFile(null);
+    setActiveModal('updateImage');
+  };
+
+  const handleImageFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleSaveImage = async () => {
+    if (!selectedTeacher || !imageFile) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('avatar', imageFile);
+
+      const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
+      const res = await fetch(`${apiURL}/api/teachers/${selectedTeacher._id}/avatar`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      const json = await res.json();
+      if (res.ok && json.avatarUrl) {
+        setTeachers((prev) =>
+          prev.map((t) => (t._id === selectedTeacher._id ? { ...t, avatarUrl: json.avatarUrl, profilePhoto: json.avatarUrl } : t))
+        );
+        closeModal();
+      }
+    } catch (err) {
+      console.error('Failed to upload image:', err);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const closeModal = () => {
     setActiveModal(null);
     setSelectedTeacher(null);
+    setImageFile(null);
+    setImagePreview('');
   };
 
   return (
@@ -233,19 +289,31 @@ export default function ManageTeachersPage() {
                   {paginatedTeachers.map((teacher, idx) => {
                     const teacherSubjects = normalizeSubjects(teacher.subjectSpecialization);
                     const globalIndex = (currentPage - 1) * ITEMS_PER_PAGE + idx + 1;
+                    const avatarSrc =
+                      teacher.profilePhoto ||
+                      teacher.avatarUrl ||
+                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
+                        teacher.fullName || 'default'
+                      )}`;
+
                     return (
                       <tr key={teacher._id} className="hover:bg-slate-50/50 transition-colors">
                         <td className="py-4 px-2 text-slate-500">{globalIndex}</td>
                         <td className="py-4 px-2">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
+                            <div className="relative group w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
                               <img
-                                src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(
-                                  teacher.fullName || 'default'
-                                )}`}
+                                src={avatarSrc}
                                 alt={teacher.fullName}
                                 className="w-full h-full object-cover"
                               />
+                              <button
+                                onClick={() => handleOpenImageModal(teacher)}
+                                title="Change Image"
+                                className="absolute inset-0 bg-slate-900/40 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <Camera size={14} />
+                              </button>
                             </div>
                             <div>
                               <div className="font-semibold text-slate-900">{teacher.fullName}</div>
@@ -273,11 +341,10 @@ export default function ManageTeachersPage() {
                         </td>
                         <td className="py-4 px-2">
                           <span
-                            className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              teacher.status === 'Active'
+                            className={`px-2 py-1 rounded-full text-xs font-medium ${teacher.status === 'Active'
                                 ? 'bg-emerald-50 text-emerald-600'
                                 : 'bg-slate-100 text-slate-500'
-                            }`}
+                              }`}
                           >
                             {teacher.status}
                           </span>
@@ -345,11 +412,10 @@ export default function ManageTeachersPage() {
                     <button
                       key={item}
                       onClick={() => setRawPage(item as number)}
-                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                        currentPage === item
+                      className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
                           ? 'bg-indigo-600 text-white'
                           : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
-                      }`}
+                        }`}
                     >
                       {item}
                     </button>
@@ -369,24 +435,44 @@ export default function ManageTeachersPage() {
         )}
       </div>
 
-      {activeModal && (
+      {/* Image Upload Modal */}
+      {activeModal === 'updateImage' && selectedTeacher && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-xl relative">
             <button onClick={closeModal} className="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
               <X size={20} />
             </button>
-            <h3 className="text-lg font-bold text-slate-900 capitalize mb-2">
-              {activeModal.replace(/([A-Z])/g, ' $1')}
-            </h3>
-            <p className="text-sm text-slate-500 mb-4">
-              {selectedTeacher ? `Target: ${selectedTeacher.fullName}` : 'Form action initialized.'}
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Update Teacher Profile Photo</h3>
+            <p className="text-sm text-slate-500 mb-6">
+              Upload a profile photo for <span className="font-semibold text-slate-700">{selectedTeacher.fullName}</span>
             </p>
+
+            <div className="flex flex-col items-center gap-4 mb-6">
+              <div className="w-24 h-24 rounded-full bg-slate-100 overflow-hidden border-2 border-indigo-100 shadow-sm relative">
+                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+
+              <label className="w-full flex flex-col items-center px-4 py-6 bg-slate-50 border-2 border-dashed border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100/70 transition">
+                <Upload size={24} className="text-slate-400 mb-2" />
+                <span className="text-xs font-medium text-slate-600">Click to upload image</span>
+                <span className="text-[10px] text-slate-400 mt-1">PNG, JPG or WEBP (Max 5MB)</span>
+                <input type="file" accept="image/*" onChange={handleImageFileChange} className="hidden" />
+              </label>
+            </div>
+
             <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
               <button
                 onClick={closeModal}
                 className="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg transition"
               >
-                Close
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveImage}
+                disabled={!imageFile || isUploading}
+                className="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition flex items-center gap-2"
+              >
+                {isUploading ? 'Uploading...' : 'Save Image'}
               </button>
             </div>
           </div>
@@ -395,5 +481,3 @@ export default function ManageTeachersPage() {
     </div>
   );
 }
-
-

@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import { Eye, ToggleLeft, ToggleRight, Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight} from "lucide-react";
+import { Eye, ToggleLeft, ToggleRight, Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
 import { Button } from "@heroui/react";
 import Link from "next/link";
@@ -15,19 +15,21 @@ interface Student {
   className: string;
   section: string;
   status: "Active" | "Inactive";
+  avatarUrl?: string;
+  profileImage?: string;
 }
 
 const getInitials = (name: string) => {
-  return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+  return name ? name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() : "?";
 };
 
 const getAvatarBg = (index: number) => {
   const colors = [
-    "bg-blue-100 text-blue-600",
-    "bg-purple-100 text-purple-600",
-    "bg-green-100 text-green-600",
-    "bg-amber-100 text-amber-600",
-    "bg-rose-100 text-rose-600"
+    "bg-blue-100 text-blue-600 border-blue-200",
+    "bg-purple-100 text-purple-600 border-purple-200",
+    "bg-green-100 text-green-600 border-green-200",
+    "bg-amber-100 text-amber-600 border-amber-200",
+    "bg-rose-100 text-rose-600 border-rose-200"
   ];
   return colors[index % colors.length];
 };
@@ -35,6 +37,7 @@ const getAvatarBg = (index: number) => {
 export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
   // Search & Filter states
   const [searchTerm, setSearchTerm] = useState("");
@@ -116,6 +119,10 @@ export default function ManageStudents() {
     setSelectedClass("All Classes");
     setSelectedSection("All Sections");
     setCurrentPage(1);
+  };
+
+  const handleImageError = (studentId: string) => {
+    setImageErrors((prev) => ({ ...prev, [studentId]: true }));
   };
 
   const getPaginationRange = () => {
@@ -236,14 +243,30 @@ export default function ManageStudents() {
               ) : (
                 currentStudents.map((student, idx) => {
                   const overallIndex = (currentPage - 1) * itemsPerPage + idx;
+                  const photoUrl = student.profileImage || student.avatarUrl;
+                  const hasValidPhoto = photoUrl && !imageErrors[student._id];
+
                   return (
                     <tr key={student._id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3 px-4 text-center text-slate-500">{overallIndex + 1}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(overallIndex)}`}>
-                            {getInitials(student.name)}
+                          {/* Avatar Image or Initials Fallback */}
+                          <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200/60 shadow-sm flex items-center justify-center">
+                            {hasValidPhoto ? (
+                              <img
+                                src={photoUrl}
+                                alt={student.name}
+                                className="w-full h-full object-cover"
+                                onError={() => handleImageError(student._id)}
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(overallIndex)}`}>
+                                {getInitials(student.name)}
+                              </div>
+                            )}
                           </div>
+
                           <div>
                             <div className="font-semibold text-slate-800">{student.name}</div>
                             <div className="text-xs text-slate-400">
@@ -378,6 +401,4 @@ export default function ManageStudents() {
     </div>
   );
 }
-
-
 
