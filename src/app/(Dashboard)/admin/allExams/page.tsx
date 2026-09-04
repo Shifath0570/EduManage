@@ -232,7 +232,7 @@ export default function AllExamList() {
         <button
           type="button"
           onClick={() => router.push("/admin/createExam")}
-          className="bg-[#6348eb] hover:bg-[#5238d6] text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 transition"
+          className="bg-[#03204C]/80 hover:bg-[#1556a7] text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 transition"
         >
           <Plus size={16} /> Create Exam
         </button>
@@ -546,7 +546,7 @@ export default function AllExamList() {
                   setViewExam(null);
                   router.push("/admin/enterMarks");
                 }}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+                className="bg-[#0B386C]/80 hover:bg-indigo-950 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
               >
                 <PencilLine size={14} /> Enter Marks for this Exam
               </button>

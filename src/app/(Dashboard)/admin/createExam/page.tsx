@@ -432,7 +432,7 @@ export default function AdminCreateExam() {
             <Button
               type="submit"
               isDisabled={loading}
-              className="bg-[#03204c] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
+              className=" font-semibold text-white shadow-md shadow-purple-500/20 bg-[#03204C]/80 hover:bg-[#1556a7]"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />
