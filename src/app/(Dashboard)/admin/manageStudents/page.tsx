@@ -43,11 +43,16 @@ export default function ManageStudents() {
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const apiURL = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiURL}/api/students`);
-        // const response = await fetch("/data/demo-students.json");
+        const API_BASE =
+          process.env.NEXT_PUBLIC_API_URL ||
+          (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+            ? "https://edu-manage-server-blush.vercel.app"
+            : "http://localhost:5000");
+        const response = await fetch(`${API_BASE}/api/students`);
         const result = await response.json();
-        if (result.success) setStudents(result.data);
+        if (result.success && Array.isArray(result.data)) {
+          setStudents(result.data);
+        }
       } catch (err) {
         console.error("Error fetching students:", err);
       } finally {
