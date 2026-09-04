@@ -18,14 +18,12 @@ interface Teacher {
 
 const ITEMS_PER_PAGE = 10;
 
-// Helper to reliably format subjects as a string array regardless of API payload shape
 const normalizeSubjects = (subjects: string[] | string | undefined | null): string[] => {
   if (Array.isArray(subjects)) return subjects;
   if (typeof subjects === 'string') return subjects.split(',').map((s) => s.trim()).filter(Boolean);
   return [];
 };
 
-// Helper function to generate pagination range with ellipsis (...)
 const getPaginationRange = (currentPage: number, totalPages: number) => {
   const delta = 1;
   const range: (number | string)[] = [];
@@ -397,4 +395,5 @@ export default function ManageTeachersPage() {
     </div>
   );
 }
+
 

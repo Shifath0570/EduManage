@@ -210,7 +210,7 @@ const AssingSSC = () => {
       }
 
       alert("Teacher assigned successfully!");
-      router.push("/admin/manageTeachers");
+      // router.push(`/admin/manageTeachers/assing/${teacherIdParam}`);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Assignment failed.";
       alert(errorMessage);

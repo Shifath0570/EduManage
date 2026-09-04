@@ -154,7 +154,7 @@ export default function TeacherDetailsPage({ params }: PageProps) {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div className="flex items-center gap-3">
           <Link
-            href="/teachers"
+            href="/admin/manageTeachers"
             className="p-2 text-slate-600 bg-white hover:bg-slate-50 border border-slate-200 rounded-lg transition shadow-sm"
           >
             <ArrowLeft size={18} />
