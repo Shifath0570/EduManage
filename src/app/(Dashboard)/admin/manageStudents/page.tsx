@@ -189,16 +189,6 @@ export default function ManageStudents() {
           </table>
         </div>
 
-        {/* Pagination Footer */}
-        <div className="p-4 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-100 text-xs text-slate-500">
-          <div>Showing 1 to {students.length} of 25 students</div>
-          <div className="flex gap-1 items-center flex-wrap justify-center">
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">Previous</button>
-            <button className="px-3 py-1.5 bg-slate-900 text-white rounded-md font-medium">1</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">2</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">3</button>
-            <button className="px-3 py-1.5 border border-slate-200 rounded-md hover:bg-slate-50">Next</button>
-=======
         {/* Dynamic Pagination Footer */}
         <div className="p-4 flex flex-wrap gap-3 items-center justify-between border-t border-slate-100 text-xs text-slate-500">
           <div className="flex items-center gap-4">
