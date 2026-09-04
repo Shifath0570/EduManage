@@ -60,6 +60,9 @@ const CLASS_OPTIONS = [
 
 const SECTION_OPTIONS = ["All", "A", "B", "C", "D"];
 
+// Standard institutional attendance threshold target (75%)
+const ATTENDANCE_THRESHOLD_PERCENTAGE = 75;
+
 const SUBJECT_OPTIONS = [
     "All",
     "Mathematics",
