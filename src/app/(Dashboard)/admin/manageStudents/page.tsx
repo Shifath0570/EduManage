@@ -2,10 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import {
-  Eye, ToggleLeft, ToggleRight,
-  Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight
-} from "lucide-react";
+import { Eye, ToggleLeft, ToggleRight, Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight} from "lucide-react";
 import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
 import { Button } from "@heroui/react";
 import Link from "next/link";
