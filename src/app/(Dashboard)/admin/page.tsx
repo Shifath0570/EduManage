@@ -1,4 +1,3 @@
-// app/admin/page.tsx
 
 export default function AdminDashboard() {
   // Dummy statistics data
