@@ -1,10 +1,9 @@
-
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent, useMemo } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent, useMemo } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
-import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { Calendar, ChevronDown, Save, Upload, ArrowLeft } from "lucide-react";
+import { useRouter, useParams } from "next/navigation";
 
 // NCTB Subjects Dataset structured with explicit class + stream keys
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
@@ -180,12 +179,66 @@ const initialFormData: StudentFormData = {
   stream: "",
 };
 
-export default function CreateStudent() {
+export default function EditStudent() {
+  const [fetching, setFetching] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
+
   const router = useRouter();
+  const params = useParams();
+  const studentIdParam = params?.id as string;
+
+  // Fetch initial student details on component mount
+  useEffect(() => {
+    if (!studentIdParam) return;
+
+    const fetchStudentData = async () => {
+      try {
+        const apiURL = process.env.NEXT_PUBLIC_API_URL;
+        const res = await fetch(`${apiURL}/api/students/${studentIdParam}`);
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to fetch student details.");
+        }
+
+        const student = data.data || data;
+
+        // Populate state with retrieved data
+        setFormData({
+          name: student.name || "",
+          email: student.email || "",
+          phone: student.phone || "",
+          dateOfBirth: student.dateOfBirth ? student.dateOfBirth.split("T")[0] : "",
+          gender: student.gender || "",
+          address: student.address || "",
+          guardianName: student.guardianName || "",
+          guardianPhone: student.guardianPhone || "",
+          className: student.className || "",
+          section: student.section || "",
+          studentId: student.studentId || "",
+          roll: student.roll || "",
+          admissionDate: student.admissionDate ? student.admissionDate.split("T")[0] : "",
+          profileImage: student.profileImage || "",
+          stream: student.stream || "",
+        });
+
+        if (student.profileImage) {
+          setAvatarPreview(student.profileImage);
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : "Error fetching student details.";
+        alert(errorMessage);
+        router.push("/admin/manageStudents");
+      } finally {
+        setFetching(false);
+      }
+    };
+
+    fetchStudentData();
+  }, [studentIdParam, router]);
 
   // Directly derive subjects from CLASS_SUBJECTS_MAP using className key
   const computedSubjects = useMemo(() => {
@@ -193,14 +246,12 @@ export default function CreateStudent() {
     return CLASS_SUBJECTS_MAP[formData.className] || [];
   }, [formData.className]);
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      
+
       // Auto-populate stream property when a class with stream is chosen
       if (name === "className") {
         if (value.includes("science")) {
@@ -249,8 +300,7 @@ export default function CreateStudent() {
         throw new Error(data.error?.message || "Failed to upload image to ImgBB.");
       }
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Image upload failed.";
+      const errorMessage = err instanceof Error ? err.message : "Image upload failed.";
       alert(errorMessage);
       setAvatarPreview(formData.profileImage || null);
     } finally {
@@ -266,14 +316,14 @@ export default function CreateStudent() {
       ...formData,
       subjects: computedSubjects,
       metadata: {
-        submittedAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     };
 
     try {
       const apiURL = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiURL}/api/students`, {
-        method: "POST",
+      const res = await fetch(`${apiURL}/api/students/${studentIdParam}`, {
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
@@ -283,38 +333,49 @@ export default function CreateStudent() {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.error || "Failed to submit student form.");
+        throw new Error(data.error || "Failed to update student details.");
       }
 
-      alert("Student created successfully!");
+      alert("Student updated successfully!");
       router.push("/admin/manageStudents");
-      setFormData(initialFormData);
-      setAvatarPreview(null);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An unexpected error occurred.";
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
       alert(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
+  // if (fetching) {
+  //   return (
+  //     <div className="flex min-h-[400px] flex-col items-center justify-center gap-3">
+  //       <Spinner size="lg" color="primary" />
+  //       <p className="text-sm font-medium text-slate-500">Loading student details...</p>
+  //     </div>
+  //   );
+  // }
+
   return (
     <div className="container mx-auto max-w-5xl px-6 py-10">
-      <div className="mb-8">
-        <h1 className="text-3xl font-extrabold text-[#081838]">
-          Create Student
-        </h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Add a new student to the system.
-        </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-extrabold text-[#081838]">Edit Student Details</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            Update profile and academic information for {formData.name || "this student"}.
+          </p>
+        </div>
+        <Button
+          type="button"
+          onClick={() => router.back()}
+          className="w-fit bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200"
+        >
+          <ArrowLeft className="mr-1 h-4 w-4" /> Back
+        </Button>
       </div>
 
       <Card className="border border-slate-100 bg-white p-8 shadow-xs rounded-2xl">
         <CardHeader className="mb-6 p-0">
-          <h2 className="text-lg font-bold text-[#081838]">
-            Student Information
-          </h2>
+          <h2 className="text-lg font-bold text-[#081838]">Update Student Information</h2>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -324,9 +385,7 @@ export default function CreateStudent() {
               <AvatarFallback>ST</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center gap-2 sm:items-start">
-              <span className="text-xs font-semibold text-slate-600">
-                Upload Profile Picture
-              </span>
+              <span className="text-xs font-semibold text-slate-600">Change Profile Picture</span>
               <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-purple-50 px-4 py-2 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100">
                 {uploadingImage ? (
                   <>
@@ -336,7 +395,7 @@ export default function CreateStudent() {
                 ) : (
                   <>
                     <Upload className="h-4 w-4" />
-                    Choose Image
+                    Choose New Image
                   </>
                 )}
                 <input
@@ -367,9 +426,7 @@ export default function CreateStudent() {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-700">
-                Email
-              </label>
+              <label className="text-xs font-semibold text-slate-700">Email</label>
               <input
                 type="email"
                 name="email"
@@ -424,7 +481,9 @@ export default function CreateStudent() {
                   onChange={handleInputChange}
                   className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
-                  <option value="" disabled>Select gender</option>
+                  <option value="" disabled>
+                    Select gender
+                  </option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
@@ -490,7 +549,9 @@ export default function CreateStudent() {
                   onChange={handleInputChange}
                   className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
-                  <option value="" disabled>Select class</option>
+                  <option value="" disabled>
+                    Select class
+                  </option>
                   <option value="class_1">Class 1</option>
                   <option value="class_2">Class 2</option>
                   <option value="class_3">Class 3</option>
@@ -522,7 +583,9 @@ export default function CreateStudent() {
                   onChange={handleInputChange}
                   className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
                 >
-                  <option value="" disabled>Select section</option>
+                  <option value="" disabled>
+                    Select section
+                  </option>
                   <option value="a">Section A</option>
                   <option value="b">Section B</option>
                   <option value="c">Section C</option>
@@ -582,14 +645,14 @@ export default function CreateStudent() {
           {/* Assigned Subjects Preview */}
           {computedSubjects.length > 0 && (
             <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
-              <h3 className="text-xs font-semibold text-slate-700 mb-2">
+              <h3 className="mb-2 text-xs font-semibold text-slate-700">
                 Auto-assigned Subjects ({computedSubjects.length})
               </h3>
               <div className="flex flex-wrap gap-1.5">
                 {computedSubjects.map((subject, idx) => (
                   <span
                     key={idx}
-                    className="inline-block rounded-lg bg-purple-50 border border-purple-200/60 px-2.5 py-1 text-xs font-medium text-purple-700"
+                    className="inline-block rounded-lg border border-purple-200/60 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700"
                   >
                     {subject}
                   </span>
@@ -601,6 +664,7 @@ export default function CreateStudent() {
           <div className="mt-8 flex items-center justify-end gap-3 pt-4">
             <Button
               type="button"
+              onClick={() => router.push("/admin/manageStudents")}
               className="bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200"
             >
               Cancel
@@ -614,8 +678,7 @@ export default function CreateStudent() {
                 <Spinner size="sm" color="current" />
               ) : (
                 <>
-                  <Plus className="h-4 w-4 mr-1 inline" />
-                  Create Student
+                  <Save className="mr-1 h-4 w-4 inline" /> Save Changes
                 </>
               )}
             </Button>
@@ -625,4 +688,3 @@ export default function CreateStudent() {
     </div>
   );
 }
-

@@ -13,6 +13,7 @@ const baseNavItems = [
   { label: "About", href: "/about" },
   { label: "Notice", href: "/notice" },
   { label: "Blog", href: "/blog" },
+  { label: "Chat", href: "/chat" },
   { label: "Contact", href: "/contact" },
 ];
 
