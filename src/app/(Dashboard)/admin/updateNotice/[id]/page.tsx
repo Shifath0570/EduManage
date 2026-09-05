@@ -57,7 +57,7 @@ const UpdateNotice = () => {
   const params = useParams();
   const router = useRouter();
   const id = params?.id as string;
-  
+
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -307,14 +307,17 @@ const UpdateNotice = () => {
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        setTimeout(() => {
-          router.push('/notice');
-        }, 2000);
 
         toast.success("Notice updated successfully!", {
           duration: 3000,
           position: "top-right",
         });
+        
+        setTimeout(() => {
+          router.push('/notice');
+        }, 2000);
+
+
 
 
       } else {
@@ -424,8 +427,8 @@ const UpdateNotice = () => {
 
       {message && (
         <div className={`p-4 rounded-lg mb-6 ${message.type === 'success'
-            ? "bg-green-50 border border-green-200 text-green-800"
-            : "bg-red-50 border border-red-200 text-red-800"
+          ? "bg-green-50 border border-green-200 text-green-800"
+          : "bg-red-50 border border-red-200 text-red-800"
           }`}>
           {message.text}
         </div>
@@ -649,9 +652,9 @@ const UpdateNotice = () => {
                 Status
               </label>
               <span className={`text-xs px-2 py-0.5 rounded-full ${formData.status === 'published' ? 'bg-green-100 text-green-800' :
-                  formData.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                    formData.status === 'archived' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-red-100 text-red-800'
+                formData.status === 'draft' ? 'bg-gray-100 text-gray-800' :
+                  formData.status === 'archived' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
                 }`}>
                 {formData.status || "Not set"}
               </span>
