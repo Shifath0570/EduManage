@@ -5,6 +5,7 @@ import { useEffect, useState, useMemo, ChangeEvent } from 'react';
 import { Search, Eye, UserCheck, ToggleLeft, ToggleRight, RotateCcw, X, ChevronLeft, ChevronRight, Camera, Upload } from 'lucide-react';
 import { Button } from '@heroui/react';
 import Link from 'next/link';
+import { TeacherStatusAction } from '@/app/component/TeacherStatusAction';
 
 interface Teacher {
   _id: string;
@@ -342,8 +343,8 @@ export default function ManageTeachersPage() {
                         <td className="py-4 px-2">
                           <span
                             className={`px-2 py-1 rounded-full text-xs font-medium ${teacher.status === 'Active'
-                                ? 'bg-emerald-50 text-emerald-600'
-                                : 'bg-slate-100 text-slate-500'
+                              ? 'bg-emerald-50 text-emerald-600'
+                              : 'bg-slate-100 text-slate-500'
                               }`}
                           >
                             {teacher.status}
@@ -361,16 +362,7 @@ export default function ManageTeachersPage() {
                                 <UserCheck size={16} />
                               </Button>
                             </Link>
-                            <Button
-                              onClick={() => handleToggleStatus(teacher)}
-                              className="p-1.5 bg-slate-100 rounded-md hover:bg-slate-200 transition"
-                            >
-                              {teacher.status === 'Active' ? (
-                                <ToggleRight size={18} className="text-emerald-600" />
-                              ) : (
-                                <ToggleLeft size={18} className="text-slate-400" />
-                              )}
-                            </Button>
+                            <TeacherStatusAction teacherId={teacher._id} teacherName={teacher.fullName} currentStatus={teacher.status}/>
                           </div>
                         </td>
                       </tr>
@@ -413,8 +405,8 @@ export default function ManageTeachersPage() {
                       key={item}
                       onClick={() => setRawPage(item as number)}
                       className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${currentPage === item
-                          ? 'bg-indigo-600 text-white'
-                          : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
+                        ? 'bg-indigo-600 text-white'
+                        : 'border border-slate-200 text-slate-600 hover:bg-slate-50'
                         }`}
                     >
                       {item}
@@ -481,3 +473,11 @@ export default function ManageTeachersPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
