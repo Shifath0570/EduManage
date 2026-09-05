@@ -130,7 +130,7 @@ export default function AddTeacherPage(): React.ReactElement {
     setLoading(true);
     setError("");
 
-    const payload = {
+    const rawPayload = {
       teacherId: user?.id,
       ...formData,
       experienceYears: formData.experienceYears
@@ -139,6 +139,10 @@ export default function AddTeacherPage(): React.ReactElement {
       submittedAt: new Date().toISOString(),
       status: "Active",
     };
+
+    const payload = Object.fromEntries(
+    Object.entries(rawPayload).filter(([_, v]) => v !== "" && v !== undefined)
+  );
 
     try {
       const apiURL = process.env.NEXT_PUBLIC_API_URL;
