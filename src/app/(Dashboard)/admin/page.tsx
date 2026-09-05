@@ -1,11 +1,45 @@
-// app/admin/page.tsx
 
+export default function AdminDashboard() {
+  // Dummy statistics data
+  const stats = [
+    { title: "Total Students", value: "1,247", icon: "👨‍🎓", change: "+12%", color: "bg-blue-500" },
+    { title: "Total Teachers", value: "48", icon: "👨‍🏫", change: "+3%", color: "bg-green-500" },
+    { title: "Total Classes", value: "24", icon: "📚", change: "+0%", color: "bg-purple-500" },
+    { title: "Total Subjects", value: "32", icon: "📖", change: "+5%", color: "bg-orange-500" },
+  ];
 
-const admin = () => {
+  // Dummy recent activities
+  const recentActivities = [
+    { id: 1, action: "New student enrolled", user: "John Doe", time: "2 minutes ago", type: "student" },
+    { id: 2, action: "Assignment submitted", user: "Jane Smith", time: "15 minutes ago", type: "assignment" },
+    { id: 3, action: "New teacher added", user: "Admin", time: "1 hour ago", type: "teacher" },
+    { id: 4, action: "Exam results published", user: "Dr. Williams", time: "3 hours ago", type: "exam" },
+    { id: 5, action: "Notice posted", user: "Admin", time: "5 hours ago", type: "notice" },
+  ];
 
-    return (
-        <div>
-            <h2>this is admin</h2>
+  // Dummy upcoming events
+  const upcomingEvents = [
+    { id: 1, title: "Math Exam", date: "2024-01-25", time: "10:00 AM", class: "Class 10" },
+    { id: 2, title: "Science Fair", date: "2024-01-28", time: "09:00 AM", class: "All Classes" },
+    { id: 3, title: "PTA Meeting", date: "2024-02-01", time: "03:00 PM", class: "Parents & Teachers" },
+    { id: 4, title: "Assignment Deadline", date: "2024-02-05", time: "11:59 PM", class: "Class 12" },
+  ];
+
+  // Dummy attendance summary
+  const attendanceData = [
+    { class: "Class 10", present: 85, total: 90, percentage: 94 },
+    { class: "Class 11", present: 78, total: 85, percentage: 92 },
+    { class: "Class 12", present: 42, total: 50, percentage: 84 },
+    { class: "Class 9", present: 65, total: 70, percentage: 93 },
+  ];
+
+  return (
+    <div className="p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-800">Welcome back, Admin! 👋</h1>
+          <p className="text-gray-600 mt-1">Here s what s happening with your school today.</p>
         </div>
 
         {/* Statistics Cards */}
@@ -100,7 +134,7 @@ const admin = () => {
         {/* Attendance Summary Section */}
         <div className="mt-6 bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold text-gray-800">Today's Attendance Summary</h2>
+            <h2 className="text-lg font-semibold text-gray-800">Today s Attendance Summary</h2>
             <button className="text-sm text-blue-600 hover:text-blue-800 font-medium">
               View Full Report →
             </button>

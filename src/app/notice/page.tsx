@@ -52,7 +52,16 @@ export default async function HomePage() {
                   </p>
                 </div>
 
-                <div className="flex-shrink-0 ml-4">
+                <div className="flex-shrink-0 ml-4 flex items-center gap-2">
+
+                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium 
+                      ${notice.status === 'published' && 'bg-green-100 text-green-800'}
+                      ${notice.status === 'draft' && 'bg-gray-100 text-gray-800'}
+                      ${notice.status === 'archived' && 'bg-purple-100 text-purple-800'}
+                      ${notice.status === 'expired' && 'bg-red-100 text-red-800'}
+                    `}>
+                    {notice.status}
+                  </span>
                   <Link href={`/notice/${notice._id}`}>
                     <span className="text-sm font-semibold text-blue-600 transition hover:text-blue-800 sm:text-base lg:text-lg">
                       View Details →
