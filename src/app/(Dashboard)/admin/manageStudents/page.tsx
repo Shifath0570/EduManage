@@ -6,6 +6,7 @@ import { Eye, ToggleLeft, ToggleRight, Trash2, Search, Filter, RotateCcw, Plus, 
 import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
 import { Button } from "@heroui/react";
 import Link from "next/link";
+import { StudentStatusAction } from "@/app/component/StudentStatusAction";
 
 interface Student {
   _id: string;
@@ -278,11 +279,10 @@ export default function ManageStudents() {
                       <td className="py-3 px-4 text-slate-600">{student.className}</td>
                       <td className="py-3 px-4 text-slate-600">{student.section}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          student.status === "Active"
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${student.status === "Active"
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50"
                             : "bg-rose-50 text-rose-500 border border-rose-200/50"
-                        }`}>
+                          }`}>
                           {student.status}
                         </span>
                       </td>
@@ -293,9 +293,7 @@ export default function ManageStudents() {
                               <Eye size={15} />
                             </Button>
                           </Link>
-                          <Button className="p-1.5 text-emerald-600 bg-white hover:bg-emerald-50 rounded-md border border-emerald-100">
-                            {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
-                          </Button>
+                          <StudentStatusAction studentId={student._id} studentName={student.name} currentStatus={student.status} onSuccess={() => {}}/>
                           <StudentDeleteAction studentId={student._id} studentName={student.name} />
                         </div>
                       </td>
@@ -358,11 +356,10 @@ export default function ManageStudents() {
                 <button
                   key={item}
                   onClick={() => handlePageChange(Number(item))}
-                  className={`px-3 py-1.5 rounded-md font-medium transition ${
-                    currentPage === item
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${currentPage === item
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   {item}
                 </button>
