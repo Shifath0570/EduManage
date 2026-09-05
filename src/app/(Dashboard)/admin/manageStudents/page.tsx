@@ -2,10 +2,7 @@
 "use client";
 
 import React, { useEffect, useState, useMemo } from "react";
-import {
-  Eye, ToggleLeft, ToggleRight,
-  Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight
-} from "lucide-react";
+import { Eye, ToggleLeft, ToggleRight, Trash2, Search, Filter, RotateCcw, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import { StudentDeleteAction } from "@/app/component/StudentDeleteAction";
 import { Button } from "@heroui/react";
 import Link from "next/link";
@@ -18,19 +15,21 @@ interface Student {
   className: string;
   section: string;
   status: "Active" | "Inactive";
+  avatarUrl?: string;
+  profileImage?: string;
 }
 
 const getInitials = (name: string) => {
-  return name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase();
+  return name ? name.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() : "?";
 };
 
 const getAvatarBg = (index: number) => {
   const colors = [
-    "bg-blue-100 text-blue-600",
-    "bg-purple-100 text-purple-600",
-    "bg-green-100 text-green-600",
-    "bg-amber-100 text-amber-600",
-    "bg-rose-100 text-rose-600"
+    "bg-blue-100 text-blue-600 border-blue-200",
+    "bg-purple-100 text-purple-600 border-purple-200",
+    "bg-green-100 text-green-600 border-green-200",
+    "bg-amber-100 text-amber-600 border-amber-200",
+    "bg-rose-100 text-rose-600 border-rose-200"
   ];
   return colors[index % colors.length];
 };
@@ -38,15 +37,21 @@ const getAvatarBg = (index: number) => {
 export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({});
 
-  // Pagination states (Default 10 students per page)
+  // Search & Filter states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedClass, setSelectedClass] = useState("All Classes");
+  const [selectedSection, setSelectedSection] = useState("All Sections");
+
+  // Pagination states
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(10);
 
   useEffect(() => {
     async function fetchStudents() {
       try {
-        const apiURL = process.env.NEXT_PUBLIC_API_URL;
+        const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
         const response = await fetch(`${apiURL}/api/students`);
         const result = await response.json();
         if (result.success) setStudents(result.data);
@@ -59,17 +64,47 @@ export default function ManageStudents() {
     fetchStudents();
   }, []);
 
+  // Extract unique options for dropdowns dynamically from API response
+  const classOptions = useMemo(() => {
+    const classes = Array.from(new Set(students.map((s) => s.className).filter(Boolean)));
+    return ["All Classes", ...classes];
+  }, [students]);
+
+  const sectionOptions = useMemo(() => {
+    const sections = Array.from(new Set(students.map((s) => s.section).filter(Boolean)));
+    return ["All Sections", ...sections];
+  }, [students]);
+
+  // Filter students based on search term, selected class, and section
+  const filteredStudents = useMemo(() => {
+    return students.filter((student) => {
+      const query = searchTerm.toLowerCase().trim();
+      const matchesSearch =
+        !query ||
+        student.name?.toLowerCase().includes(query) ||
+        student.roll?.toString().toLowerCase().includes(query) ||
+        student.email?.toLowerCase().includes(query);
+
+      const matchesClass =
+        selectedClass === "All Classes" || student.className === selectedClass;
+
+      const matchesSection =
+        selectedSection === "All Sections" || student.section === selectedSection;
+
+      return matchesSearch && matchesClass && matchesSection;
+    });
+  }, [students, searchTerm, selectedClass, selectedSection]);
+
   // Calculate pagination bounds
-  const totalStudents = students.length;
+  const totalStudents = filteredStudents.length;
   const totalPages = Math.ceil(totalStudents / itemsPerPage) || 1;
 
-  // Slice current page data
+  // Slice current page data from filtered list
   const currentStudents = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return students.slice(startIndex, startIndex + itemsPerPage);
-  }, [students, currentPage, itemsPerPage]);
+    return filteredStudents.slice(startIndex, startIndex + itemsPerPage);
+  }, [filteredStudents, currentPage, itemsPerPage]);
 
-  // Display counters (Showing X to Y of Z)
   const startItemIndex = totalStudents === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
   const endItemIndex = Math.min(currentPage * itemsPerPage, totalStudents);
 
@@ -79,15 +114,26 @@ export default function ManageStudents() {
     }
   };
 
+  const handleResetFilters = () => {
+    setSearchTerm("");
+    setSelectedClass("All Classes");
+    setSelectedSection("All Sections");
+    setCurrentPage(1);
+  };
+
+  const handleImageError = (studentId: string) => {
+    setImageErrors((prev) => ({ ...prev, [studentId]: true }));
+  };
+
   const getPaginationRange = () => {
-    const delta = 1; // Number of pages to show around the current page
+    const delta = 1;
     const range: (number | string)[] = [];
 
     for (let i = 1; i <= totalPages; i++) {
       if (
-        i === 1 || // Always show first page
-        i === totalPages || // Always show last page
-        (i >= currentPage - delta && i <= currentPage + delta) // Show sibling pages
+        i === 1 ||
+        i === totalPages ||
+        (i >= currentPage - delta && i <= currentPage + delta)
       ) {
         range.push(i);
       } else if (
@@ -98,21 +144,17 @@ export default function ManageStudents() {
       }
     }
 
-    // Filter duplicate consecutive ellipses
     return range.filter((item, index, array) => item !== array[index - 1]);
   };
 
   return (
-    <div className="p-8 bg-slate-50 min-h-screen text-slate-800 font-sans">
+    <div className="mx-auto w-[90%] px-6 py-10">
       {/* Header */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Manage Students</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Manage Students</h1>
           <p className="text-sm text-slate-500 mt-1">View, add, and manage all students.</p>
         </div>
-        <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg font-medium text-sm flex items-center gap-2 transition">
-          <Plus size={16} /> Add Student
-        </button>
       </div>
 
       {/* Main Container */}
@@ -123,21 +165,50 @@ export default function ManageStudents() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search by name, roll, email..."
               className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </div>
           <div className="flex gap-2 items-center flex-wrap">
-            <select className="bg-slate-50 border border-slate-200 text-sm rounded-lg px-3 py-2 text-slate-600 outline-none">
-              <option>All Classes</option>
+            <select
+              value={selectedClass}
+              onChange={(e) => {
+                setSelectedClass(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-slate-50 border border-slate-200 text-sm rounded-lg px-3 py-2 text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              {classOptions.map((cls) => (
+                <option key={cls} value={cls}>
+                  {cls}
+                </option>
+              ))}
             </select>
-            <select className="bg-slate-50 border border-slate-200 text-sm rounded-lg px-3 py-2 text-slate-600 outline-none">
-              <option>All Sections</option>
+
+            <select
+              value={selectedSection}
+              onChange={(e) => {
+                setSelectedSection(e.target.value);
+                setCurrentPage(1);
+              }}
+              className="bg-slate-50 border border-slate-200 text-sm rounded-lg px-3 py-2 text-slate-600 outline-none focus:ring-2 focus:ring-indigo-500/20"
+            >
+              {sectionOptions.map((sec) => (
+                <option key={sec} value={sec}>
+                  {sec}
+                </option>
+              ))}
             </select>
-            <button className="bg-slate-900 text-white text-sm px-4 py-2 rounded-lg font-medium flex items-center gap-2 hover:bg-slate-800">
-              <Filter size={14} /> Filter
-            </button>
-            <button className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-lg flex items-center gap-1 hover:bg-slate-50">
+
+            <button
+              onClick={handleResetFilters}
+              className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-lg flex items-center gap-1 hover:bg-slate-50 transition"
+            >
               <RotateCcw size={14} /> Reset
             </button>
           </div>
@@ -159,23 +230,43 @@ export default function ManageStudents() {
             <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400">Loading student data...</td>
+                  <td colSpan={6} className="text-center py-8 text-slate-400">
+                    Loading student data...
+                  </td>
                 </tr>
               ) : currentStudents.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-8 text-slate-400">No students found.</td>
+                  <td colSpan={6} className="text-center py-8 text-slate-400">
+                    No students found matching criteria.
+                  </td>
                 </tr>
               ) : (
                 currentStudents.map((student, idx) => {
                   const overallIndex = (currentPage - 1) * itemsPerPage + idx;
+                  const photoUrl = student.profileImage || student.avatarUrl;
+                  const hasValidPhoto = photoUrl && !imageErrors[student._id];
+
                   return (
                     <tr key={student._id} className="hover:bg-slate-50/60 transition">
                       <td className="py-3 px-4 text-center text-slate-500">{overallIndex + 1}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(overallIndex)}`}>
-                            {getInitials(student.name)}
+                          {/* Avatar Image or Initials Fallback */}
+                          <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200/60 shadow-sm flex items-center justify-center">
+                            {hasValidPhoto ? (
+                              <img
+                                src={photoUrl}
+                                alt={student.name}
+                                className="w-full h-full object-cover"
+                                onError={() => handleImageError(student._id)}
+                              />
+                            ) : (
+                              <div className={`w-full h-full flex items-center justify-center font-semibold text-xs ${getAvatarBg(overallIndex)}`}>
+                                {getInitials(student.name)}
+                              </div>
+                            )}
                           </div>
+
                           <div>
                             <div className="font-semibold text-slate-800">{student.name}</div>
                             <div className="text-xs text-slate-400">
@@ -187,22 +278,25 @@ export default function ManageStudents() {
                       <td className="py-3 px-4 text-slate-600">{student.className}</td>
                       <td className="py-3 px-4 text-slate-600">{student.section}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${student.status === "Active"
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          student.status === "Active"
                             ? "bg-emerald-50 text-emerald-600 border border-emerald-200/50"
                             : "bg-rose-50 text-rose-500 border border-rose-200/50"
-                          }`}>
+                        }`}>
                           {student.status}
                         </span>
                       </td>
                       <td className="py-3 px-4">
                         <div className="flex items-center justify-center gap-1">
                           <Link href={`/admin/manageStudents/${student._id}`}>
-                            <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100"><Eye size={15} /></Button>
+                            <Button className="p-1.5 text-blue-600 bg-white hover:bg-blue-50 rounded-md border border-blue-100">
+                              <Eye size={15} />
+                            </Button>
                           </Link>
                           <Button className="p-1.5 text-emerald-600 bg-white hover:bg-emerald-50 rounded-md border border-emerald-100">
                             {student.status === "Active" ? <ToggleRight size={15} /> : <ToggleLeft size={15} />}
                           </Button>
-                          <StudentDeleteAction studentId={student._id} studentName={student.name}></StudentDeleteAction>
+                          <StudentDeleteAction studentId={student._id} studentName={student.name} />
                         </div>
                       </td>
                     </tr>
@@ -241,7 +335,7 @@ export default function ManageStudents() {
             </div>
           </div>
 
-          {/* Page Buttons Controls with Ellipsis */}
+          {/* Page Buttons Controls */}
           <div className="flex gap-1 items-center">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -264,10 +358,11 @@ export default function ManageStudents() {
                 <button
                   key={item}
                   onClick={() => handlePageChange(Number(item))}
-                  className={`px-3 py-1.5 rounded-md font-medium transition ${currentPage === item
+                  className={`px-3 py-1.5 rounded-md font-medium transition ${
+                    currentPage === item
                       ? "bg-slate-900 text-white"
                       : "border border-slate-200 text-slate-600 hover:bg-slate-50"
-                    }`}
+                  }`}
                 >
                   {item}
                 </button>
@@ -306,3 +401,4 @@ export default function ManageStudents() {
     </div>
   );
 }
+
