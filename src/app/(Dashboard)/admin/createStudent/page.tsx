@@ -417,9 +417,8 @@ export default function CreateStudent() {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
                 />
-                <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
 
@@ -592,9 +591,8 @@ export default function CreateStudent() {
                   name="admissionDate"
                   value={formData.admissionDate}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
                 />
-                <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
           </div>

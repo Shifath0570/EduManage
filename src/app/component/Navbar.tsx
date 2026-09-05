@@ -112,7 +112,7 @@ export default function Navbar() {
               </div>
             ) : isAuthenticated && user ? (
               <div className="flex items-center gap-3">
-                <Link href="/profile" className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-blue-900/50">
+                <Link href={`/${user?.role}`} className="flex items-center gap-2 rounded-lg p-1 transition-colors hover:bg-blue-900/50">
                   <Avatar className="h-8 w-8 ring-2 ring-blue-400/50" size="sm">
                     {user.image && <AvatarImage src={user.image} alt={user.name || "User"} />}
                     <AvatarFallback className="bg-blue-900 text-xs font-semibold text-white">
