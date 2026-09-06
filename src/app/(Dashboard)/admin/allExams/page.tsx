@@ -124,7 +124,7 @@ export default function AllExamList() {
         throw new Error(data.message || "Failed to delete exam.");
       }
 
-      toast.success(`Exam "${examName}" deleted successfully!`);
+      // toast.success(`Exam "${examName}" deleted successfully!`);
 
       setActionFeedback({
         type: "success",

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, FormEvent, ChangeEvent } from "react";
+import React, { useState, FormEvent, ChangeEvent, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Button, Card, CardHeader, Spinner } from "@heroui/react";
 import {
@@ -11,8 +11,6 @@ import {
   Award,
   CheckCircle2,
   AlertCircle,
-  FileText,
-  Clock,
   Layers
 } from "lucide-react";
 
@@ -20,6 +18,7 @@ interface ExamFormData {
   examName: string;
   examType: string;
   className: string;
+  stream: string;
   section: string;
   subject: string;
   totalMarks: number;
@@ -29,12 +28,150 @@ interface ExamFormData {
   description: string;
 }
 
+const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
+  class_1: ["Bangla", "English", "Mathematics"],
+  class_2: ["Bangla", "English", "Mathematics"],
+  class_3: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_4: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_5: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Elementary Science",
+    "Bangladesh and Global Studies",
+    "Religious and Moral Education"
+  ],
+  class_6: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_7: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_8: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Science",
+    "History and Social Science",
+    "Digital Technology",
+    "Wellbeing",
+    "Life and Livelihood",
+    "Art and Culture",
+    "Religious Education"
+  ],
+  class_9_science: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Higher Mathematics"
+  ],
+  class_9_businessStudies: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Accounting",
+    "Business Entrepreneurship",
+    "Finance and Banking",
+    "General Science"
+  ],
+  class_9_humanities: [
+    "Bangla",
+    "English",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "History of Bangladesh and World Civilization",
+    "Geography and Environment",
+    "Civics and Citizenship",
+    "Economics"
+  ],
+  class_10_science: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Higher Mathematics"
+  ],
+  class_10_businessStudies: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "Accounting",
+    "Business Entrepreneurship",
+    "Finance and Banking",
+    "General Science"
+  ],
+  class_10_humanities: [
+    "Bangla 1st Paper",
+    "Bangla 2nd Paper",
+    "English 1st Paper",
+    "English 2nd Paper",
+    "Mathematics",
+    "Information and Communication Technology (ICT)",
+    "Religious and Moral Education",
+    "History of Bangladesh and World Civilization",
+    "Geography and Environment",
+    "Civics and Citizenship",
+    "Economics"
+  ]
+};
+
 const initialFormData: ExamFormData = {
   examName: "",
   examType: "Mid Term",
   className: "",
+  stream: "",
   section: "A",
-  subject: "All Subjects",
+  subject: "",
   totalMarks: 100,
   passMarks: 40,
   examDate: new Date().toISOString().split("T")[0],
@@ -42,7 +179,7 @@ const initialFormData: ExamFormData = {
   description: ""
 };
 
-const sectionOptions = ["A", "B", "C", "D"];
+const sectionOptions = ["A", "B", "C"];
 
 const classOptions = [
   { label: "Class 1", value: "Class 1" },
@@ -57,19 +194,10 @@ const classOptions = [
   { label: "Class 10", value: "Class 10" }
 ];
 
-const subjectOptions = [
-  "All Subjects",
-  "Mathematics",
-  "English",
-  "Bangla",
-  "Science",
-  "Physics",
-  "Chemistry",
-  "Biology",
-  "ICT",
-  "Social Science",
-  "Accounting",
-  "General"
+const groupOptions = [
+  { label: "Science", value: "Science" },
+  { label: "Business Studies", value: "Business" },
+  { label: "Humanities", value: "Humanities" }
 ];
 
 export default function AdminCreateExam() {
@@ -80,14 +208,56 @@ export default function AdminCreateExam() {
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+  // Check if current class supports Group / Stream selection
+  const requiresGroup = useMemo(() => {
+    return formData.className === "Class 9" || formData.className === "Class 10";
+  }, [formData.className]);
+
+  // Compute valid subjects based on Class and Group (matching source of truth)
+  const availableSubjects = useMemo(() => {
+    if (!formData.className) return [];
+
+    if (requiresGroup) {
+      if (!formData.stream) return [];
+      const classNum = formData.className === "Class 9" ? "9" : "10";
+      const groupLower = formData.stream.toLowerCase();
+      const groupKey =
+        groupLower.includes("science") ? "science" :
+        groupLower.includes("business") ? "businessStudies" :
+        groupLower.includes("humanities") ? "humanities" : "";
+
+      if (!groupKey) return [];
+      return CLASS_SUBJECTS_MAP[`class_${classNum}_${groupKey}`] || [];
+    }
+
+    const classNum = formData.className.replace(/\D/g, "");
+    return CLASS_SUBJECTS_MAP[`class_${classNum}`] || [];
+  }, [formData.className, formData.stream, requiresGroup]);
+
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "totalMarks" || name === "passMarks" ? Number(value) : value
-    }));
+
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        [name]: name === "totalMarks" || name === "passMarks" ? Number(value) : value
+      };
+
+      // When Class changes:
+      if (name === "className") {
+        updated.stream = ""; // Always reset group
+        updated.subject = ""; // Always reset subject
+      }
+
+      // When Group changes:
+      if (name === "stream") {
+        updated.subject = ""; // Reset subject when group changes
+      }
+
+      return updated;
+    });
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -101,6 +271,19 @@ export default function AdminCreateExam() {
 
     if (!formData.className) {
       setFeedback({ type: "error", message: "Please select a target Class." });
+      return;
+    }
+
+    if (requiresGroup && !formData.stream) {
+      setFeedback({
+        type: "error",
+        message: `Please select a Group (Science, Business, or Humanities) for ${formData.className}.`
+      });
+      return;
+    }
+
+    if (!formData.subject) {
+      setFeedback({ type: "error", message: "Please select a valid Subject for this examination." });
       return;
     }
 
@@ -121,13 +304,27 @@ export default function AdminCreateExam() {
 
     setLoading(true);
 
+    const payload = {
+      examName: formData.examName.trim(),
+      examType: formData.examType,
+      className: formData.className,
+      section: formData.section,
+      stream: requiresGroup ? formData.stream : null,
+      subject: formData.subject,
+      totalMarks: Number(formData.totalMarks),
+      passMarks: Number(formData.passMarks),
+      examDate: formData.examDate,
+      status: formData.status,
+      description: formData.description
+    };
+
     try {
       const res = await fetch(`${API_BASE}/api/exams`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -136,9 +333,10 @@ export default function AdminCreateExam() {
         throw new Error(data.message || "Failed to create exam record.");
       }
 
+      const streamLabel = data.data.stream ? ` (${data.data.stream})` : "";
       setFeedback({
         type: "success",
-        message: `Exam "${data.data.examName}" created successfully for ${data.data.className} (Section ${data.data.section || formData.section})!`
+        message: `Exam "${data.data.examName}" created successfully for ${data.data.className}${streamLabel} - ${data.data.subject} (Section ${data.data.section || formData.section})!`
       });
 
       setFormData(initialFormData);
@@ -167,7 +365,7 @@ export default function AdminCreateExam() {
             </h1>
           </div>
           <p className="mt-1 text-sm text-slate-500">
-            Schedule a new examination session for classes and set mark configurations.
+            Schedule a new examination session for classes and configure subjects dynamically.
           </p>
         </div>
 
@@ -215,7 +413,7 @@ export default function AdminCreateExam() {
           <div className="flex items-center gap-2 text-slate-800">
             <Layers className="h-5 w-5 text-[#6348eb]" />
             <h2 className="text-lg font-bold text-[#081838]">
-              Examination Details & Configuration
+              Examination Details & Subject Configuration
             </h2>
           </div>
         </CardHeader>
@@ -262,22 +460,120 @@ export default function AdminCreateExam() {
               </div>
             </div>
 
-            {/* Target Section */}
+            {/* Dynamic Group / Stream Selection (Only for Class 9 & Class 10) */}
+            {requiresGroup ? (
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
+                  <span>
+                    Group / Stream <span className="text-red-500">*</span>
+                  </span>
+                  <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
+                    Required for {formData.className}
+                  </span>
+                </label>
+                <div className="relative">
+                  <select
+                    required
+                    name="stream"
+                    value={formData.stream}
+                    onChange={handleInputChange}
+                    className="w-full appearance-none rounded-xl bg-purple-50/30 border border-purple-200 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  >
+                    <option value="" disabled>Select Group (Science / Business / Humanities)</option>
+                    {groupOptions.map((grp) => (
+                      <option key={grp.value} value={grp.value}>
+                        {grp.label}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            ) : (
+              /* Target Section when group is not applicable to keep grid balanced */
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-slate-700">
+                  Target Section <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    required
+                    name="section"
+                    value={formData.section}
+                    onChange={handleInputChange}
+                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  >
+                    {sectionOptions.map((sec) => (
+                      <option key={sec} value={sec}>
+                        Section {sec}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            )}
+
+            {/* Target Section (shown when requiresGroup is true) */}
+            {requiresGroup && (
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-slate-700">
+                  Target Section <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    required
+                    name="section"
+                    value={formData.section}
+                    onChange={handleInputChange}
+                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  >
+                    {sectionOptions.map((sec) => (
+                      <option key={sec} value={sec}>
+                        Section {sec}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            )}
+
+            {/* Dynamic Subject Selection */}
             <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-700">
-                Target Section <span className="text-red-500">*</span>
+              <label className="text-xs font-semibold text-slate-700 flex items-center justify-between">
+                <span>
+                  Subject <span className="text-red-500">*</span>
+                </span>
+                {availableSubjects.length > 0 && (
+                  <span className="text-[10px] font-semibold text-slate-500">
+                    {availableSubjects.length} subjects available
+                  </span>
+                )}
               </label>
               <div className="relative">
                 <select
                   required
-                  name="section"
-                  value={formData.section}
+                  name="subject"
+                  value={formData.subject}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  disabled={!formData.className || (requiresGroup && !formData.stream)}
+                  className={`w-full appearance-none rounded-xl border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 ${
+                    !formData.className || (requiresGroup && !formData.stream)
+                      ? "bg-slate-100 cursor-not-allowed opacity-70 text-slate-400"
+                      : "bg-slate-50/70"
+                  }`}
                 >
-                  {sectionOptions.map((sec) => (
-                    <option key={sec} value={sec}>
-                      Section {sec}
+                  <option value="" disabled>
+                    {!formData.className
+                      ? "First select target class..."
+                      : requiresGroup && !formData.stream
+                      ? "First select group..."
+                      : "Select subject..."}
+                  </option>
+                  {availableSubjects.map((subj) => (
+                    <option key={subj} value={subj}>
+                      {subj}
                     </option>
                   ))}
                 </select>
@@ -308,28 +604,6 @@ export default function AdminCreateExam() {
               </div>
             </div>
 
-            {/* Subject */}
-            <div className="flex flex-col gap-2">
-              <label className="text-xs font-semibold text-slate-700">
-                Subject Scope
-              </label>
-              <div className="relative">
-                <select
-                  name="subject"
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
-                >
-                  {subjectOptions.map((subj) => (
-                    <option key={subj} value={subj}>
-                      {subj}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-              </div>
-            </div>
-
             {/* Exam Date */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
@@ -342,7 +616,7 @@ export default function AdminCreateExam() {
                   name="examDate"
                   value={formData.examDate}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -431,8 +705,8 @@ export default function AdminCreateExam() {
             </button>
             <Button
               type="submit"
-              isDisabled={loading}
-              className=" font-semibold text-white shadow-md shadow-purple-500/20 bg-[#03204C]/80 hover:bg-[#1556a7]"
+              isDisabled={loading || !formData.className || (requiresGroup && !formData.stream) || !formData.subject}
+              className="font-semibold text-white shadow-md shadow-purple-500/20 bg-[#03204C]/80 hover:bg-[#1556a7]"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />

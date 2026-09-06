@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   PencilLine,
   CheckCircle2,
@@ -8,21 +8,28 @@ import {
   Save,
   Layers,
   ChevronDown,
+  GraduationCap,
+  BookOpen
 } from "lucide-react";
 
 interface ExamOption {
   _id?: string;
   examName: string;
   className: string;
+  stream?: string;
+  group?: string;
   section?: string;
   subject?: string;
 }
 
 interface StudentItem {
+  _id?: string;
   studentId: string;
   name: string;
   roll: string;
   className: string;
+  stream?: string;
+  group?: string;
   section: string;
 }
 
@@ -36,19 +43,6 @@ interface StudentMarkRow {
   gpa: number;
   remarks: string;
 }
-
-const classOptions = [
-  "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
-  "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
-];
-
-const sectionOptions = ["A", "B", "C", "D"];
-
-const subjectOptions = [
-  "Mathematics", "English", "Bangla", "Science",
-  "Physics", "Chemistry", "Biology", "ICT",
-  "Social Science", "Accounting", "General"
-];
 
 // Helper to calculate Grade & GPA live in UI
 const computeGradeAndGpa = (marks: number, total = 100) => {
@@ -64,8 +58,9 @@ const computeGradeAndGpa = (marks: number, total = 100) => {
 
 export default function AdminEnterMarks() {
   const [exams, setExams] = useState<ExamOption[]>([]);
-  const [selectedExam, setSelectedExam] = useState<string>("");
+  const [selectedExamId, setSelectedExamId] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedStream, setSelectedStream] = useState<string>("");
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [selectedSubject, setSelectedSubject] = useState<string>("");
 
@@ -78,9 +73,9 @@ export default function AdminEnterMarks() {
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   // Identify current selected Exam object
-  const currentExam = React.useMemo(() => {
-    return exams.find((ex) => ex.examName === selectedExam || ex._id === selectedExam) || null;
-  }, [exams, selectedExam]);
+  const currentExam = useMemo(() => {
+    return exams.find((ex) => ex._id === selectedExamId || ex.examName === selectedExamId) || null;
+  }, [exams, selectedExamId]);
 
   // Load Exams from API on mount
   useEffect(() => {
@@ -92,40 +87,20 @@ export default function AdminEnterMarks() {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
           const firstExam = data.data[0];
-          setSelectedExam(firstExam.examName);
-          if (firstExam.className) {
-            setSelectedClass(firstExam.className);
-          }
-          setSelectedSection(firstExam.section ? firstExam.section.toUpperCase().replace('SECTION', '').trim() : "A");
-          if (firstExam.subject && firstExam.subject !== "All Subjects") {
-            setSelectedSubject(firstExam.subject);
-          } else {
-            setSelectedSubject("Mathematics");
-          }
+          setSelectedExamId(firstExam._id || firstExam.examName);
+          setSelectedClass(firstExam.className || "");
+          setSelectedStream(firstExam.stream || firstExam.group || "");
+          setSelectedSection(firstExam.section ? firstExam.section.toUpperCase().replace("SECTION", "").trim() : "A");
+          setSelectedSubject(firstExam.subject || "");
         } else {
-          // Fallback default exam options if none in DB yet
-          const defaults: ExamOption[] = [
-            { examName: "Mid Term Examination 2026", className: "Class 10", section: "A", subject: "Mathematics" },
-            { examName: "Final Examination 2026", className: "Class 10", section: "A", subject: "All Subjects" },
-            { examName: "Class Test 1", className: "Class 5", section: "B", subject: "English" }
-          ];
-          setExams(defaults);
-          setSelectedExam(defaults[0].examName);
-          setSelectedClass(defaults[0].className);
-          setSelectedSection(defaults[0].section || "A");
-          setSelectedSubject(defaults[0].subject || "Mathematics");
+          setExams([]);
         }
       } catch (err) {
         console.error("Error fetching exams:", err);
-        const defaults: ExamOption[] = [
-          { examName: "Mid Term Examination 2026", className: "Class 10", section: "A", subject: "Mathematics" },
-          { examName: "Final Examination 2026", className: "Class 10", section: "A", subject: "All Subjects" }
-        ];
-        setExams(defaults);
-        setSelectedExam(defaults[0].examName);
-        setSelectedClass(defaults[0].className);
-        setSelectedSection(defaults[0].section || "A");
-        setSelectedSubject(defaults[0].subject || "Mathematics");
+        setFeedback({
+          type: "error",
+          text: "Failed to connect to backend server for exam list."
+        });
       } finally {
         setLoadingExams(false);
       }
@@ -134,42 +109,51 @@ export default function AdminEnterMarks() {
     fetchExams();
   }, [API_BASE]);
 
-  // Constrain Class, Section, and Subject whenever the selected Exam changes
+  // Constrain Class, Stream, Section, and Subject whenever the selected Exam changes
   useEffect(() => {
     if (currentExam) {
-      if (currentExam.className) {
-        setSelectedClass(currentExam.className);
-      }
-      setSelectedSection(currentExam.section ? currentExam.section.toUpperCase().replace('SECTION', '').trim() : "A");
-
-      if (currentExam.subject && currentExam.subject !== "All Subjects") {
-        setSelectedSubject(currentExam.subject);
-      }
+      setSelectedClass(currentExam.className || "");
+      setSelectedStream(currentExam.stream || currentExam.group || "");
+      setSelectedSection(
+        currentExam.section ? currentExam.section.toUpperCase().replace("SECTION", "").trim() : "A"
+      );
+      setSelectedSubject(currentExam.subject || "");
     }
   }, [currentExam]);
 
-  // Load students for selected Class & Section, and prefill marks if already entered
+  // Load ONLY students strictly matching the target Exam (Class + Group/Stream + Section), and prefill marks
   useEffect(() => {
-    if (!selectedClass || !selectedSection || !selectedExam || !selectedSubject) {
+    if (!currentExam || !selectedClass || !selectedSection || !selectedSubject) {
       setStudentRows([]);
       return;
     }
+
+    const examItem = currentExam;
 
     async function loadStudentRosterAndMarks() {
       setLoadingRoster(true);
       setFeedback(null);
       try {
-        // 1. Fetch students for selected Class + Section using existing API
-        const stuRes = await fetch(
-          `${API_BASE}/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}`
-        );
+        // 1. Fetch students strictly for target Class + Section + Stream (if applicable)
+        let stuUrl = `${API_BASE}/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}`;
+        if (selectedStream) {
+          stuUrl += `&stream=${encodeURIComponent(selectedStream)}`;
+        }
+
+        const stuRes = await fetch(stuUrl);
         const stuData = await stuRes.json();
         const rawStudents: StudentItem[] = stuData.success && Array.isArray(stuData.data) ? stuData.data : [];
 
-        // 2. Fetch existing marks for selected Exam + Class + Section + Subject
-        const markRes = await fetch(
-          `${API_BASE}/api/marks?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&exam=${encodeURIComponent(selectedExam)}&subject=${encodeURIComponent(selectedSubject)}`
-        );
+        // 2. Fetch existing marks for selected Exam + Class + Section + Subject + Stream
+        let markUrl = `${API_BASE}/api/marks?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&exam=${encodeURIComponent(examItem.examName)}&subject=${encodeURIComponent(selectedSubject)}`;
+        if (examItem._id) {
+          markUrl += `&examId=${encodeURIComponent(examItem._id)}`;
+        }
+        if (selectedStream) {
+          markUrl += `&stream=${encodeURIComponent(selectedStream)}`;
+        }
+
+        const markRes = await fetch(markUrl);
         const markData = await markRes.json();
         const existingMarksMap: Record<string, { marksObtained: number; grade: string; gpa: number; remarks?: string }> = {};
 
@@ -179,10 +163,10 @@ export default function AdminEnterMarks() {
           });
         }
 
-        // 3. Merge student roster with marks
+        // 3. Merge student roster with existing marks
         if (rawStudents.length > 0) {
           const rows: StudentMarkRow[] = rawStudents.map((s) => {
-            const stuId = s.studentId || (s as unknown as { _id: string })._id;
+            const stuId = s.studentId || s._id || "";
             const existing = existingMarksMap[stuId];
             const marksVal = existing !== undefined ? existing.marksObtained : "";
             const computed = marksVal !== "" ? computeGradeAndGpa(Number(marksVal)) : { grade: "-", gpa: 0.0 };
@@ -222,7 +206,7 @@ export default function AdminEnterMarks() {
     }
 
     loadStudentRosterAndMarks();
-  }, [selectedExam, selectedClass, selectedSection, selectedSubject, API_BASE]);
+  }, [currentExam, selectedClass, selectedStream, selectedSection, selectedSubject, API_BASE]);
 
   // Handle Mark input change per student
   const handleMarkChange = (studentId: string, value: string) => {
@@ -259,6 +243,13 @@ export default function AdminEnterMarks() {
 
   // Submit and save marks to database
   const handleSaveMarks = async () => {
+    if (!currentExam) {
+      alert("Please select an Exam first.");
+      return;
+    }
+
+    const examItem = currentExam;
+
     if (studentRows.length === 0) {
       alert("No students available to save marks for.");
       return;
@@ -277,10 +268,11 @@ export default function AdminEnterMarks() {
 
     try {
       const payload = {
-        examId: currentExam?._id,
+        examId: examItem._id,
+        exam: examItem.examName,
         className: selectedClass,
+        stream: selectedStream || null,
         section: selectedSection,
-        exam: selectedExam,
         subject: selectedSubject,
         records: studentRows.map((r) => ({
           studentId: r.studentId,
@@ -306,9 +298,10 @@ export default function AdminEnterMarks() {
         throw new Error(data.message || "Failed to save student marks.");
       }
 
+      const streamBadge = selectedStream ? ` (${selectedStream})` : "";
       setFeedback({
         type: "success",
-        text: `Successfully saved marks for ${data.count} students in ${selectedClass} Section ${selectedSection} (${selectedSubject})!`
+        text: `Successfully saved marks for ${data.count} students in ${selectedClass}${streamBadge} Section ${selectedSection} (${selectedSubject})!`
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to save marks.";
@@ -333,7 +326,7 @@ export default function AdminEnterMarks() {
               </h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Select examination to enter and update marks. Target Class and Section are automatically locked to the Exam.
+              Select an examination to enter marks. Target Class, Group/Stream, Section, and Subject are automatically determined by the Exam.
             </p>
           </div>
         </div>
@@ -342,39 +335,46 @@ export default function AdminEnterMarks() {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
           <h2 className="mb-4 text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <Layers className="h-4 w-4 text-[#6348eb]" />
-            Examination & Class Selection
+            Exam & Target Scope Selection
           </h2>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {/* Exam Selector */}
-            <div>
+            <div className="sm:col-span-2 lg:col-span-2">
               <label className="mb-1.5 block text-xs font-semibold text-slate-700">
                 Select Exam <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <select
-                  value={selectedExam}
-                  onChange={(e) => setSelectedExam(e.target.value)}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
+                  value={selectedExamId}
+                  onChange={(e) => setSelectedExamId(e.target.value)}
+                  disabled={loadingExams || exams.length === 0}
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-50"
                 >
-                  {exams.map((ex, idx) => (
-                    <option key={idx} value={ex.examName}>
-                      {ex.examName} ({ex.className} - Sec {ex.section || 'A'})
-                    </option>
-                  ))}
+                  {exams.length === 0 ? (
+                    <option value="">No examinations available</option>
+                  ) : (
+                    exams.map((ex) => (
+                      <option key={ex._id || ex.examName} value={ex._id || ex.examName}>
+                        {ex.examName} ({ex.className}
+                        {ex.stream ? ` - ${ex.stream}` : ""} - Sec {ex.section || "A"}
+                        {ex.subject ? ` - ${ex.subject}` : ""})
+                      </option>
+                    ))
+                  )}
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
 
-            {/* Target Class (Constrained by selected Exam) */}
+            {/* Target Class (Auto-derived) */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Target Class <span className="text-red-500">*</span>
+                  Target Class
                 </label>
                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                  Exam Target
+                  Locked
                 </span>
               </div>
               <input
@@ -386,14 +386,33 @@ export default function AdminEnterMarks() {
               />
             </div>
 
-            {/* Target Section (Constrained by selected Exam) */}
+            {/* Target Group / Stream (Auto-derived for Class 9 & 10) */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
                 <label className="block text-xs font-semibold text-slate-700">
-                  Target Section <span className="text-red-500">*</span>
+                  Group / Stream
+                </label>
+                <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">
+                  Locked
+                </span>
+              </div>
+              <input
+                type="text"
+                disabled
+                readOnly
+                value={selectedStream || (selectedClass === "Class 9" || selectedClass === "Class 10" ? "Not set" : "N/A (Class 1-8)")}
+                className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
+              />
+            </div>
+
+            {/* Target Section (Auto-derived) */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700">
+                  Section
                 </label>
                 <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-100">
-                  Exam Target
+                  Locked
                 </span>
               </div>
               <input
@@ -404,44 +423,21 @@ export default function AdminEnterMarks() {
                 className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
               />
             </div>
+          </div>
 
-            {/* Subject Selector */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-slate-700">
-                  Select Subject <span className="text-red-500">*</span>
-                </label>
-                {currentExam?.subject && currentExam.subject !== "All Subjects" && (
-                  <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">
-                    Exam Scope
-                  </span>
-                )}
-              </div>
-              {currentExam?.subject && currentExam.subject !== "All Subjects" ? (
-                <input
-                  type="text"
-                  disabled
-                  readOnly
-                  value={selectedSubject}
-                  className="w-full rounded-xl border border-slate-200 bg-slate-100/90 px-3.5 py-2.5 text-sm font-semibold text-slate-700 cursor-not-allowed select-none"
-                />
-              ) : (
-                <div className="relative">
-                  <select
-                    value={selectedSubject}
-                    onChange={(e) => setSelectedSubject(e.target.value)}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
-                  >
-                    {subjectOptions.map((subj) => (
-                      <option key={subj} value={subj}>
-                        {subj}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                </div>
-              )}
+          {/* Subject Display */}
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-slate-700">Target Subject:</span>
+              <span className="font-bold text-purple-700 bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-200">
+                {selectedSubject || "All Subjects"}
+              </span>
             </div>
+            {selectedStream && (
+              <span className="font-medium text-slate-500">
+                Eligible Group: <strong className="text-slate-800">{selectedStream}</strong>
+              </span>
+            )}
           </div>
         </div>
 
@@ -469,16 +465,17 @@ export default function AdminEnterMarks() {
           <div className="flex flex-col gap-2 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
             <div>
               <h3 className="text-base font-bold text-slate-900">
-                Student Marks • {selectedClass || "Select Class"} (Section {selectedSection})
+                Student Marks • {selectedClass || "Select Class"}
+                {selectedStream ? ` (${selectedStream})` : ""} (Section {selectedSection})
               </h3>
               <p className="text-xs text-slate-500">
-                Exam: <span className="font-semibold text-slate-700">{selectedExam}</span> | Subject: <span className="font-semibold text-slate-700">{selectedSubject}</span>
+                Exam: <span className="font-semibold text-slate-700">{currentExam?.examName || "None"}</span> | Subject: <span className="font-semibold text-slate-700">{selectedSubject || "None"}</span>
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <span className="rounded-lg bg-indigo-50 px-3 py-1 text-xs font-bold text-indigo-700 border border-indigo-100">
-                {studentRows.length} Enrolled Students
+                {studentRows.length} Eligible Students
               </span>
             </div>
           </div>
@@ -501,13 +498,13 @@ export default function AdminEnterMarks() {
                 {loadingRoster ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400">
-                      Loading students for {selectedClass} Section {selectedSection}...
+                      Loading eligible students for {selectedClass}{selectedStream ? ` (${selectedStream})` : ""} Section {selectedSection}...
                     </td>
                   </tr>
                 ) : studentRows.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-12 text-center text-slate-400">
-                      No students found matching <span className="font-semibold text-slate-600">{selectedClass} Section {selectedSection}</span>.
+                      No eligible students found matching <span className="font-semibold text-slate-600">{selectedClass}{selectedStream ? ` (${selectedStream})` : ""} Section {selectedSection}</span>.
                     </td>
                   </tr>
                 ) : (
@@ -574,7 +571,10 @@ export default function AdminEnterMarks() {
           {/* Footer Submit Button */}
           <div className="flex flex-col gap-3 border-t border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
             <div className="text-xs text-slate-500">
-              Exam: <span className="font-semibold text-slate-700">{selectedExam}</span> | Target: <span className="font-semibold text-slate-700">{selectedClass} - {selectedSection}</span>
+              Exam: <span className="font-semibold text-slate-700">{currentExam?.examName || "None"}</span> | Target:{" "}
+              <span className="font-semibold text-slate-700">
+                {selectedClass}{selectedStream ? ` (${selectedStream})` : ""} - Section {selectedSection}
+              </span>
             </div>
 
             <button
