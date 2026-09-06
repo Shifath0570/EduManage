@@ -281,6 +281,7 @@ const adminNavItems: NavItem[] = [
   { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Award className="w-5 h-5" /> },  
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-5 h-5" /> },
   { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
+  { id: "teacherSalary", href: "/admin/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const studentNavItems: NavItem[] = [
