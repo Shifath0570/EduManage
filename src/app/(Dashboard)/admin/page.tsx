@@ -13,9 +13,6 @@ import {
   UserPlus,
   Calendar,
   FileText,
-  Clock,
-  Search,
-  Bell,
   Menu,
 } from "lucide-react";
 import {
@@ -30,7 +27,6 @@ import {
   Tooltip,
 } from "recharts";
 
-// Data Types
 interface DashboardStats {
   totalStudents: number;
   totalTeachers: number;
@@ -43,6 +39,11 @@ interface DashboardStats {
 }
 
 interface StudentGenderStats {
+  male: number;
+  female: number;
+}
+
+interface TeacherGenderStats {
   male: number;
   female: number;
 }
@@ -63,8 +64,18 @@ interface Student {
   name: string;
   class: string;
   email: string;
+  gender?: string;
   status: string;
   avatar?: string;
+}
+
+interface Teacher {
+  id: string;
+  name: string;
+  subject: string;
+  email: string;
+  gender?: string;
+  status: string;
 }
 
 interface Activity {
@@ -87,10 +98,9 @@ interface EventItem {
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Initial / Default Dynamic Data Matching Design
   const [stats, setStats] = useState<DashboardStats>({
-    totalStudents: 1250,
-    totalTeachers: 85,
+    totalStudents: 0,
+    totalTeachers: 0,
     totalClasses: 32,
     totalSubjects: 48,
     studentGrowth: "12% this month",
@@ -100,17 +110,22 @@ export default function AdminDashboardPage() {
   });
 
   const [studentGender, setStudentGender] = useState<StudentGenderStats>({
-    male: 650,
-    female: 600,
+    male: 0,
+    female: 0,
   });
 
-  const [todayAttendance, setTodayAttendance] = useState<AttendanceStats>({
+  const [teacherGender, setTeacherGender] = useState<TeacherGenderStats>({
+    male: 0,
+    female: 0,
+  });
+
+  const [todayAttendance] = useState<AttendanceStats>({
     present: 1150,
     absent: 62,
     late: 38,
   });
 
-  const [weeklyAttendance, setWeeklyAttendance] = useState<AttendanceTrend[]>([
+  const [weeklyAttendance] = useState<AttendanceTrend[]>([
     { day: "Mon", rate: 90 },
     { day: "Tue", rate: 92 },
     { day: "Wed", rate: 93 },
@@ -121,45 +136,99 @@ export default function AdminDashboardPage() {
   ]);
 
   const [recentStudents, setRecentStudents] = useState<Student[]>([
-    { id: "1", name: "Ahmed Rahman", class: "Class 10", email: "ahmed@gmail.com", status: "Active" },
-    { id: "2", name: "Karim Hasan", class: "Class 9", email: "karim@gmail.com", status: "Active" },
-    { id: "3", name: "Sadia Akter", class: "Class 8", email: "sadia@gmail.com", status: "Active" },
-    { id: "4", name: "Nusrat Jahan", class: "Class 10", email: "nusrat@gmail.com", status: "Active" },
-    { id: "5", name: "Rafiul Islam", class: "Class 7", email: "rafiul@gmail.com", status: "Active" },
+    { id: "1", name: "Ahmed Rahman", class: "Class 10", email: "ahmed@gmail.com", gender: "male", status: "Active" },
+    { id: "2", name: "Karim Hasan", class: "Class 9", email: "karim@gmail.com", gender: "male", status: "Active" },
+    { id: "3", name: "Sadia Akter", class: "Class 8", email: "sadia@gmail.com", gender: "female", status: "Active" },
+    { id: "4", name: "Nusrat Jahan", class: "Class 10", email: "nusrat@gmail.com", gender: "female", status: "Active" },
+    { id: "5", name: "Rafiul Islam", class: "Class 7", email: "rafiul@gmail.com", gender: "male", status: "Active" },
   ]);
 
-  const [recentActivities, setRecentActivities] = useState<Activity[]>([
+  const [teachersList] = useState<Teacher[]>([
+    { id: "1", name: "Md. Osman Goni", subject: "Mathematics", email: "osman@school.edu", gender: "male", status: "Active" },
+    { id: "2", name: "Farhana Islam", subject: "English", email: "farhana@school.edu", gender: "female", status: "Active" },
+    { id: "3", name: "Tariq Mahmood", subject: "Physics", email: "tariq@school.edu", gender: "male", status: "Active" },
+    { id: "4", name: "Ayesha Siddiqua", subject: "Chemistry", email: "ayesha@school.edu", gender: "female", status: "Active" },
+  ]);
+
+  const [recentActivities] = useState<Activity[]>([
     { id: "1", type: "student", title: "New student added", description: "Ahmed Rahman was added by Admin", time: "10 minutes ago" },
     { id: "2", type: "teacher", title: "New teacher added", description: "Md. Osman Goni joined the school", time: "1 hour ago" },
     { id: "3", type: "class", title: "Class updated", description: "Class 10 Science was updated", time: "2 hours ago" },
     { id: "4", type: "assignment", title: "New assignment created", description: "Mathematics assignment for Class 9", time: "3 hours ago" },
   ]);
 
-  const [upcomingEvents, setUpcomingEvents] = useState<EventItem[]>([
+  const [upcomingEvents] = useState<EventItem[]>([
     { id: "1", dateDay: "08", dateMonth: "Sep", title: "Mid-Term Examination", fullDate: "Monday, 08 September 2024", colorClass: "bg-blue-600" },
     { id: "2", dateDay: "12", dateMonth: "Sep", title: "Parent-Teacher Meeting", fullDate: "Friday, 12 September 2024", colorClass: "bg-emerald-600" },
     { id: "3", dateDay: "15", dateMonth: "Sep", title: "Sports Day", fullDate: "Monday, 15 September 2024", colorClass: "bg-amber-500" },
     { id: "4", dateDay: "20", dateMonth: "Sep", title: "Science Fair", fullDate: "Saturday, 20 September 2024", colorClass: "bg-purple-600" },
   ]);
 
+  // Calculation Helpers defined before useEffect or using function declarations for hoisting
+  function calculateFallbackStudentStats(list: Student[]) {
+    const totalCount = list.length;
+    const maleCount = list.filter((s) => s.gender?.toLowerCase() === "male").length;
+    const femaleCount = list.filter((s) => s.gender?.toLowerCase() === "female").length;
+
+    setStats((prev) => ({ ...prev, totalStudents: totalCount }));
+    setStudentGender({ male: maleCount, female: femaleCount });
+  }
+
+  function calculateFallbackTeacherStats(list: Teacher[]) {
+    const totalCount = list.length;
+    const maleCount = list.filter((t) => t.gender?.toLowerCase() === "male").length;
+    const femaleCount = list.filter((t) => t.gender?.toLowerCase() === "female").length;
+
+    setStats((prev) => ({ ...prev, totalTeachers: totalCount }));
+    setTeacherGender({ male: maleCount, female: femaleCount });
+  }
+
   useEffect(() => {
-    // Dynamic Fetch Example from Backend
     const fetchDashboardData = async () => {
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${apiURL}/api/admin/dashboard-stats`);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.stats) setStats(data.stats);
-          if (data.studentGender) setStudentGender(data.studentGender);
-          if (data.todayAttendance) setTodayAttendance(data.todayAttendance);
-          if (data.weeklyAttendance) setWeeklyAttendance(data.weeklyAttendance);
-          if (data.recentStudents) setRecentStudents(data.recentStudents);
-          if (data.recentActivities) setRecentActivities(data.recentActivities);
-          if (data.upcomingEvents) setUpcomingEvents(data.upcomingEvents);
+
+        const [studentsRes, teachersRes] = await Promise.allSettled([
+          fetch(`${apiURL}/api/students`),
+          fetch(`${apiURL}/api/teachers`),
+        ]);
+
+        if (studentsRes.status === "fulfilled" && studentsRes.value.ok) {
+          const data = await studentsRes.value.json();
+          const list: Student[] = Array.isArray(data) ? data : data.data || [];
+
+          if (list.length > 0) {
+            const totalCount = list.length;
+            const maleCount = list.filter((s) => s.gender?.toLowerCase() === "male").length;
+            const femaleCount = list.filter((s) => s.gender?.toLowerCase() === "female").length;
+
+            setStats((prev) => ({ ...prev, totalStudents: totalCount }));
+            setStudentGender({ male: maleCount, female: femaleCount });
+            setRecentStudents(list.slice(0, 5));
+          }
+        } else {
+          calculateFallbackStudentStats(recentStudents);
+        }
+
+        if (teachersRes.status === "fulfilled" && teachersRes.value.ok) {
+          const teacherData = await teachersRes.value.json();
+          const list: Teacher[] = Array.isArray(teacherData) ? teacherData : teacherData.data || [];
+
+          if (list.length > 0) {
+            const totalCount = list.length;
+            const maleCount = list.filter((t) => t.gender?.toLowerCase() === "male").length;
+            const femaleCount = list.filter((t) => t.gender?.toLowerCase() === "female").length;
+
+            setStats((prev) => ({ ...prev, totalTeachers: totalCount }));
+            setTeacherGender({ male: maleCount, female: femaleCount });
+          }
+        } else {
+          calculateFallbackTeacherStats(teachersList);
         }
       } catch (err) {
-        console.log("Using default overview state:", err);
+        console.log("Using fallback overview state:", err);
+        calculateFallbackStudentStats(recentStudents);
+        calculateFallbackTeacherStats(teachersList);
       } finally {
         setLoading(false);
       }
@@ -168,12 +237,11 @@ export default function AdminDashboardPage() {
     fetchDashboardData();
   }, []);
 
-  // Calculation Helpers
-  const totalStudentsCount = studentGender.male + studentGender.female;
+  const totalStudentsCount = stats.totalStudents || studentGender.male + studentGender.female;
+  const totalTeachersCount = stats.totalTeachers || teacherGender.male + teacherGender.female;
   const totalAttendanceCount = todayAttendance.present + todayAttendance.absent + todayAttendance.late;
   const presentPercentage = Math.round((todayAttendance.present / totalAttendanceCount) * 100);
 
-  // Donut Chart Data
   const genderChartData = [
     { name: "Male", value: studentGender.male, color: "#2563eb" },
     { name: "Female", value: studentGender.female, color: "#ec4899" },
@@ -187,7 +255,6 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="mx-auto w-[90%] px-6 py-10">
-      {/* Top Bar Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <div className="flex items-center gap-2">
@@ -200,9 +267,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 1. Stat Cards Row */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {/* Total Students */}
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-blue-50 rounded-2xl text-blue-600">
@@ -211,7 +276,7 @@ export default function AdminDashboardPage() {
             <div>
               <p className="text-xs text-slate-500 font-medium">Total Students</p>
               <h3 className="text-xl font-bold text-slate-900 mt-0.5">
-                {stats.totalStudents.toLocaleString()}
+                {loading ? "..." : totalStudentsCount.toLocaleString()}
               </h3>
             </div>
           </div>
@@ -221,7 +286,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Total Teachers */}
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600">
@@ -230,7 +294,7 @@ export default function AdminDashboardPage() {
             <div>
               <p className="text-xs text-slate-500 font-medium">Total Teachers</p>
               <h3 className="text-xl font-bold text-slate-900 mt-0.5">
-                {stats.totalTeachers.toLocaleString()}
+                {loading ? "..." : totalTeachersCount.toLocaleString()}
               </h3>
             </div>
           </div>
@@ -240,7 +304,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Total Classes */}
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-purple-50 rounded-2xl text-purple-600">
@@ -259,7 +322,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Total Subjects */}
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-amber-50 rounded-2xl text-amber-600">
@@ -279,9 +341,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* 2. Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        {/* Student Overview Donut Chart */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between">
           <h2 className="text-sm font-bold text-slate-800 mb-4">Student Overview</h2>
           <div className="relative h-44 flex items-center justify-center">
@@ -317,7 +377,7 @@ export default function AdminDashboardPage() {
                 <span className="text-slate-600">Male Students</span>
               </div>
               <span className="font-semibold text-slate-800">
-                {studentGender.male} ({Math.round((studentGender.male / totalStudentsCount) * 100)}%)
+                {studentGender.male} ({totalStudentsCount ? Math.round((studentGender.male / totalStudentsCount) * 100) : 0}%)
               </span>
             </div>
             <div className="flex items-center justify-between">
@@ -326,7 +386,7 @@ export default function AdminDashboardPage() {
                 <span className="text-slate-600">Female Students</span>
               </div>
               <span className="font-semibold text-slate-800">
-                {studentGender.female} ({Math.round((studentGender.female / totalStudentsCount) * 100)}%)
+                {studentGender.female} ({totalStudentsCount ? Math.round((studentGender.female / totalStudentsCount) * 100) : 0}%)
               </span>
             </div>
           </div>
@@ -337,7 +397,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Attendance Overview Donut Chart */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between">
           <h2 className="text-sm font-bold text-slate-800 mb-4">Attendance Overview (Today)</h2>
           <div className="relative h-44 flex items-center justify-center">
@@ -395,7 +454,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Attendance Trend Line Chart */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm flex flex-col justify-between">
           <h2 className="text-sm font-bold text-slate-800 mb-4">Attendance Trend (This Week)</h2>
           <div className="h-56 w-full">
@@ -418,9 +476,7 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* 3. Bottom Grid Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Students Table */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-slate-800">Recent Students</h2>
@@ -464,7 +520,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Recent Activities */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm lg:col-span-1">
           <h2 className="text-sm font-bold text-slate-800 mb-4">Recent Activities</h2>
           <div className="space-y-4">
@@ -486,7 +541,6 @@ export default function AdminDashboardPage() {
           </div>
         </Card>
 
-        {/* Upcoming Events */}
         <Card className="p-5 bg-white border border-slate-100 rounded-2xl shadow-sm lg:col-span-1">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-sm font-bold text-slate-800">Upcoming Events</h2>
@@ -515,7 +569,6 @@ export default function AdminDashboardPage() {
         </Card>
       </div>
 
-      {/* Footer */}
       <div className="mt-8 pt-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-400 gap-2">
         <p>© 2026 EduManage. All rights reserved.</p>
         <p>Activate Settings</p>
@@ -523,7 +576,5 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
-
-
 
 

@@ -18,7 +18,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const user = session?.user as { name?: string; email?: string; image?: string; role?: string } | undefined;
   const role = user?.role || "user";
 
-  // Auto-close sidebar on mobile route change
   useEffect(() => {
     setSidebarOpen(false);
   }, [pathname]);
@@ -84,3 +83,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     </div>
   );
 }
+
+
+
+
