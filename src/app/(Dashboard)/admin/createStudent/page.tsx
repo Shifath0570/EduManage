@@ -3,7 +3,7 @@
 
 import React, { useState, ChangeEvent, FormEvent, useMemo } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
-import { Calendar, ChevronDown, Plus, Upload } from "lucide-react";
+import { ChevronDown, Plus, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
@@ -186,30 +186,36 @@ export default function CreateStudent() {
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
   const router = useRouter();
 
+  const isGroupRequired = useMemo(() => {
+    return formData.className === "class_9" || formData.className === "class_10";
+  }, [formData.className]);
+
   const computedSubjects = useMemo(() => {
     if (!formData.className) return [];
+    
+    if (isGroupRequired) {
+      if (!formData.stream) return [];
+      const classKey = `${formData.className}_${formData.stream}`;
+      return CLASS_SUBJECTS_MAP[classKey] || [];
+    }
+
     return CLASS_SUBJECTS_MAP[formData.className] || [];
-  }, [formData.className]);
+  }, [formData.className, formData.stream, isGroupRequired]);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    
+
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      
+
       if (name === "className") {
-        if (value.includes("science")) {
-          updated.stream = "science";
-        } else if (value.includes("businessStudies")) {
-          updated.stream = "businessStudies";
-        } else if (value.includes("humanities")) {
-          updated.stream = "humanities";
-        } else {
+        if (value !== "class_9" && value !== "class_10") {
           updated.stream = "";
         }
       }
+
       return updated;
     });
   };
@@ -261,10 +267,21 @@ export default function CreateStudent() {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (isGroupRequired && !formData.stream) {
+      alert("Please select a group for Class 9/10.");
+      return;
+    }
+
     setLoading(true);
+
+    const fullClassName = isGroupRequired 
+      ? `${formData.className}_${formData.stream}` 
+      : formData.className;
 
     const payload = {
       ...formData,
+      className: fullClassName,
       subjects: computedSubjects,
       metadata: {
         submittedAt: new Date().toISOString(),
@@ -514,16 +531,36 @@ export default function CreateStudent() {
                   <option value="class_6">Class 6</option>
                   <option value="class_7">Class 7</option>
                   <option value="class_8">Class 8</option>
-                  <option value="class_9_science">Class 9 (Science)</option>
-                  <option value="class_9_businessStudies">Class 9 (Business Studies)</option>
-                  <option value="class_9_humanities">Class 9 (Humanities)</option>
-                  <option value="class_10_science">Class 10 (Science)</option>
-                  <option value="class_10_businessStudies">Class 10 (Business Studies)</option>
-                  <option value="class_10_humanities">Class 10 (Humanities)</option>
+                  <option value="class_9">Class 9</option>
+                  <option value="class_10">Class 10</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
+
+            {/* Dynamic Group / Stream Selection for Class 9 & 10 */}
+            {isGroupRequired && (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-semibold text-slate-700">
+                  Group / Stream <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    required
+                    name="stream"
+                    value={formData.stream || ""}
+                    onChange={handleInputChange}
+                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 pl-4 pr-10 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  >
+                    <option value="" disabled>Select group</option>
+                    <option value="science">Science</option>
+                    <option value="businessStudies">Business Studies</option>
+                    <option value="humanities">Humanities</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            )}
 
             {/* Section Selection */}
             <div className="flex flex-col gap-1.5">
@@ -645,4 +682,5 @@ export default function CreateStudent() {
     </div>
   );
 }
+
 
