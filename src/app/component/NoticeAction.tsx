@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Modal } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 const NoticeAction = ({ notice }: { notice: any }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,7 +30,7 @@ const NoticeAction = ({ notice }: { notice: any }) => {
       }
 
       setIsOpen(false);
-      
+      toast.success("Notice deleted successfully");
       // Force a refresh with cache busting
       router.refresh();
       // Force a hard refresh of the page data
@@ -38,7 +39,7 @@ const NoticeAction = ({ notice }: { notice: any }) => {
       console.log("Notice deleted successfully");
     } catch (error) {
       console.error("Error deleting notice:", error);
-      alert(error instanceof Error ? error.message : "Failed to delete notice");
+      toast.error("Failed to delete notice");
     } finally {
       setIsDeleting(false);
     }
