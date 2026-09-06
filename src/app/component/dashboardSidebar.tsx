@@ -270,7 +270,7 @@ const teacherNavItems: NavItem[] = [
 
 const adminNavItems: NavItem[] = [
   { id: "overview", href: "/admin", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
-  { id: "createStudent", href: "/admin/createStudent", label: "Create Student", icon: <UserPlus className="w-5 h-5" /> },
+  { id: "createStudent", href: "/admin/createStudent/student", label: "Create Student", icon: <UserPlus className="w-5 h-5" /> },
   { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <UserCheck2 className="w-5 h-5" /> },
   { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Users className="w-5 h-5" /> },
   { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Users className="w-5 h-5" /> },
