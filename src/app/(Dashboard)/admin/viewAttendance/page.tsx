@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
     Calendar,
     Search,
@@ -10,13 +10,10 @@ import {
     XCircle,
     Clock,
     Shield,
-    ChevronDown,
     Eye,
     BookOpen,
     Users,
-    Sparkles,
-    Download,
-    BarChart3
+    Sparkles
 } from "lucide-react";
 
 interface AttendanceRecordItem {
@@ -47,9 +44,42 @@ interface AttendanceSession {
 
 interface TeacherItem {
     _id: string;
-    name: string;
+    fullName?: string;
+    name?: string;
     email: string;
 }
+
+const CLASS_OPTIONS = [
+    { value: "All", label: "All Classes" },
+    { value: "1", label: "Class 1" },
+    { value: "2", label: "Class 2" },
+    { value: "3", label: "Class 3" },
+    { value: "4", label: "Class 4" },
+    { value: "5", label: "Class 5" },
+    { value: "6", label: "Class 6" },
+    { value: "7", label: "Class 7" },
+    { value: "8", label: "Class 8" },
+    { value: "9", label: "Class 9" },
+    { value: "10", label: "Class 10" },
+];
+
+const SECTION_OPTIONS = ["All", "A", "B", "C", "D"];
+
+const SUBJECT_OPTIONS = [
+    "All",
+    "Mathematics",
+    "English",
+    "Bangla",
+    "General Science",
+    "Physics",
+    "Chemistry",
+    "Biology",
+    "Higher Mathematics",
+    "ICT",
+    "Social Science",
+    "Accounting",
+    "Business Entrepreneurship"
+];
 
 export default function AdminViewAttendance() {
     const [sessions, setSessions] = useState<AttendanceSession[]>([]);
@@ -73,7 +103,7 @@ export default function AdminViewAttendance() {
     useEffect(() => {
         async function fetchTeachers() {
             try {
-                const res = await fetch(`${API_BASE}/api/teachers?limit=50`);
+                const res = await fetch(`${API_BASE}/api/teachers?limit=100`);
                 const data = await res.json();
                 if (data.success && Array.isArray(data.data)) {
                     setTeachers(data.data);
@@ -85,7 +115,7 @@ export default function AdminViewAttendance() {
         fetchTeachers();
     }, [API_BASE]);
 
-    const fetchAttendance = async () => {
+    const fetchAttendance = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams();
@@ -110,16 +140,11 @@ export default function AdminViewAttendance() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filterClass, filterSection, filterSubject, filterTeacher, filterStudentSearch, filterDate, filterMonth, API_BASE]);
 
     useEffect(() => {
         fetchAttendance();
-    }, [filterClass, filterSection, filterSubject, filterTeacher, filterDate, filterMonth, API_BASE]);
-
-    const handleSearchSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        fetchAttendance();
-    };
+    }, [fetchAttendance]);
 
     const handleReset = () => {
         setFilterClass("All");
@@ -136,11 +161,11 @@ export default function AdminViewAttendance() {
     const totalPresent = sessions.reduce((acc, s) => acc + (s.presentCount || 0), 0);
     const totalAbsent = sessions.reduce((acc, s) => acc + (s.absentCount || 0), 0);
     const totalLate = sessions.reduce((acc, s) => acc + (s.lateCount || 0), 0);
-    const totalExcused = sessions.reduce((acc, s) => acc + (s.excusedCount || 0), 0);
     const totalStudentsMarked = sessions.reduce((acc, s) => acc + (s.totalStudents || 0), 0);
-    const schoolAttendanceRate = totalStudentsMarked > 0
-        ? Math.round(((totalPresent + totalLate) / totalStudentsMarked) * 100)
-        : 0;
+    const schoolAttendanceRate =
+        totalStudentsMarked > 0
+            ? Math.round(((totalPresent + totalLate) / totalStudentsMarked) * 100)
+            : 0;
 
     return (
         <div className="min-h-screen bg-slate-50/60 p-4 sm:p-6 lg:p-8 font-sans text-slate-800">
@@ -149,17 +174,22 @@ export default function AdminViewAttendance() {
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <div className="flex items-center gap-2">
-                            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-                                <Shield className="h-4 w-4" />
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700 shadow-xs">
+                                <Shield className="h-5 w-5" />
                             </span>
                             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
                                 School Attendance Overview
                             </h1>
                         </div>
                         <p className="mt-1 text-sm text-slate-500">
-                            Comprehensive school-wide attendance reporting, filters, and analytics across all classes.
+                            Comprehensive school-wide attendance logs and analytics across Classes 1 to 10.
                         </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 rounded-xl border border-purple-200 bg-purple-50 px-3.5 py-2 text-xs font-semibold text-purple-800">
+                        <Users className="h-4 w-4 text-purple-600" />
+                        <span>Admin Console • Classes 1–10</span>
                     </div>
                 </div>
 
@@ -210,11 +240,11 @@ export default function AdminViewAttendance() {
                     </div>
                 </div>
 
-                {/* Multidimensional Filters */}
+                {/* Filters */}
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                            <Filter className="h-3.5 w-3.5 text-purple-600" /> Filter School Attendance
+                            <Filter className="h-3.5 w-3.5 text-purple-600" /> Filter Attendance (Class 1–10)
                         </h2>
                         <button
                             type="button"
@@ -225,86 +255,90 @@ export default function AdminViewAttendance() {
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                        {/* Student Search */}
-                        <form onSubmit={handleSearchSubmit} className="relative sm:col-span-2 lg:col-span-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
-                            <input
-                                type="text"
-                                placeholder="Student name, roll, ID..."
-                                value={filterStudentSearch}
-                                onChange={(e) => setFilterStudentSearch(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-9 pr-3 py-2 text-xs text-slate-800 outline-none focus:border-purple-500 focus:bg-white"
-                            />
-                        </form>
-
-                        {/* Class */}
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+                        {/* Class 1 to 10 */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Class</label>
                             <select
                                 value={filterClass}
                                 onChange={(e) => setFilterClass(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-500"
                             >
-                                <option value="All">All Classes</option>
-                                <option value="6">Class 6</option>
-                                <option value="7">Class 7</option>
-                                <option value="8">Class 8</option>
-                                <option value="9">Class 9</option>
-                                <option value="10">Class 10</option>
-                                <option value="11">Class 11</option>
-                                <option value="12">Class 12</option>
+                                {CLASS_OPTIONS.map((c) => (
+                                    <option key={c.value} value={c.value}>
+                                        {c.label}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         {/* Section */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Section</label>
                             <select
                                 value={filterSection}
                                 onChange={(e) => setFilterSection(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-500"
                             >
-                                <option value="All">All Sections</option>
-                                <option value="A">Section A</option>
-                                <option value="B">Section B</option>
-                                <option value="C">Section C</option>
-                                <option value="D">Section D</option>
+                                {SECTION_OPTIONS.map((sec) => (
+                                    <option key={sec} value={sec}>
+                                        {sec === "All" ? "All Sections" : `Section ${sec}`}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         {/* Subject */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Subject</label>
                             <select
                                 value={filterSubject}
                                 onChange={(e) => setFilterSubject(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-500"
                             >
-                                <option value="All">All Subjects</option>
-                                <option value="Mathematics">Mathematics</option>
-                                <option value="English">English</option>
-                                <option value="Bangla">Bangla</option>
-                                <option value="Science">Science</option>
-                                <option value="Physics">Physics</option>
-                                <option value="Chemistry">Chemistry</option>
-                                <option value="ICT">ICT</option>
+                                {SUBJECT_OPTIONS.map((sub) => (
+                                    <option key={sub} value={sub}>
+                                        {sub === "All" ? "All Subjects" : sub}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
                         {/* Teacher */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Teacher</label>
                             <select
                                 value={filterTeacher}
                                 onChange={(e) => setFilterTeacher(e.target.value)}
                                 className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-purple-500"
                             >
                                 <option value="All">All Teachers</option>
-                                {teachers.map(t => (
-                                    <option key={t._id} value={t.name}>{t.name}</option>
+                                {teachers.map((t) => (
+                                    <option key={t._id} value={t.email || t.fullName || t.name}>
+                                        {t.fullName || t.name || t.email}
+                                    </option>
                                 ))}
                             </select>
                         </div>
 
+                        {/* Student Search */}
+                        <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Search Student</label>
+                            <div className="relative">
+                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                <input
+                                    type="text"
+                                    placeholder="Name, roll..."
+                                    value={filterStudentSearch}
+                                    onChange={(e) => setFilterStudentSearch(e.target.value)}
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-8 pr-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-purple-500"
+                                />
+                            </div>
+                        </div>
+
                         {/* Date */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Date</label>
                             <input
                                 type="date"
                                 value={filterDate}
@@ -315,6 +349,7 @@ export default function AdminViewAttendance() {
 
                         {/* Month */}
                         <div>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Month</label>
                             <input
                                 type="month"
                                 value={filterMonth}
@@ -338,9 +373,9 @@ export default function AdminViewAttendance() {
                             <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                                 <tr>
                                     <th className="py-3.5 px-4">Date</th>
-                                    <th className="py-3.5 px-4">Class</th>
+                                    <th className="py-3.5 px-4">Class & Section</th>
                                     <th className="py-3.5 px-4">Subject</th>
-                                    <th className="py-3.5 px-4">Teacher</th>
+                                    <th className="py-3.5 px-4">Recorded By</th>
                                     <th className="py-3.5 px-4 text-center">Present</th>
                                     <th className="py-3.5 px-4 text-center">Absent</th>
                                     <th className="py-3.5 px-4 text-center">Late</th>
@@ -352,20 +387,23 @@ export default function AdminViewAttendance() {
                                 {loading ? (
                                     <tr>
                                         <td colSpan={9} className="py-12 text-center text-slate-400">
-                                            Loading school attendance data...
+                                            Loading school attendance data from database...
                                         </td>
                                     </tr>
                                 ) : sessions.length === 0 ? (
                                     <tr>
                                         <td colSpan={9} className="py-12 text-center text-slate-400">
-                                            No attendance records found matching current filters.
+                                            No attendance records found in the database matching current filters.
                                         </td>
                                     </tr>
                                 ) : (
                                     sessions.map((item) => {
-                                        const rate = item.totalStudents > 0
-                                            ? Math.round(((item.presentCount + (item.lateCount || 0)) / item.totalStudents) * 100)
-                                            : 0;
+                                        const rate =
+                                            item.totalStudents > 0
+                                                ? Math.round(
+                                                      ((item.presentCount + (item.lateCount || 0)) / item.totalStudents) * 100
+                                                  )
+                                                : 0;
 
                                         return (
                                             <tr key={item._id} className="hover:bg-slate-50/60 transition">
@@ -373,7 +411,7 @@ export default function AdminViewAttendance() {
                                                     {item.date}
                                                 </td>
                                                 <td className="py-3.5 px-4">
-                                                    <span className="rounded-md bg-purple-50 px-2 py-0.5 text-xs font-bold text-purple-700 border border-purple-200">
+                                                    <span className="rounded-md bg-purple-50 px-2.5 py-1 text-xs font-bold text-purple-700 border border-purple-200">
                                                         Class {item.className}-{item.section}
                                                     </span>
                                                 </td>
@@ -400,9 +438,15 @@ export default function AdminViewAttendance() {
                                                     </span>
                                                 </td>
                                                 <td className="py-3.5 px-4 text-center">
-                                                    <span className={`text-xs font-bold ${
-                                                        rate >= 80 ? "text-emerald-600" : rate >= 60 ? "text-amber-600" : "text-rose-600"
-                                                    }`}>
+                                                    <span
+                                                        className={`text-xs font-bold ${
+                                                            rate >= 80
+                                                                ? "text-emerald-600"
+                                                                : rate >= 60
+                                                                ? "text-amber-600"
+                                                                : "text-rose-600"
+                                                        }`}
+                                                    >
                                                         {rate}%
                                                     </span>
                                                 </td>
@@ -434,12 +478,12 @@ export default function AdminViewAttendance() {
                                         Session Breakdown • Class {selectedSession.className}-{selectedSession.section}
                                     </h3>
                                     <p className="text-xs text-slate-500">
-                                        Subject: {selectedSession.subject} | Date: {selectedSession.date} | Teacher: {selectedSession.teacherName}
+                                        Subject: {selectedSession.subject} | Date: {selectedSession.date} | Recorded By: {selectedSession.teacherName}
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 font-bold"
                                 >
                                     ✕
                                 </button>
@@ -456,29 +500,41 @@ export default function AdminViewAttendance() {
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
-                                        {selectedSession.records.map((r, idx) => (
-                                            <tr key={idx} className="hover:bg-slate-50/50">
-                                                <td className="py-2.5 px-3 font-bold text-slate-700">{r.roll}</td>
-                                                <td className="py-2.5 px-3 font-semibold text-slate-900">
-                                                    <div>{r.studentName}</div>
-                                                    {r.studentEmail && <div className="text-[11px] text-slate-400">{r.studentEmail}</div>}
+                                        {selectedSession.records && selectedSession.records.length > 0 ? (
+                                            selectedSession.records.map((r, idx) => (
+                                                <tr key={idx} className="hover:bg-slate-50/50">
+                                                    <td className="py-2.5 px-3 font-bold text-slate-700">{r.roll}</td>
+                                                    <td className="py-2.5 px-3 font-semibold text-slate-900">
+                                                        <div>{r.studentName}</div>
+                                                        {r.studentEmail && (
+                                                            <div className="text-[11px] text-slate-400">{r.studentEmail}</div>
+                                                        )}
+                                                    </td>
+                                                    <td className="py-2.5 px-3 text-center">
+                                                        <span
+                                                            className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                                                r.status === "PRESENT"
+                                                                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                                                    : r.status === "ABSENT"
+                                                                    ? "bg-rose-50 text-rose-700 border border-rose-200"
+                                                                    : r.status === "LATE"
+                                                                    ? "bg-amber-50 text-amber-700 border border-amber-200"
+                                                                    : "bg-purple-50 text-purple-700 border border-purple-200"
+                                                            }`}
+                                                        >
+                                                            {r.status}
+                                                        </span>
+                                                    </td>
+                                                    <td className="py-2.5 px-3 text-xs text-slate-500">{r.remarks || "—"}</td>
+                                                </tr>
+                                            ))
+                                        ) : (
+                                            <tr>
+                                                <td colSpan={4} className="py-6 text-center text-slate-400">
+                                                    No individual student records stored in this session.
                                                 </td>
-                                                <td className="py-2.5 px-3 text-center">
-                                                    <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                                                        r.status === "PRESENT"
-                                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                                            : r.status === "ABSENT"
-                                                            ? "bg-rose-50 text-rose-700 border border-rose-200"
-                                                            : r.status === "LATE"
-                                                            ? "bg-amber-50 text-amber-700 border border-amber-200"
-                                                            : "bg-purple-50 text-purple-700 border border-purple-200"
-                                                    }`}>
-                                                        {r.status}
-                                                    </span>
-                                                </td>
-                                                <td className="py-2.5 px-3 text-xs text-slate-500">{r.remarks || "—"}</td>
                                             </tr>
-                                        ))}
+                                        )}
                                     </tbody>
                                 </table>
                             </div>
@@ -486,7 +542,7 @@ export default function AdminViewAttendance() {
                             <div className="flex justify-end border-t border-slate-100 p-4 bg-slate-50/50">
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-bold text-white hover:bg-slate-800"
+                                    className="rounded-xl bg-purple-700 px-5 py-2 text-xs font-bold text-white hover:bg-purple-800 transition"
                                 >
                                     Close
                                 </button>
