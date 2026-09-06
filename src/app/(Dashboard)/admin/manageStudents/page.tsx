@@ -65,14 +65,29 @@ export default function ManageStudents() {
     fetchStudents();
   }, []);
 
-  // Extract unique options for dropdowns dynamically from API response
+  // Extract unique class options and sort them in numerical order (serially 1 to 10)
   const classOptions = useMemo(() => {
     const classes = Array.from(new Set(students.map((s) => s.className).filter(Boolean)));
-    return ["All Classes", ...classes];
+
+    const sortedClasses = classes.sort((a, b) => {
+      const matchA = a.match(/\d+/);
+      const matchB = b.match(/\d+/);
+
+      const numA = matchA ? parseInt(matchA[0], 10) : Infinity;
+      const numB = matchB ? parseInt(matchB[0], 10) : Infinity;
+
+      if (numA !== numB) {
+        return numA - numB;
+      }
+
+      return a.localeCompare(b);
+    });
+
+    return ["All Classes", ...sortedClasses];
   }, [students]);
 
   const sectionOptions = useMemo(() => {
-    const sections = Array.from(new Set(students.map((s) => s.section).filter(Boolean)));
+    const sections = Array.from(new Set(students.map((s) => s.section).filter(Boolean))).sort();
     return ["All Sections", ...sections];
   }, [students]);
 
@@ -252,7 +267,6 @@ export default function ManageStudents() {
                       <td className="py-3 px-4 text-center text-slate-500">{overallIndex + 1}</td>
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          {/* Avatar Image or Initials Fallback */}
                           <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200/60 shadow-sm flex items-center justify-center">
                             {hasValidPhoto ? (
                               <img
@@ -314,7 +328,6 @@ export default function ManageStudents() {
               <span className="font-semibold text-slate-700">{totalStudents}</span> students
             </div>
 
-            {/* Items Per Page Selector */}
             <div className="flex items-center gap-2 border-l border-slate-200 pl-4">
               <span>Per page:</span>
               <select
@@ -333,7 +346,6 @@ export default function ManageStudents() {
             </div>
           </div>
 
-          {/* Page Buttons Controls */}
           <div className="flex gap-1 items-center">
             <button
               onClick={() => handlePageChange(currentPage - 1)}
@@ -398,4 +410,6 @@ export default function ManageStudents() {
     </div>
   );
 }
+
+
 
