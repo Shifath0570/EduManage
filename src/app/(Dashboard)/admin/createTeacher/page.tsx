@@ -1,12 +1,21 @@
 
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button, Card } from "@heroui/react";
-import { ArrowLeft, Upload, Plus, ChevronDown, Check } from "lucide-react";
+import {
+  ArrowLeft,
+  Upload,
+  Plus,
+  ChevronDown,
+  Check,
+  Sparkles,
+  FileSpreadsheet,
+} from "lucide-react";
 import { useSession } from "@/app/lib/auth-client";
+import * as XLSX from "xlsx";
 
 interface TeacherFormData {
   fullName: string;
@@ -40,6 +49,7 @@ export default function AddTeacherPage(): React.ReactElement {
   const [uploadingPhoto, setUploadingPhoto] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
   const [photoName, setPhotoName] = useState<string>("");
+  const [generatingAI, setGeneratingAI] = useState<boolean>(false);
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -66,6 +76,17 @@ export default function AddTeacherPage(): React.ReactElement {
     emergencyContact: "",
   });
 
+  // Automatically populate name and email from session when loaded
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        fullName: prev.fullName || user.name || "",
+        email: prev.email || user.email || "",
+      }));
+    }
+  }, [user]);
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ): void => {
@@ -77,16 +98,21 @@ export default function AddTeacherPage(): React.ReactElement {
     const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
 
     if (!apiKey) {
-      throw new Error("ImgBB API key is missing. Check your environment variables.");
+      throw new Error(
+        "ImgBB API key is missing. Check your environment variables."
+      );
     }
 
     const data = new FormData();
     data.append("image", file);
 
-    const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
-      method: "POST",
-      body: data,
-    });
+    const response = await fetch(
+      `https://api.imgbb.com/1/upload?key=${apiKey}`,
+      {
+        method: "POST",
+        body: data,
+      }
+    );
 
     const resData = await response.json();
 
@@ -97,7 +123,9 @@ export default function AddTeacherPage(): React.ReactElement {
     return resData.data.url;
   };
 
-  const handleImageUpload = async (e: ChangeEvent<HTMLInputElement>): Promise<void> => {
+  const handleImageUpload = async (
+    e: ChangeEvent<HTMLInputElement>
+  ): Promise<void> => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -125,26 +153,95 @@ export default function AddTeacherPage(): React.ReactElement {
     }
   };
 
+  // AI Auto-fill current form
+  const handleAIAutofill = async (): Promise<void> => {
+    try {
+      setGeneratingAI(true);
+      setError("");
+      const apiURL = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiURL}/api/teachers/generate-ai-excel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count: 1 }),
+      });
+
+      const result = await res.json();
+      if (result.success && result.data.length > 0) {
+        const teacher = result.data[0];
+        setFormData((prev) => ({
+          ...prev,
+          ...teacher,
+          experienceYears: String(teacher.experienceYears || ""),
+        }));
+      } else {
+        throw new Error(result.message || "Failed to generate AI data.");
+      }
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to auto-generate data using AI";
+      setError(msg);
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
+  // AI Generate & Export Bulk Data to Excel Sheet
+  const handleAIGenerateExcel = async (): Promise<void> => {
+    try {
+      setGeneratingAI(true);
+      setError("");
+      const apiURL = process.env.NEXT_PUBLIC_API_URL;
+      const res = await fetch(`${apiURL}/api/teachers/generate-ai-excel`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ count: 10 }),
+      });
+
+      const result = await res.json();
+      if (!result.success) throw new Error(result.message || "Export failed.");
+
+      const worksheet = XLSX.utils.json_to_sheet(result.data);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Teachers");
+
+      XLSX.writeFile(workbook, `AI_Generated_Teachers_${Date.now()}.xlsx`);
+    } catch (err: unknown) {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : "Failed to generate Excel file";
+      setError(msg);
+    } finally {
+      setGeneratingAI(false);
+    }
+  };
+
+  // Unified Handler: Save to DB & Export Current Form Data to Excel Sheet
   const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setError("");
 
-    const rawPayload = {
-      teacherId: user?.id,
-      ...formData,
-      experienceYears: formData.experienceYears
-        ? Number(formData.experienceYears)
-        : undefined,
-      submittedAt: new Date().toISOString(),
-      status: "Active",
-    };
-
-    const payload = Object.fromEntries(
-    Object.entries(rawPayload).filter(([_, v]) => v !== "" && v !== undefined)
-  );
-
     try {
+      // 1. Build and post payload to Database
+      const rawPayload = {
+        teacherId: user?.id,
+        ...formData,
+        experienceYears: formData.experienceYears
+          ? Number(formData.experienceYears)
+          : undefined,
+        submittedAt: new Date().toISOString(),
+        status: "Active",
+      };
+
+      const payload = Object.fromEntries(
+        Object.entries(rawPayload).filter(
+          ([_, v]) => v !== "" && v !== undefined
+        )
+      );
+
       const apiURL = process.env.NEXT_PUBLIC_API_URL;
       const res = await fetch(`${apiURL}/api/teachers`, {
         method: "POST",
@@ -154,15 +251,48 @@ export default function AddTeacherPage(): React.ReactElement {
 
       if (!res.ok) {
         const data: ApiErrorResponse = await res.json();
-        throw new Error(data.message || "Something went wrong");
+        throw new Error(data.message || "Failed to submit teacher record");
       }
 
-      alert("Teacher created successfully!");
+      // 2. Generate and trigger Excel download from current Form Data
+      const exportData = [
+        {
+          "Full Name": formData.fullName,
+          Email: formData.email,
+          Phone: formData.phone,
+          "Date of Birth": formData.dateOfBirth,
+          Gender: formData.gender,
+          "Blood Group": formData.bloodGroup,
+          Qualifications: formData.qualifications,
+          "Experience (Years)": formData.experienceYears,
+          Specialization: formData.subjectSpecialization,
+          "Joining Date": formData.joiningDate,
+          "Employee ID": formData.employeeId,
+          Address: formData.address,
+          City: formData.city,
+          "State/Province": formData.stateProvince,
+          "Post Code": formData.postCode,
+          "Guardian Name": formData.guardianName,
+          "Guardian Phone": formData.guardianPhone,
+          "Emergency Contact": formData.emergencyContact,
+          "Profile Photo URL": formData.profilePhoto,
+          "Submitted At": new Date().toLocaleString(),
+        },
+      ];
+
+      const worksheet = XLSX.utils.json_to_sheet(exportData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Teacher Record");
+
+      const fileName = `${formData.fullName.replace(/\s+/g, "_")}_Record_${Date.now()}.xlsx`;
+      XLSX.writeFile(workbook, fileName);
+
+      alert("Teacher added to database and Excel exported successfully!");
       router.push("/admin/manageTeachers");
     } catch (err: unknown) {
       const errorMessage =
         err instanceof Error ? err.message : "An unexpected error occurred.";
-      alert(errorMessage);
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -184,13 +314,38 @@ export default function AddTeacherPage(): React.ReactElement {
         </Link>
       </div>
 
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#081838]">
-          Teacher Information
-        </h1>
-        <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Add a new teacher to the system.
-        </p>
+      {/* Header & AI Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
+        <div>
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold tracking-tight text-[#081838]">
+            Teacher Information
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            Add a new teacher manually or auto-generate records with AI.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            onPress={handleAIAutofill}
+            isDisabled={generatingAI}
+            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 font-medium text-xs rounded-xl inline-flex items-center gap-1.5"
+          >
+            <Sparkles className="h-4 w-4 text-indigo-600" />
+            {generatingAI ? "Generating..." : "AI Auto-Fill Form"}
+          </Button>
+
+          <Button
+            type="button"
+            onPress={handleAIGenerateExcel}
+            isDisabled={generatingAI}
+            className="bg-emerald-600 text-white hover:bg-emerald-700 font-medium text-xs rounded-xl inline-flex items-center gap-1.5"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            {generatingAI ? "Building Excel..." : "Export AI Data to Excel"}
+          </Button>
+        </div>
       </div>
 
       {error && (
@@ -215,7 +370,8 @@ export default function AddTeacherPage(): React.ReactElement {
                 <input
                   type="text"
                   name="fullName"
-                  value={user?.name}
+                  placeholder="Enter full name"
+                  value={formData.fullName}
                   onChange={handleChange}
                   required
                   className={inputStyles}
@@ -229,7 +385,8 @@ export default function AddTeacherPage(): React.ReactElement {
                 <input
                   type="email"
                   name="email"
-                  value={user?.email}
+                  placeholder="Enter email address"
+                  value={formData.email}
                   onChange={handleChange}
                   required
                   className={inputStyles}
@@ -334,7 +491,9 @@ export default function AddTeacherPage(): React.ReactElement {
                   ) : photoName ? (
                     <div className="flex items-center justify-center gap-1.5 text-xs text-emerald-600 font-semibold px-2 w-full">
                       <Check className="h-4 w-4 shrink-0" />
-                      <span className="truncate max-w-[180px]">{photoName}</span>
+                      <span className="truncate max-w-[180px]">
+                        {photoName}
+                      </span>
                     </div>
                   ) : (
                     <>
@@ -563,21 +722,20 @@ export default function AddTeacherPage(): React.ReactElement {
           >
             Cancel
           </Button>
+
+          {/* Unified Form Submission Button */}
           <Button
             type="submit"
             isDisabled={loading || uploadingPhoto}
             className="w-full sm:w-auto px-6 font-medium text-white bg-[#5b21b6] hover:bg-[#4c1d95] inline-flex items-center justify-center gap-2"
           >
             {!loading && <Plus className="h-4 w-4" />}
-            {loading ? "Adding..." : "Add Teacher"}
+            {loading ? "Saving & Exporting..." : "Add Teacher & Export Excel"}
           </Button>
         </div>
       </form>
     </div>
   );
 }
-
-
-
 
 
