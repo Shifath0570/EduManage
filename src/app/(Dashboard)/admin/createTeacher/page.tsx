@@ -153,39 +153,6 @@ export default function AddTeacherPage(): React.ReactElement {
     }
   };
 
-  // AI Auto-fill current form
-  const handleAIAutofill = async (): Promise<void> => {
-    try {
-      setGeneratingAI(true);
-      setError("");
-      const apiURL = process.env.NEXT_PUBLIC_API_URL;
-      const res = await fetch(`${apiURL}/api/teachers/generate-ai-excel`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count: 1 }),
-      });
-
-      const result = await res.json();
-      if (result.success && result.data.length > 0) {
-        const teacher = result.data[0];
-        setFormData((prev) => ({
-          ...prev,
-          ...teacher,
-          experienceYears: String(teacher.experienceYears || ""),
-        }));
-      } else {
-        throw new Error(result.message || "Failed to generate AI data.");
-      }
-    } catch (err: unknown) {
-      const msg =
-        err instanceof Error
-          ? err.message
-          : "Failed to auto-generate data using AI";
-      setError(msg);
-    } finally {
-      setGeneratingAI(false);
-    }
-  };
 
   // AI Generate & Export Bulk Data to Excel Sheet
   const handleAIGenerateExcel = async (): Promise<void> => {
@@ -326,16 +293,6 @@ export default function AddTeacherPage(): React.ReactElement {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            type="button"
-            onPress={handleAIAutofill}
-            isDisabled={generatingAI}
-            className="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 font-medium text-xs rounded-xl inline-flex items-center gap-1.5"
-          >
-            <Sparkles className="h-4 w-4 text-indigo-600" />
-            {generatingAI ? "Generating..." : "AI Auto-Fill Form"}
-          </Button>
-
           <Button
             type="button"
             onPress={handleAIGenerateExcel}
