@@ -215,8 +215,7 @@ export default function AddTeacherPage(): React.ReactElement {
                 <input
                   type="text"
                   name="fullName"
-                  placeholder="Enter full name"
-                  value={formData.fullName}
+                  value={user?.name}
                   onChange={handleChange}
                   required
                   className={inputStyles}
@@ -230,8 +229,7 @@ export default function AddTeacherPage(): React.ReactElement {
                 <input
                   type="email"
                   name="email"
-                  placeholder="Enter email address"
-                  value={formData.email}
+                  value={user?.email}
                   onChange={handleChange}
                   required
                   className={inputStyles}

@@ -1,11 +1,12 @@
 
 // "use client";
 
-// import React, { useState, ChangeEvent, FormEvent, useMemo } from "react";
-// import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback, Spinner } from "@heroui/react";
-// import { ChevronDown, Plus, Upload } from "lucide-react";
+// import React, { useState, ChangeEvent, FormEvent, useMemo, useEffect } from "react";
+// import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback } from "@heroui/react";
+// import { ChevronDown, FileSpreadsheet, Upload } from "lucide-react";
 // import { useRouter } from "next/navigation";
 // import { useSession } from "@/app/lib/auth-client";
+// import * as XLSX from "xlsx";
 
 // const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
 //   class_1: ["Bangla", "English", "Mathematics"],
@@ -16,7 +17,7 @@
 //     "Mathematics",
 //     "Elementary Science",
 //     "Bangladesh and Global Studies",
-//     "Religious and Moral Education"
+//     "Religious and Moral Education",
 //   ],
 //   class_4: [
 //     "Bangla",
@@ -24,7 +25,7 @@
 //     "Mathematics",
 //     "Elementary Science",
 //     "Bangladesh and Global Studies",
-//     "Religious and Moral Education"
+//     "Religious and Moral Education",
 //   ],
 //   class_5: [
 //     "Bangla",
@@ -32,7 +33,7 @@
 //     "Mathematics",
 //     "Elementary Science",
 //     "Bangladesh and Global Studies",
-//     "Religious and Moral Education"
+//     "Religious and Moral Education",
 //   ],
 //   class_6: [
 //     "Bangla",
@@ -44,7 +45,7 @@
 //     "Wellbeing",
 //     "Life and Livelihood",
 //     "Art and Culture",
-//     "Religious Education"
+//     "Religious Education",
 //   ],
 //   class_7: [
 //     "Bangla",
@@ -56,7 +57,7 @@
 //     "Wellbeing",
 //     "Life and Livelihood",
 //     "Art and Culture",
-//     "Religious Education"
+//     "Religious Education",
 //   ],
 //   class_8: [
 //     "Bangla",
@@ -68,7 +69,7 @@
 //     "Wellbeing",
 //     "Life and Livelihood",
 //     "Art and Culture",
-//     "Religious Education"
+//     "Religious Education",
 //   ],
 //   class_9_science: [
 //     "Bangla",
@@ -79,7 +80,7 @@
 //     "Physics",
 //     "Chemistry",
 //     "Biology",
-//     "Higher Mathematics"
+//     "Higher Mathematics",
 //   ],
 //   class_9_businessStudies: [
 //     "Bangla",
@@ -90,7 +91,7 @@
 //     "Accounting",
 //     "Business Entrepreneurship",
 //     "Finance and Banking",
-//     "General Science"
+//     "General Science",
 //   ],
 //   class_9_humanities: [
 //     "Bangla",
@@ -101,7 +102,7 @@
 //     "History of Bangladesh and World Civilization",
 //     "Geography and Environment",
 //     "Civics and Citizenship",
-//     "Economics"
+//     "Economics",
 //   ],
 //   class_10_science: [
 //     "Bangla 1st Paper",
@@ -114,7 +115,7 @@
 //     "Physics",
 //     "Chemistry",
 //     "Biology",
-//     "Higher Mathematics"
+//     "Higher Mathematics",
 //   ],
 //   class_10_businessStudies: [
 //     "Bangla 1st Paper",
@@ -127,7 +128,7 @@
 //     "Accounting",
 //     "Business Entrepreneurship",
 //     "Finance and Banking",
-//     "General Science"
+//     "General Science",
 //   ],
 //   class_10_humanities: [
 //     "Bangla 1st Paper",
@@ -140,8 +141,8 @@
 //     "History of Bangladesh and World Civilization",
 //     "Geography and Environment",
 //     "Civics and Citizenship",
-//     "Economics"
-//   ]
+//     "Economics",
+//   ],
 // };
 
 // interface StudentFormData {
@@ -160,6 +161,14 @@
 //   admissionDate: string;
 //   profileImage: string;
 //   stream?: string;
+// }
+
+// interface StudentPayload extends StudentFormData {
+//   stuId?: string;
+//   subjects: string[];
+//   metadata: {
+//     submittedAt: string;
+//   };
 // }
 
 // const initialFormData: StudentFormData = {
@@ -182,21 +191,32 @@
 
 // export default function CreateStudent() {
 //   const [loading, setLoading] = useState<boolean>(false);
+//   const [generatingAi, setGeneratingAi] = useState<boolean>(false);
 //   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
 //   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 //   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
 //   const router = useRouter();
 
 //   const { data: session } = useSession();
-//     const user = session?.user;
+//   const user = session?.user;
 
-//   const isGroupRequired = useMemo(() => {
+//   useEffect(() => {
+//     if (user) {
+//       setFormData((prev: StudentFormData): StudentFormData => ({
+//         ...prev,
+//         name: prev.name || user.name || "",
+//         email: prev.email || user.email || "",
+//       }));
+//     }
+//   }, [user]);
+
+//   const isGroupRequired = useMemo<boolean>(() => {
 //     return formData.className === "class_9" || formData.className === "class_10";
 //   }, [formData.className]);
 
-//   const computedSubjects = useMemo(() => {
+//   const computedSubjects = useMemo<string[]>(() => {
 //     if (!formData.className) return [];
-    
+
 //     if (isGroupRequired) {
 //       if (!formData.stream) return [];
 //       const classKey = `${formData.className}_${formData.stream}`;
@@ -211,13 +231,11 @@
 //   ) => {
 //     const { name, value } = e.target;
 
-//     setFormData((prev) => {
-//       const updated = { ...prev, [name]: value };
+//     setFormData((prev: StudentFormData): StudentFormData => {
+//       const updated: StudentFormData = { ...prev, [name]: value };
 
-//       if (name === "className") {
-//         if (value !== "class_9" && value !== "class_10") {
-//           updated.stream = "";
-//         }
+//       if (name === "className" && value !== "class_9" && value !== "class_10") {
+//         updated.stream = "";
 //       }
 
 //       return updated;
@@ -243,15 +261,18 @@
 
 //       const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
 //         method: "POST",
-//         body: body,
+//         body,
 //       });
 
 //       const data = await res.json();
 
 //       if (data.success) {
-//         const imageUrl = data.data.url;
+//         const imageUrl: string = data.data.url;
 //         setAvatarPreview(imageUrl);
-//         setFormData((prev) => ({ ...prev, profileImage: imageUrl }));
+//         setFormData((prev: StudentFormData): StudentFormData => ({
+//           ...prev,
+//           profileImage: imageUrl,
+//         }));
 //       } else {
 //         throw new Error(data.error?.message || "Failed to upload image to ImgBB.");
 //       }
@@ -261,12 +282,44 @@
 //       alert(errorMessage);
 //       setAvatarPreview(formData.profileImage || null);
 //     } finally {
+//       URL.revokeObjectURL(localPreviewUrl);
 //       setUploadingImage(false);
 //     }
 //   };
 
 //   const handleCancel = () => {
 //     router.push("/admin/manageStudents");
+//   };
+
+//   const exportToExcel = (payload: StudentPayload) => {
+//     const excelData = [
+//       {
+//         "Student ID": payload.studentId,
+//         "Full Name": payload.name,
+//         "Email": payload.email,
+//         "Phone": payload.phone,
+//         "Class": payload.className,
+//         "Section": payload.section,
+//         "Roll": payload.roll,
+//         "Gender": payload.gender,
+//         "Date of Birth": payload.dateOfBirth,
+//         "Admission Date": payload.admissionDate,
+//         "Address": payload.address,
+//         "Guardian Name": payload.guardianName,
+//         "Guardian Phone": payload.guardianPhone,
+//         "Assigned Subjects": payload.subjects.join(", "),
+//         "Profile Image": payload.profileImage || "N/A",
+//       },
+//     ];
+
+//     const worksheet = XLSX.utils.json_to_sheet(excelData);
+//     const workbook = XLSX.utils.book_new();
+//     XLSX.utils.book_append_sheet(workbook, worksheet, "Student Record");
+
+//     XLSX.writeFile(
+//       workbook,
+//       `Student_${payload.studentId || "Record"}_${Date.now()}.xlsx`
+//     );
 //   };
 
 //   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -279,12 +332,12 @@
 
 //     setLoading(true);
 
-//     const fullClassName = isGroupRequired 
-//       ? `${formData.className}_${formData.stream}` 
+//     const fullClassName = isGroupRequired
+//       ? `${formData.className}_${formData.stream}`
 //       : formData.className;
 
-//     const payload = {
-//       studentId: user?.id,
+//     const payload: StudentPayload = {
+//       stuId: user?.id,
 //       ...formData,
 //       className: fullClassName,
 //       subjects: computedSubjects,
@@ -309,7 +362,8 @@
 //         throw new Error(data.error || "Failed to submit student form.");
 //       }
 
-//       alert("Student created successfully!");
+//       exportToExcel(payload);
+//       alert("Student created and Excel file downloaded successfully!");
 //       router.push("/admin/manageStudents");
 //       setFormData(initialFormData);
 //       setAvatarPreview(null);
@@ -322,19 +376,67 @@
 //     }
 //   };
 
+//   const handleAiExcelGenerate = async () => {
+//     if (!formData.className) {
+//       alert("Please select a class first to generate AI batch data.");
+//       return;
+//     }
+
+//     setGeneratingAi(true);
+//     try {
+//       const response = await fetch(
+//         `${process.env.NEXT_PUBLIC_API_URL}/api/students/generate-excel`,
+//         {
+//           method: "POST",
+//           headers: { "Content-Type": "application/json" },
+//           body: JSON.stringify({
+//             count: 10,
+//             className: formData.className,
+//           }),
+//         }
+//       );
+
+//       if (!response.ok) throw new Error("Generation failed");
+
+//       const blob = await response.blob();
+//       const url = window.URL.createObjectURL(blob);
+//       const a = document.createElement("a");
+//       a.href = url;
+//       a.download = `AI_Students_${formData.className}_${Date.now()}.xlsx`;
+//       document.body.appendChild(a);
+//       a.click();
+//       a.remove();
+//       window.URL.revokeObjectURL(url);
+//     } catch {
+//       alert("Failed to generate AI Excel sheet");
+//     } finally {
+//       setGeneratingAi(false);
+//     }
+//   };
+
 //   return (
 //     <div className="mx-auto w-[90%] px-6 py-10 max-w-7xl">
-//       {/* Header section */}
-//       <div className="mb-6 sm:mb-8 text-left">
-//         <h1 className="text-2xl font-extrabold text-[#081838] sm:text-3xl">
-//           Create Student
-//         </h1>
-//         <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-//           Add a new student to the system.
-//         </p>
+//       <div className="mb-6 sm:mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+//         <div>
+//           <h1 className="text-2xl font-extrabold text-[#081838] sm:text-3xl">
+//             Create Student
+//           </h1>
+//           <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+//             Add a new student to the system and download the Excel record.
+//           </p>
+//         </div>
+
+//         <button
+//           type="button"
+//           onClick={handleAiExcelGenerate}
+//           disabled={generatingAi}
+//           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 font-semibold text-white hover:bg-emerald-700 shadow-md transition disabled:opacity-50 text-xs sm:text-sm"
+//         >
+//           <FileSpreadsheet className="h-4 w-4" />
+//           {generatingAi ? "Generating Excel with AI..." : "Spark AI Data to Excel"}
+//         </button>
 //       </div>
 
-//       {/* Main Form Container */}
 //       <Card className="border border-slate-100 bg-white p-4 shadow-sm rounded-2xl sm:p-6 md:p-8">
 //         <CardHeader className="mb-4 sm:mb-6 p-0">
 //           <h2 className="text-base font-bold text-[#081838] sm:text-lg">
@@ -343,7 +445,6 @@
 //         </CardHeader>
 
 //         <form onSubmit={handleSubmit} className="space-y-6">
-//           {/* Avatar & Upload Section */}
 //           <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-start">
 //             <Avatar className="h-20 w-20 ring-2 ring-purple-500/20 shrink-0">
 //               {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
@@ -357,10 +458,7 @@
 //               </span>
 //               <label className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-purple-50 px-4 py-2.5 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100 active:bg-purple-200">
 //                 {uploadingImage ? (
-//                   <>
-//                     <Spinner size="sm" color="current" />
-//                     Uploading...
-//                   </>
+//                   <span>Uploading...</span>
 //                 ) : (
 //                   <>
 //                     <Upload className="h-4 w-4" />
@@ -378,9 +476,7 @@
 //             </div>
 //           </div>
 
-//           {/* Form Fields Grid */}
 //           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-//             {/* Full Name */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Name <span className="text-red-500">*</span>
@@ -389,14 +485,12 @@
 //                 required
 //                 type="text"
 //                 name="name"
-//                 placeholder="Enter full name"
 //                 value={formData.name}
 //                 onChange={handleInputChange}
 //                 className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
 //               />
 //             </div>
 
-//             {/* Email */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Email
@@ -404,14 +498,12 @@
 //               <input
 //                 type="email"
 //                 name="email"
-//                 placeholder="Enter email address"
 //                 value={formData.email}
 //                 onChange={handleInputChange}
 //                 className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
 //               />
 //             </div>
 
-//             {/* Phone */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Phone <span className="text-red-500">*</span>
@@ -427,7 +519,6 @@
 //               />
 //             </div>
 
-//             {/* Date of Birth */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Date of Birth <span className="text-red-500">*</span>
@@ -444,7 +535,6 @@
 //               </div>
 //             </div>
 
-//             {/* Gender */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Gender <span className="text-red-500">*</span>
@@ -466,7 +556,6 @@
 //               </div>
 //             </div>
 
-//             {/* Address */}
 //             <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Address <span className="text-red-500">*</span>
@@ -482,7 +571,6 @@
 //               />
 //             </div>
 
-//             {/* Guardian Name */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Guardian Name <span className="text-red-500">*</span>
@@ -498,7 +586,6 @@
 //               />
 //             </div>
 
-//             {/* Guardian Phone */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Guardian Phone <span className="text-red-500">*</span>
@@ -514,7 +601,6 @@
 //               />
 //             </div>
 
-//             {/* Class Selection */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Class <span className="text-red-500">*</span>
@@ -543,7 +629,6 @@
 //               </div>
 //             </div>
 
-//             {/* Dynamic Group / Stream Selection for Class 9 & 10 */}
 //             {isGroupRequired && (
 //               <div className="flex flex-col gap-1.5">
 //                 <label className="text-xs font-semibold text-slate-700">
@@ -567,7 +652,6 @@
 //               </div>
 //             )}
 
-//             {/* Section Selection */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Section <span className="text-red-500">*</span>
@@ -589,7 +673,6 @@
 //               </div>
 //             </div>
 
-//             {/* Student ID */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Student ID <span className="text-red-500">*</span>
@@ -605,7 +688,6 @@
 //               />
 //             </div>
 
-//             {/* Roll Number */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Roll Number <span className="text-red-500">*</span>
@@ -621,7 +703,6 @@
 //               />
 //             </div>
 
-//             {/* Admission Date */}
 //             <div className="flex flex-col gap-1.5">
 //               <label className="text-xs font-semibold text-slate-700">
 //                 Admission Date <span className="text-red-500">*</span>
@@ -639,7 +720,6 @@
 //             </div>
 //           </div>
 
-//           {/* Assigned Subjects Preview */}
 //           {computedSubjects.length > 0 && (
 //             <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4">
 //               <h3 className="mb-2 text-xs font-semibold text-slate-700">
@@ -658,7 +738,6 @@
 //             </div>
 //           )}
 
-//           {/* Action Buttons */}
 //           <div className="mt-8 flex flex-col-reverse justify-end gap-3 pt-4 sm:flex-row sm:items-center">
 //             <Button
 //               type="button"
@@ -670,16 +749,10 @@
 //             <Button
 //               type="submit"
 //               isDisabled={loading || uploadingImage}
-//               className="w-full bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6] sm:w-auto"
+//               className="w-full bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6] sm:w-auto inline-flex items-center gap-2"
 //             >
-//               {loading ? (
-//                 <Spinner size="sm" color="current" />
-//               ) : (
-//                 <>
-//                   <Plus className="mr-1 inline h-4 w-4" />
-//                   Create Student
-//                 </>
-//               )}
+//               <FileSpreadsheet className="h-4 w-4" />
+//               {loading ? "Saving & Generating..." : "Create Student & Export Excel"}
 //             </Button>
 //           </div>
 //         </form>
@@ -691,11 +764,12 @@
 
 "use client";
 
-import React, { useState, ChangeEvent, FormEvent, useMemo } from "react";
+import React, { useState, ChangeEvent, FormEvent, useMemo, useEffect } from "react";
 import { Button, Card, CardHeader, Avatar, AvatarImage, AvatarFallback } from "@heroui/react";
-import { ChevronDown, Plus, Upload } from "lucide-react";
+import { ChevronDown, FileSpreadsheet, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/app/lib/auth-client";
+import * as XLSX from "xlsx";
 
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
   class_1: ["Bangla", "English", "Mathematics"],
@@ -706,7 +780,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_4: [
     "Bangla",
@@ -714,7 +788,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_5: [
     "Bangla",
@@ -722,7 +796,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_6: [
     "Bangla",
@@ -734,7 +808,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_7: [
     "Bangla",
@@ -746,7 +820,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_8: [
     "Bangla",
@@ -758,7 +832,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_9_science: [
     "Bangla",
@@ -769,7 +843,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Physics",
     "Chemistry",
     "Biology",
-    "Higher Mathematics"
+    "Higher Mathematics",
   ],
   class_9_businessStudies: [
     "Bangla",
@@ -780,7 +854,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Accounting",
     "Business Entrepreneurship",
     "Finance and Banking",
-    "General Science"
+    "General Science",
   ],
   class_9_humanities: [
     "Bangla",
@@ -791,7 +865,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "History of Bangladesh and World Civilization",
     "Geography and Environment",
     "Civics and Citizenship",
-    "Economics"
+    "Economics",
   ],
   class_10_science: [
     "Bangla 1st Paper",
@@ -804,7 +878,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Physics",
     "Chemistry",
     "Biology",
-    "Higher Mathematics"
+    "Higher Mathematics",
   ],
   class_10_businessStudies: [
     "Bangla 1st Paper",
@@ -817,7 +891,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Accounting",
     "Business Entrepreneurship",
     "Finance and Banking",
-    "General Science"
+    "General Science",
   ],
   class_10_humanities: [
     "Bangla 1st Paper",
@@ -830,8 +904,8 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "History of Bangladesh and World Civilization",
     "Geography and Environment",
     "Civics and Citizenship",
-    "Economics"
-  ]
+    "Economics",
+  ],
 };
 
 interface StudentFormData {
@@ -850,6 +924,14 @@ interface StudentFormData {
   admissionDate: string;
   profileImage: string;
   stream?: string;
+}
+
+interface StudentPayload extends StudentFormData {
+  stuId?: string;
+  subjects: string[];
+  metadata: {
+    submittedAt: string;
+  };
 }
 
 const initialFormData: StudentFormData = {
@@ -872,6 +954,7 @@ const initialFormData: StudentFormData = {
 
 export default function CreateStudent() {
   const [loading, setLoading] = useState<boolean>(false);
+  const [generatingAi, setGeneratingAi] = useState<boolean>(false);
   const [uploadingImage, setUploadingImage] = useState<boolean>(false);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<StudentFormData>(initialFormData);
@@ -880,11 +963,21 @@ export default function CreateStudent() {
   const { data: session } = useSession();
   const user = session?.user;
 
-  const isGroupRequired = useMemo(() => {
+ useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || "",
+        email: prev.email || user.email || "",
+      }));
+    }
+  }, [user]);
+
+  const isGroupRequired = useMemo<boolean>(() => {
     return formData.className === "class_9" || formData.className === "class_10";
   }, [formData.className]);
 
-  const computedSubjects = useMemo(() => {
+  const computedSubjects = useMemo<string[]>(() => {
     if (!formData.className) return [];
 
     if (isGroupRequired) {
@@ -901,13 +994,11 @@ export default function CreateStudent() {
   ) => {
     const { name, value } = e.target;
 
-    setFormData((prev) => {
-      const updated = { ...prev, [name]: value };
+    setFormData((prev: StudentFormData): StudentFormData => {
+      const updated: StudentFormData = { ...prev, [name]: value };
 
-      if (name === "className") {
-        if (value !== "class_9" && value !== "class_10") {
-          updated.stream = "";
-        }
+      if (name === "className" && value !== "class_9" && value !== "class_10") {
+        updated.stream = "";
       }
 
       return updated;
@@ -933,15 +1024,18 @@ export default function CreateStudent() {
 
       const res = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
         method: "POST",
-        body: body,
+        body,
       });
 
       const data = await res.json();
 
       if (data.success) {
-        const imageUrl = data.data.url;
+        const imageUrl: string = data.data.url;
         setAvatarPreview(imageUrl);
-        setFormData((prev) => ({ ...prev, profileImage: imageUrl }));
+        setFormData((prev: StudentFormData): StudentFormData => ({
+          ...prev,
+          profileImage: imageUrl,
+        }));
       } else {
         throw new Error(data.error?.message || "Failed to upload image to ImgBB.");
       }
@@ -960,6 +1054,37 @@ export default function CreateStudent() {
     router.push("/admin/manageStudents");
   };
 
+  const exportToExcel = (payload: StudentPayload) => {
+    const excelData = [
+      {
+        "Student ID": payload.studentId,
+        "Full Name": payload.name,
+        "Email": payload.email,
+        "Phone": payload.phone,
+        "Class": payload.className,
+        "Section": payload.section,
+        "Roll": payload.roll,
+        "Gender": payload.gender,
+        "Date of Birth": payload.dateOfBirth,
+        "Admission Date": payload.admissionDate,
+        "Address": payload.address,
+        "Guardian Name": payload.guardianName,
+        "Guardian Phone": payload.guardianPhone,
+        "Assigned Subjects": payload.subjects.join(", "),
+        "Profile Image": payload.profileImage || "N/A",
+      },
+    ];
+
+    const worksheet = XLSX.utils.json_to_sheet(excelData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Student Record");
+
+    XLSX.writeFile(
+      workbook,
+      `Student_${payload.studentId || "Record"}_${Date.now()}.xlsx`
+    );
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -974,10 +1099,9 @@ export default function CreateStudent() {
       ? `${formData.className}_${formData.stream}`
       : formData.className;
 
-    const payload = {
+    const payload: StudentPayload = {
       stuId: user?.id,
       ...formData,
-      studentId: formData.studentId,
       className: fullClassName,
       subjects: computedSubjects,
       metadata: {
@@ -1001,7 +1125,8 @@ export default function CreateStudent() {
         throw new Error(data.error || "Failed to submit student form.");
       }
 
-      alert("Student created successfully!");
+      exportToExcel(payload);
+      alert("Student created and Excel file downloaded successfully!");
       router.push("/admin/manageStudents");
       setFormData(initialFormData);
       setAvatarPreview(null);
@@ -1014,19 +1139,67 @@ export default function CreateStudent() {
     }
   };
 
+  const handleAiExcelGenerate = async () => {
+    if (!formData.className) {
+      alert("Please select a class first to generate AI batch data.");
+      return;
+    }
+
+    setGeneratingAi(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/students/generate-excel`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            count: 10,
+            className: formData.className,
+          }),
+        }
+      );
+
+      if (!response.ok) throw new Error("Generation failed");
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `AI_Students_${formData.className}_${Date.now()}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      alert("Failed to generate AI Excel sheet");
+    } finally {
+      setGeneratingAi(false);
+    }
+  };
+
   return (
     <div className="mx-auto w-[90%] px-6 py-10 max-w-7xl">
-      {/* Header section */}
-      <div className="mb-6 sm:mb-8 text-left">
-        <h1 className="text-2xl font-extrabold text-[#081838] sm:text-3xl">
-          Create Student
-        </h1>
-        <p className="mt-1 text-xs text-slate-500 sm:text-sm">
-          Add a new student to the system.
-        </p>
+      <div className="mb-6 sm:mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div>
+          <h1 className="text-2xl font-extrabold text-[#081838] sm:text-3xl">
+            Create Student
+          </h1>
+          <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+            Add a new student to the system and download the Excel record.
+          </p>
+        </div>
+
+        <Button
+          type="button"
+          onClick={handleAiExcelGenerate}
+          isDisabled={generatingAi}
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-600 font-semibold text-white hover:bg-emerald-700 shadow-md transition text-xs sm:text-sm"
+        >
+          <FileSpreadsheet className="h-4 w-4" />
+          {generatingAi ? "Generating Excel with AI..." : "Spark AI Data to Excel"}
+        </Button>
       </div>
 
-      {/* Main Form Container */}
       <Card className="border border-slate-100 bg-white p-4 shadow-sm rounded-2xl sm:p-6 md:p-8">
         <CardHeader className="mb-4 sm:mb-6 p-0">
           <h2 className="text-base font-bold text-[#081838] sm:text-lg">
@@ -1035,7 +1208,6 @@ export default function CreateStudent() {
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Avatar & Upload Section */}
           <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:justify-start">
             <Avatar className="h-20 w-20 ring-2 ring-purple-500/20 shrink-0">
               {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
@@ -1067,9 +1239,7 @@ export default function CreateStudent() {
             </div>
           </div>
 
-          {/* Form Fields Grid */}
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 sm:gap-6">
-            {/* Full Name */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Name <span className="text-red-500">*</span>
@@ -1078,14 +1248,12 @@ export default function CreateStudent() {
                 required
                 type="text"
                 name="name"
-                placeholder="Enter full name"
                 value={formData.name}
                 onChange={handleInputChange}
                 className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
 
-            {/* Email */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Email
@@ -1093,14 +1261,12 @@ export default function CreateStudent() {
               <input
                 type="email"
                 name="email"
-                placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleInputChange}
                 className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
 
-            {/* Phone */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Phone <span className="text-red-500">*</span>
@@ -1116,7 +1282,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Date of Birth */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Date of Birth <span className="text-red-500">*</span>
@@ -1133,7 +1298,6 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            {/* Gender */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Gender <span className="text-red-500">*</span>
@@ -1155,7 +1319,6 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            {/* Address */}
             <div className="flex flex-col gap-1.5 sm:col-span-2 lg:col-span-1">
               <label className="text-xs font-semibold text-slate-700">
                 Address <span className="text-red-500">*</span>
@@ -1171,7 +1334,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Guardian Name */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Guardian Name <span className="text-red-500">*</span>
@@ -1187,7 +1349,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Guardian Phone */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Guardian Phone <span className="text-red-500">*</span>
@@ -1203,7 +1364,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Class Selection */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Class <span className="text-red-500">*</span>
@@ -1232,7 +1392,6 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            {/* Dynamic Group / Stream Selection for Class 9 & 10 */}
             {isGroupRequired && (
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-semibold text-slate-700">
@@ -1256,7 +1415,6 @@ export default function CreateStudent() {
               </div>
             )}
 
-            {/* Section Selection */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Section <span className="text-red-500">*</span>
@@ -1278,7 +1436,6 @@ export default function CreateStudent() {
               </div>
             </div>
 
-            {/* Student ID */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Student ID <span className="text-red-500">*</span>
@@ -1294,7 +1451,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Roll Number */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Roll Number <span className="text-red-500">*</span>
@@ -1310,7 +1466,6 @@ export default function CreateStudent() {
               />
             </div>
 
-            {/* Admission Date */}
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-700">
                 Admission Date <span className="text-red-500">*</span>
@@ -1328,7 +1483,6 @@ export default function CreateStudent() {
             </div>
           </div>
 
-          {/* Assigned Subjects Preview */}
           {computedSubjects.length > 0 && (
             <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-3.5 sm:p-4">
               <h3 className="mb-2 text-xs font-semibold text-slate-700">
@@ -1347,7 +1501,6 @@ export default function CreateStudent() {
             </div>
           )}
 
-          {/* Action Buttons */}
           <div className="mt-8 flex flex-col-reverse justify-end gap-3 pt-4 sm:flex-row sm:items-center">
             <Button
               type="button"
@@ -1359,8 +1512,10 @@ export default function CreateStudent() {
             <Button
               type="submit"
               isDisabled={loading || uploadingImage}
-              className="w-full bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6] sm:w-auto">
-              Create Student
+              className="w-full bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6] sm:w-auto inline-flex items-center gap-2"
+            >
+              <FileSpreadsheet className="h-4 w-4" />
+              {loading ? "Saving & Generating..." : "Create Student & Export Excel"}
             </Button>
           </div>
         </form>
@@ -1368,4 +1523,5 @@ export default function CreateStudent() {
     </div>
   );
 }
+
 
