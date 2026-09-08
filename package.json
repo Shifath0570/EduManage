@@ -11,9 +11,13 @@
   "dependencies": {
     "@better-auth/mongo-adapter": "^1.6.29",
     "@google/genai": "^2.20.0",
+    "@google/generative-ai": "^0.24.1",
     "@heroui/react": "^3.2.4",
     "@heroui/styles": "^3.2.4",
     "better-auth": "^1.6.29",
+    "groq-sdk": "^1.6.0",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
     "katex": "^0.18.5",
     "lucide-react": "^1.31.0",
     "mongodb": "^7.5.0",
