@@ -262,10 +262,11 @@ const teacherNavItems: NavItem[] = [
   { id: "overview", href: "/teacher", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
   { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <UserCheck className="w-5 h-5" /> },
   { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
-  { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },  
-  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> }, 
+  { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },
+  { id: "allExams", href: "/teacher/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
+  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> },
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Results", icon: <Award className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <Megaphone className="w-5 h-5" /> },
+  { id: "teacherSalary", href: "/teacher/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const adminNavItems: NavItem[] = [
@@ -274,11 +275,8 @@ const adminNavItems: NavItem[] = [
   { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <UserCheck2 className="w-5 h-5" /> },
   { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Users className="w-5 h-5" /> },
   { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Users className="w-5 h-5" /> },
-  { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },
   { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
-  { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> },
-  { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Award className="w-5 h-5" /> },  
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-5 h-5" /> },
   { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
   { id: "teacherSalary", href: "/admin/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-5 h-5" /> },
@@ -287,6 +285,8 @@ const adminNavItems: NavItem[] = [
 const studentNavItems: NavItem[] = [
   { id: "overview", href: "/student", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
   { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/student/viewResuls", label: "View Results", icon: <Award className="w-5 h-5" /> },
+  { id: "feeCollection", href: "/student/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
