@@ -102,7 +102,7 @@ export default function AdminDashboardPage() {
     totalStudents: 0,
     totalTeachers: 0,
     totalClasses: 32,
-    totalSubjects: 48,
+    totalSubjects: 25,
     studentGrowth: "12% this month",
     teacherGrowth: "5% this month",
     classGrowth: "3 this year",
