@@ -496,11 +496,26 @@ export default function AddTeacherPage(): React.ReactElement {
                     <option value="" disabled>
                       Select subject specialization
                     </option>
+                    <option value="Bengali Literature">Bengali Literature</option>
+                    <option value="English Literature">English Literature</option>
                     <option value="Mathematics">Mathematics</option>
+                    <option value="Computer Science and Engineering">Computer Science and Engineering</option>
+                    <option value="Islamic Studies">Islamic Studies</option>
                     <option value="Physics">Physics</option>
                     <option value="Chemistry">Chemistry</option>
-                    <option value="English">English</option>
-                    <option value="Computer Science">Computer Science</option>
+                    <option value="Biology">Biology</option>
+                    <option value="Applied Mathematics">Applied Mathematics</option>
+                    <option value="Accounting">Accounting</option>
+                    <option value="Business Entrepreneurship">Business Entrepreneurship</option>
+                    <option value="Finance">Finance</option>
+                    <option value="General Science">General Science</option>
+                    <option value="History">History</option>
+                    <option value="Geography and Environment">Geography and Environment</option>
+                    <option value="Political Science">Political Science</option>
+                    <option value="Economics">Economics</option>
+                    <option value="Science">Science</option>
+                    <option value="Wellbeing">Wellbeing</option>
+                    <option value="Art and Culture">Art and Culture</option>
                   </select>
                   <ChevronDown className="absolute right-3 top-3 h-4 w-4 text-slate-400 pointer-events-none" />
                 </div>
