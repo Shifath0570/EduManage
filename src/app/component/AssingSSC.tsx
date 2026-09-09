@@ -9,6 +9,7 @@ import { useSession } from "@/app/lib/auth-client";
 
 interface AssignFormData {
   classId: string;
+  groupId: string;
   sectionId: string;
   subjectId: string;
   academicYear: string;
@@ -23,7 +24,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_4: [
     "Bangla",
@@ -31,7 +32,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_5: [
     "Bangla",
@@ -39,7 +40,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Mathematics",
     "Elementary Science",
     "Bangladesh and Global Studies",
-    "Religious and Moral Education"
+    "Religious and Moral Education",
   ],
   class_6: [
     "Bangla",
@@ -51,7 +52,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_7: [
     "Bangla",
@@ -63,7 +64,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_8: [
     "Bangla",
@@ -75,7 +76,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Wellbeing",
     "Life and Livelihood",
     "Art and Culture",
-    "Religious Education"
+    "Religious Education",
   ],
   class_9_science: [
     "Bangla",
@@ -86,7 +87,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Physics",
     "Chemistry",
     "Biology",
-    "Higher Mathematics"
+    "Higher Mathematics",
   ],
   class_9_businessStudies: [
     "Bangla",
@@ -97,7 +98,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Accounting",
     "Business Entrepreneurship",
     "Finance and Banking",
-    "General Science"
+    "General Science",
   ],
   class_9_humanities: [
     "Bangla",
@@ -108,7 +109,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "History of Bangladesh and World Civilization",
     "Geography and Environment",
     "Civics and Citizenship",
-    "Economics"
+    "Economics",
   ],
   class_10_science: [
     "Bangla 1st Paper",
@@ -121,7 +122,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Physics",
     "Chemistry",
     "Biology",
-    "Higher Mathematics"
+    "Higher Mathematics",
   ],
   class_10_businessStudies: [
     "Bangla 1st Paper",
@@ -134,7 +135,7 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "Accounting",
     "Business Entrepreneurship",
     "Finance and Banking",
-    "General Science"
+    "General Science",
   ],
   class_10_humanities: [
     "Bangla 1st Paper",
@@ -147,15 +148,14 @@ const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
     "History of Bangladesh and World Civilization",
     "Geography and Environment",
     "Civics and Citizenship",
-    "Economics"
-  ]
+    "Economics",
+  ],
 };
 
 const AssingSSC = () => {
   const router = useRouter();
   const params = useParams();
-  const teacherIdParam = params?.id as string;
-
+  const teacherIdParam = typeof params?.id === "string" ? params.id : "";
 
   const { data: session } = useSession();
   const user = session?.user;
@@ -164,23 +164,37 @@ const AssingSSC = () => {
 
   const [formData, setFormData] = useState<AssignFormData>({
     classId: "",
+    groupId: "",
     sectionId: "",
     subjectId: "",
     academicYear: new Date().getFullYear().toString(),
   });
 
+  const isGroupRequired = formData.classId === "class_9" || formData.classId === "class_10";
+
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
 
     setFormData((prev) => {
-      // If the user changes the class, reset the selected subject back to empty
+      // Reset dependent fields when Class changes
       if (name === "classId") {
         return {
           ...prev,
           classId: value,
+          groupId: "",
           subjectId: "",
         };
       }
+
+      // Reset subject when Group changes
+      if (name === "groupId") {
+        return {
+          ...prev,
+          groupId: value,
+          subjectId: "",
+        };
+      }
+
       return { ...prev, [name]: value };
     });
   };
@@ -189,14 +203,45 @@ const AssingSSC = () => {
     e.preventDefault();
     setSubmitting(true);
 
-    const payload = {
-          teacherId: teacherIdParam,
-          assignedBy: user?.id,
-          ...formData,
-        }
-
     try {
-      const apiURL = process.env.NEXT_PUBLIC_API_URL;
+      const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
+
+      if (!teacherIdParam) {
+        throw new Error("Missing teacher parameter in URL.");
+      }
+
+      // 1. Retrieve teacher data safely
+      const teacherRes = await fetch(`${apiURL}/api/teachers/${teacherIdParam}`);
+      const teacher = await teacherRes.json();
+      const teacherData = teacher.data
+
+      if (!teacherRes.ok || !teacherData) {
+        throw new Error(teacherData?.message || teacherData?.error || "Teacher not found.");
+      }
+
+      console.log(teacherData)
+
+
+      // Safe extraction of IDs and Names
+      const resolvedTeacherId = teacherData?._id || teacherData?.id || teacherIdParam;
+      const teacherName = teacherData?.fullName || teacherData?.name || "Unknown Teacher";
+      const teacherEmail = teacherData?.email || "";
+      const assignedBy = user?.id ? String(user.id) : "admin";
+
+      // 2. Prepare assignment payload with sanitized fallbacks
+      const payload = {
+        teacherName,
+        teacherEmail,
+        teacherId: String(resolvedTeacherId),
+        assignedBy,
+        classId: formData.classId,
+        sectionId: formData.sectionId,
+        subjectId: formData.subjectId,
+        academicYear: formData.academicYear,
+        groupId: isGroupRequired ? formData.groupId : "N/A",
+      };
+
+      // 3. Submit assignment
       const res = await fetch(`${apiURL}/api/assignments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -206,14 +251,17 @@ const AssingSSC = () => {
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(data.message || data.error || "Failed to assign teacher.");
+        const errorMsg = Array.isArray(data?.errors) && data.errors.length > 0
+          ? data.errors.join("\n• ")
+          : data?.message || "Failed to assign teacher.";
+        throw new Error(errorMsg);
       }
 
       alert("Teacher assigned successfully!");
-      // router.push(`/admin/manageTeachers/assing/${teacherIdParam}`);
+      router.push(`/admin/manageTeachers/assing/${teacherIdParam}`);
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Assignment failed.";
-      alert(errorMessage);
+      alert(`Validation Error:\n${errorMessage}`);
     } finally {
       setSubmitting(false);
     }
@@ -222,12 +270,16 @@ const AssingSSC = () => {
   const selectStyles =
     "w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20";
 
-  // Get dynamic array of subjects based on selected classId key
-  const availableSubjects = formData.classId ? CLASS_SUBJECTS_MAP[formData.classId] || [] : [];
+  // Derive key for subject mapping
+  const subjectMapKey = isGroupRequired
+    ? `${formData.classId}_${formData.groupId}`
+    : formData.classId;
+
+  const availableSubjects = subjectMapKey ? CLASS_SUBJECTS_MAP[subjectMapKey] || [] : [];
 
   return (
     <div className="mx-auto w-[90%] px-6">
-      <Card className="border border-slate-100 bg-white p-8 shadow-xs rounded-2xl">
+      <Card className="rounded-2xl border border-slate-100 bg-white p-8 shadow-xs">
         <h2 className="mb-6 text-lg font-bold text-[#081838]">Assign Class & Subject</h2>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -256,16 +308,38 @@ const AssingSSC = () => {
                   <option value="class_6">Class 6</option>
                   <option value="class_7">Class 7</option>
                   <option value="class_8">Class 8</option>
-                  <option value="class_9_science">Class 9 (Science)</option>
-                  <option value="class_9_businessStudies">Class 9 (Business Studies)</option>
-                  <option value="class_9_humanities">Class 9 (Humanities)</option>
-                  <option value="class_10_science">Class 10 (Science)</option>
-                  <option value="class_10_businessStudies">Class 10 (Business Studies)</option>
-                  <option value="class_10_humanities">Class 10 (Humanities)</option>
+                  <option value="class_9">Class 9</option>
+                  <option value="class_10">Class 10</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
+
+            {/* Select Group (Only visible for Class 9 and 10) */}
+            {isGroupRequired && (
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-semibold text-slate-700">
+                  Group / Stream <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    required={isGroupRequired}
+                    name="groupId"
+                    value={formData.groupId}
+                    onChange={handleInputChange}
+                    className={selectStyles}
+                  >
+                    <option value="" disabled>
+                      Select Group
+                    </option>
+                    <option value="science">Science</option>
+                    <option value="businessStudies">Business Studies</option>
+                    <option value="humanities">Humanities</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                </div>
+              </div>
+            )}
 
             {/* Select Section */}
             <div className="flex flex-col gap-2">
@@ -291,7 +365,7 @@ const AssingSSC = () => {
               </div>
             </div>
 
-            {/* Select Subject (Populated dynamically based on chosen class) */}
+            {/* Select Subject */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
                 Subject <span className="text-red-500">*</span>
@@ -302,13 +376,19 @@ const AssingSSC = () => {
                   name="subjectId"
                   value={formData.subjectId}
                   onChange={handleInputChange}
-                  disabled={!formData.classId}
+                  disabled={!formData.classId || (isGroupRequired && !formData.groupId)}
                   className={`${selectStyles} ${
-                    !formData.classId ? "cursor-not-allowed opacity-60" : ""
+                    !formData.classId || (isGroupRequired && !formData.groupId)
+                      ? "cursor-not-allowed opacity-60"
+                      : ""
                   }`}
                 >
                   <option value="" disabled>
-                    {formData.classId ? "Select Subject" : "First Select Class"}
+                    {!formData.classId
+                      ? "First Select Class"
+                      : isGroupRequired && !formData.groupId
+                      ? "First Select Group"
+                      : "Select Subject"}
                   </option>
                   {availableSubjects.map((subj) => (
                     <option key={subj} value={subj}>
@@ -328,7 +408,7 @@ const AssingSSC = () => {
                 name="academicYear"
                 value={formData.academicYear}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl border border-slate-200/60 bg-slate-50/70 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
               />
             </div>
           </div>
@@ -362,10 +442,3 @@ const AssingSSC = () => {
 };
 
 export default AssingSSC;
-
-
-
-
-
-
-
