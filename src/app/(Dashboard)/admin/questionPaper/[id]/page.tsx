@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Sparkles,
@@ -18,8 +18,8 @@ import {
   Layers,
   ChevronDown,
   ChevronUp,
-  Share2,
-  Bookmark
+  Settings2,
+  X
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 
@@ -51,6 +51,18 @@ interface Section {
   questions: Question[];
 }
 
+interface QuestionConfigItem {
+  count: number;
+  marksPerQuestion: number;
+  totalMarks?: number;
+}
+
+interface QuestionConfiguration {
+  mcq: QuestionConfigItem;
+  short: QuestionConfigItem;
+  creative: QuestionConfigItem;
+}
+
 interface QuestionPaperData {
   _id: string;
   examId: string;
@@ -65,6 +77,7 @@ interface QuestionPaperData {
   duration: string;
   generalInstructions: string[];
   sections: Section[];
+  questionConfiguration?: QuestionConfiguration;
   generatedBy?: string;
   createdAt?: string;
 }
@@ -81,9 +94,16 @@ interface ExamInfo {
   passMarks: number;
   examDate: string;
   duration?: string;
+  questionConfiguration?: QuestionConfiguration;
   status: string;
   description?: string;
 }
+
+const defaultQuestionConfig: QuestionConfiguration = {
+  mcq: { count: 20, marksPerQuestion: 1 },
+  short: { count: 5, marksPerQuestion: 2 },
+  creative: { count: 4, marksPerQuestion: 5 }
+};
 
 export default function QuestionPaperPage() {
   const params = useParams();
@@ -96,8 +116,44 @@ export default function QuestionPaperPage() {
   const [questionPaper, setQuestionPaper] = useState<QuestionPaperData | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showAnswerKey, setShowAnswerKey] = useState<boolean>(false);
+  const [showConfigModal, setShowConfigModal] = useState<boolean>(false);
+
+  // Question Configuration State
+  const [questionConfig, setQuestionConfig] = useState<QuestionConfiguration>(defaultQuestionConfig);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  // Calculations for Question Configuration
+  const mcqTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.mcq.count) || 0);
+    const m = Math.max(0, Number(questionConfig.mcq.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.mcq]);
+
+  const shortTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.short.count) || 0);
+    const m = Math.max(0, Number(questionConfig.short.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.short]);
+
+  const creativeTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.creative.count) || 0);
+    const m = Math.max(0, Number(questionConfig.creative.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.creative]);
+
+  const configuredGrandTotal = useMemo(() => {
+    return mcqTotal + shortTotal + creativeTotal;
+  }, [mcqTotal, shortTotal, creativeTotal]);
+
+  const targetExamMarks = Number(exam?.totalMarks) || 100;
+  const marksDiff = useMemo(() => {
+    return Math.abs(configuredGrandTotal - targetExamMarks);
+  }, [configuredGrandTotal, targetExamMarks]);
+
+  const isConfigMatched = useMemo(() => {
+    return configuredGrandTotal === targetExamMarks;
+  }, [configuredGrandTotal, targetExamMarks]);
 
   // Fetch Exam and Question Paper Data
   const fetchData = useCallback(async () => {
@@ -112,8 +168,40 @@ export default function QuestionPaperPage() {
         throw new Error(data.message || "Failed to load examination question paper.");
       }
 
-      setExam(data.data.exam);
-      setQuestionPaper(data.data.questionPaper);
+      const fetchedExam: ExamInfo = data.data.exam;
+      const fetchedPaper: QuestionPaperData | null = data.data.questionPaper;
+
+      setExam(fetchedExam);
+      setQuestionPaper(fetchedPaper);
+
+      // Initialize question configuration from paper, exam, or defaults
+      if (fetchedPaper?.questionConfiguration) {
+        setQuestionConfig(fetchedPaper.questionConfiguration);
+      } else if (fetchedExam?.questionConfiguration && fetchedExam.questionConfiguration.mcq) {
+        setQuestionConfig(fetchedExam.questionConfiguration);
+      } else {
+        // Compute smart defaults based on exam total marks
+        const total = fetchedExam?.totalMarks || 100;
+        if (total === 100) {
+          setQuestionConfig({
+            mcq: { count: 20, marksPerQuestion: 1 },
+            short: { count: 6, marksPerQuestion: 5 },
+            creative: { count: 5, marksPerQuestion: 10 }
+          });
+        } else if (total === 50) {
+          setQuestionConfig({
+            mcq: { count: 20, marksPerQuestion: 1 },
+            short: { count: 5, marksPerQuestion: 2 },
+            creative: { count: 4, marksPerQuestion: 5 }
+          });
+        } else {
+          setQuestionConfig({
+            mcq: { count: Math.floor(total * 0.4), marksPerQuestion: 1 },
+            short: { count: Math.floor((total * 0.3) / 2), marksPerQuestion: 2 },
+            creative: { count: Math.floor((total * 0.3) / 5), marksPerQuestion: 5 }
+          });
+        }
+      }
     } catch (err) {
       console.error("Fetch question paper error:", err);
       setError(err instanceof Error ? err.message : "Error connecting to server.");
@@ -126,16 +214,44 @@ export default function QuestionPaperPage() {
     fetchData();
   }, [fetchData]);
 
+  const handleQuestionConfigChange = (
+    sectionKey: "mcq" | "short" | "creative",
+    field: "count" | "marksPerQuestion",
+    val: number
+  ) => {
+    setQuestionConfig((prev) => ({
+      ...prev,
+      [sectionKey]: {
+        ...prev[sectionKey],
+        [field]: Math.max(0, val)
+      }
+    }));
+  };
+
   // Generate Question Paper with AI
   const handleGenerate = async (forceRegenerate: boolean = false) => {
     if (!examId) return;
+
+    if (!isConfigMatched) {
+      const direction = configuredGrandTotal > targetExamMarks ? "exceeded" : "missing";
+      toast.error(
+        `Question paper total must equal exam total marks (${targetExamMarks}). Configured Total: ${configuredGrandTotal} (${marksDiff} marks ${direction}).`
+      );
+      return;
+    }
+
+    if (configuredGrandTotal === 0) {
+      toast.error("Please configure at least one question section with count > 0.");
+      return;
+    }
+
     setGenerating(true);
     setError(null);
 
     const toastId = toast.loading(
       forceRegenerate
-        ? "AI is regenerating curriculum-aligned questions..."
-        : "AI is analyzing syllabus and generating questions..."
+        ? "AI is strictly generating new questions using your configuration..."
+        : "AI is generating questions according to your exact structure..."
     );
 
     try {
@@ -143,12 +259,33 @@ export default function QuestionPaperPage() {
         ? `${API_BASE}/api/question-papers/regenerate/${examId}`
         : `${API_BASE}/api/question-papers/generate/${examId}`;
 
+      const payload = {
+        force: forceRegenerate,
+        questionConfiguration: {
+          mcq: {
+            count: Number(questionConfig.mcq.count),
+            marksPerQuestion: Number(questionConfig.mcq.marksPerQuestion),
+            totalMarks: mcqTotal
+          },
+          short: {
+            count: Number(questionConfig.short.count),
+            marksPerQuestion: Number(questionConfig.short.marksPerQuestion),
+            totalMarks: shortTotal
+          },
+          creative: {
+            count: Number(questionConfig.creative.count),
+            marksPerQuestion: Number(questionConfig.creative.marksPerQuestion),
+            totalMarks: creativeTotal
+          }
+        }
+      };
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ force: forceRegenerate })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json();
@@ -158,10 +295,15 @@ export default function QuestionPaperPage() {
       }
 
       setQuestionPaper(data.data);
+      if (data.data.questionConfiguration) {
+        setQuestionConfig(data.data.questionConfiguration);
+      }
+      setShowConfigModal(false);
+
       toast.success(
         forceRegenerate
-          ? "Question paper regenerated successfully!"
-          : "Question paper generated successfully!",
+          ? "Question paper regenerated successfully according to structure!"
+          : "Question paper generated successfully according to structure!",
         { id: toastId }
       );
     } catch (err) {
@@ -270,7 +412,7 @@ export default function QuestionPaperPage() {
             </h1>
             <p className="text-xs text-slate-500">
               {exam?.className}
-              {exam?.stream ? ` (${exam.stream})` : ""} &bull; {exam?.subject}
+              {exam?.stream ? ` (${exam.stream})` : ""} &bull; {exam?.subject} &bull; {exam?.totalMarks} Marks
             </p>
           </div>
         </div>
@@ -278,6 +420,15 @@ export default function QuestionPaperPage() {
         <div className="flex flex-wrap items-center gap-2">
           {questionPaper && (
             <>
+              <button
+                type="button"
+                onClick={() => setShowConfigModal(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition"
+              >
+                <Settings2 size={14} className="text-purple-600" />
+                Configure Blueprint
+              </button>
+
               <button
                 type="button"
                 onClick={() => setShowAnswerKey((prev) => !prev)}
@@ -288,7 +439,7 @@ export default function QuestionPaperPage() {
                 }`}
               >
                 <HelpCircle size={14} />
-                {showAnswerKey ? "Hide Answer Key" : "Marking Guide / Key"}
+                {showAnswerKey ? "Hide Answer Key" : "Marking Guide"}
               </button>
 
               <button
@@ -307,7 +458,7 @@ export default function QuestionPaperPage() {
                 className="inline-flex items-center gap-1.5 rounded-xl bg-[#03204C]/80 hover:bg-[#1556a7] px-4 py-2 text-xs font-semibold text-white shadow-sm transition"
               >
                 <Printer size={14} />
-                Print / Save as PDF
+                Print / Save PDF
               </button>
             </>
           )}
@@ -317,64 +468,223 @@ export default function QuestionPaperPage() {
       {/* Main Content Area */}
       <div className="print-container mx-auto max-w-4xl">
         {!questionPaper ? (
-          /* Empty State: Prompt to Generate Question Paper */
-          <div className="no-print rounded-2xl border border-slate-200 bg-white p-8 md:p-12 text-center shadow-xs">
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 shadow-inner">
-              <Sparkles className="h-8 w-8 animate-pulse" />
+          /* Empty State: Admin Configures Structure Before AI Generation */
+          <div className="no-print rounded-2xl border border-slate-200 bg-white p-6 md:p-10 shadow-xs space-y-6">
+            <div className="text-center max-w-lg mx-auto">
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-100 text-purple-700 shadow-inner">
+                <Sparkles className="h-7 w-7" />
+              </div>
+              <h2 className="mt-4 text-2xl font-extrabold text-slate-900">
+                Configure & Generate Question Paper
+              </h2>
+              <p className="mt-1.5 text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Define the exact number of questions and marks for each section. The AI will strictly follow your blueprint.
+              </p>
             </div>
 
-            <h2 className="mt-5 text-2xl font-extrabold text-slate-900">
-              Generate AI Question Paper
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-sm text-slate-600">
-              Generate a curriculum-aligned examination paper with Multiple Choice (MCQ), Short Answer, and Creative/Structured questions using Gemini AI.
-            </p>
-
-            {/* Exam Context Card */}
+            {/* Exam Context Summary Bar */}
             {exam && (
-              <div className="mx-auto my-6 max-w-lg rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-left text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <span className="font-semibold text-slate-400">Exam Title:</span>
-                    <p className="font-bold text-slate-800">{exam.examName}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-400">Class & Section:</span>
-                    <p className="font-bold text-slate-800">
-                      {exam.className}
-                      {exam.stream ? ` (${exam.stream})` : ""} - Sec {exam.section || "A"}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-400">Subject:</span>
-                    <p className="font-bold text-purple-700">{exam.subject}</p>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-slate-400">Total Marks:</span>
-                    <p className="font-bold text-slate-800">{exam.totalMarks || 100} Marks</p>
-                  </div>
+              <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-4 text-xs grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <span className="font-semibold text-slate-400">Exam Title:</span>
+                  <p className="font-bold text-slate-800">{exam.examName}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400">Class & Group:</span>
+                  <p className="font-bold text-slate-800">
+                    {exam.className} {exam.stream ? `(${exam.stream})` : ""} - Sec {exam.section || "A"}
+                  </p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400">Subject:</span>
+                  <p className="font-bold text-purple-700">{exam.subject}</p>
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-400">Exam Total Marks:</span>
+                  <p className="font-bold text-slate-800">{exam.totalMarks} Marks</p>
                 </div>
               </div>
             )}
 
-            <button
-              type="button"
-              disabled={generating}
-              onClick={() => handleGenerate(false)}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#03204C]/80 hover:bg-[#1556a7] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition disabled:opacity-60"
-            >
-              {generating ? (
-                <>
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  Generating Questions with AI...
-                </>
-              ) : (
-                <>
-                  <Sparkles className="h-4 w-4" />
-                  Generate Question Paper Now
-                </>
-              )}
-            </button>
+            {/* Question Paper Configuration Section */}
+            <div className="rounded-2xl border border-purple-200 bg-purple-50/30 p-5 md:p-6 space-y-5">
+              <div className="flex items-center justify-between border-b border-purple-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-purple-600" />
+                  <h3 className="text-sm font-bold text-slate-900">Question Paper Structure Configuration</h3>
+                </div>
+                <div className="text-right">
+                  <span className="text-xs font-medium text-slate-500">Configured Total: </span>
+                  <span className={`text-sm font-extrabold ${isConfigMatched ? "text-emerald-700" : "text-purple-700"}`}>
+                    {configuredGrandTotal} Marks
+                  </span>
+                </div>
+              </div>
+
+              {/* 3 Section Inputs */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* MCQ / Objective */}
+                <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">MCQ / Objective</span>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                      {mcqTotal} Marks
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={questionConfig.mcq.count}
+                        onChange={(e) => handleQuestionConfigChange("mcq", "count", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={questionConfig.mcq.marksPerQuestion}
+                        onChange={(e) => handleQuestionConfigChange("mcq", "marksPerQuestion", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                    {questionConfig.mcq.count} × {questionConfig.mcq.marksPerQuestion} = {mcqTotal} Marks
+                  </div>
+                </div>
+
+                {/* Short Questions */}
+                <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">Short Questions</span>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                      {shortTotal} Marks
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={questionConfig.short.count}
+                        onChange={(e) => handleQuestionConfigChange("short", "count", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={questionConfig.short.marksPerQuestion}
+                        onChange={(e) => handleQuestionConfigChange("short", "marksPerQuestion", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                    {questionConfig.short.count} × {questionConfig.short.marksPerQuestion} = {shortTotal} Marks
+                  </div>
+                </div>
+
+                {/* Creative / Broad Questions */}
+                <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">Creative / Broad</span>
+                    <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                      {creativeTotal} Marks
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                      <input
+                        type="number"
+                        min={0}
+                        value={questionConfig.creative.count}
+                        onChange={(e) => handleQuestionConfigChange("creative", "count", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                      <input
+                        type="number"
+                        min={1}
+                        value={questionConfig.creative.marksPerQuestion}
+                        onChange={(e) => handleQuestionConfigChange("creative", "marksPerQuestion", Number(e.target.value))}
+                        className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                    {questionConfig.creative.count} × {questionConfig.creative.marksPerQuestion} = {creativeTotal} Marks
+                  </div>
+                </div>
+              </div>
+
+              {/* Validation Feedback */}
+              <div
+                className={`rounded-xl p-3.5 text-xs font-medium flex items-center gap-2 border ${
+                  isConfigMatched
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                    : "bg-amber-50 text-amber-900 border-amber-200"
+                }`}
+              >
+                {isConfigMatched ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                )}
+                <span>
+                  {isConfigMatched ? (
+                    <>
+                      Configuration matches Exam Total Marks:{" "}
+                      <strong>
+                        MCQ ({mcqTotal}) + Short ({shortTotal}) + Creative ({creativeTotal}) = {configuredGrandTotal} Marks
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      Question paper total must equal exam total marks. Exam Total:{" "}
+                      <strong>{targetExamMarks}</strong> | Configured Total:{" "}
+                      <strong>{configuredGrandTotal}</strong> | Difference:{" "}
+                      <strong>
+                        {marksDiff} marks {configuredGrandTotal > targetExamMarks ? "exceeded" : "missing"}
+                      </strong>
+                    </>
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* Generation CTA Button */}
+            <div className="text-center pt-2">
+              <button
+                type="button"
+                disabled={generating || !isConfigMatched || configuredGrandTotal === 0}
+                onClick={() => handleGenerate(false)}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#03204C]/80 hover:bg-[#1556a7] px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-purple-500/20 transition disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {generating ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Generating Questions According to Blueprint...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="h-4 w-4" />
+                    Generate Question Paper ({configuredGrandTotal} Marks)
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         ) : (
           /* Formal Printable Question Paper Layout */
@@ -540,6 +850,162 @@ export default function QuestionPaperPage() {
           </div>
         )}
       </div>
+
+      {/* Blueprint Edit & Re-generation Modal */}
+      {showConfigModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                  <Settings2 className="h-4 w-4" />
+                </span>
+                <h3 className="text-base font-bold text-slate-900">Configure Question Blueprint</h3>
+              </div>
+              <button
+                onClick={() => setShowConfigModal(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg hover:bg-slate-100"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600">
+              Update the question counts and marks per question. Regenerating will create new questions matching this exact specification.
+            </p>
+
+            <div className="space-y-3">
+              {/* MCQ */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between gap-3 text-xs">
+                <div className="font-bold text-slate-800 w-28">MCQ / Objective</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Qty:</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.mcq.count}
+                      onChange={(e) => handleQuestionConfigChange("mcq", "count", Number(e.target.value))}
+                      className="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Marks:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.mcq.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("mcq", "marksPerQuestion", Number(e.target.value))}
+                      className="w-14 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                </div>
+                <div className="font-extrabold text-purple-700 w-16 text-right">{mcqTotal} M</div>
+              </div>
+
+              {/* Short Questions */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between gap-3 text-xs">
+                <div className="font-bold text-slate-800 w-28">Short Questions</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Qty:</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.short.count}
+                      onChange={(e) => handleQuestionConfigChange("short", "count", Number(e.target.value))}
+                      className="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Marks:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.short.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("short", "marksPerQuestion", Number(e.target.value))}
+                      className="w-14 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                </div>
+                <div className="font-extrabold text-purple-700 w-16 text-right">{shortTotal} M</div>
+              </div>
+
+              {/* Creative Questions */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 flex items-center justify-between gap-3 text-xs">
+                <div className="font-bold text-slate-800 w-28">Creative / Broad</div>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Qty:</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.creative.count}
+                      onChange={(e) => handleQuestionConfigChange("creative", "count", Number(e.target.value))}
+                      className="w-16 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-[11px] text-slate-500">Marks:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.creative.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("creative", "marksPerQuestion", Number(e.target.value))}
+                      className="w-14 rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-800"
+                    />
+                  </div>
+                </div>
+                <div className="font-extrabold text-purple-700 w-16 text-right">{creativeTotal} M</div>
+              </div>
+            </div>
+
+            {/* Validation Banner */}
+            <div
+              className={`rounded-xl p-3 text-xs font-medium flex items-center gap-2 border ${
+                isConfigMatched
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : "bg-rose-50 text-rose-800 border-rose-200"
+              }`}
+            >
+              {isConfigMatched ? (
+                <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+              ) : (
+                <AlertCircle className="h-4 w-4 text-rose-600 shrink-0" />
+              )}
+              <span>
+                {isConfigMatched ? (
+                  <>Total matches: {configuredGrandTotal} / {targetExamMarks} Marks</>
+                ) : (
+                  <>
+                    Total must equal {targetExamMarks} Marks. Current: {configuredGrandTotal} ({marksDiff} marks {configuredGrandTotal > targetExamMarks ? "exceeded" : "missing"}).
+                  </>
+                )}
+              </span>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowConfigModal(false)}
+                className="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={generating || !isConfigMatched || configuredGrandTotal === 0}
+                onClick={() => handleGenerate(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 px-4 py-2 text-xs font-semibold text-white shadow-sm disabled:opacity-50"
+              >
+                <RotateCcw size={14} className={generating ? "animate-spin" : ""} />
+                Regenerate With Blueprint
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

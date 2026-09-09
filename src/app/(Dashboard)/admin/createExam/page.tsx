@@ -205,9 +205,27 @@ const groupOptions = [
   { label: "Humanities", value: "Humanities" }
 ];
 
+interface QuestionConfigItem {
+  count: number;
+  marksPerQuestion: number;
+}
+
+interface QuestionConfiguration {
+  mcq: QuestionConfigItem;
+  short: QuestionConfigItem;
+  creative: QuestionConfigItem;
+}
+
+const initialQuestionConfig: QuestionConfiguration = {
+  mcq: { count: 20, marksPerQuestion: 1 },
+  short: { count: 5, marksPerQuestion: 2 },
+  creative: { count: 4, marksPerQuestion: 5 }
+};
+
 export default function AdminCreateExam() {
   const router = useRouter();
   const [formData, setFormData] = useState<ExamFormData>(initialFormData);
+  const [questionConfig, setQuestionConfig] = useState<QuestionConfiguration>(initialQuestionConfig);
   const [loading, setLoading] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
   const [lastCreatedExam, setLastCreatedExam] = useState<{
@@ -225,6 +243,37 @@ export default function AdminCreateExam() {
   const requiresGroup = useMemo(() => {
     return formData.className === "Class 9" || formData.className === "Class 10";
   }, [formData.className]);
+
+  // Question Paper Configuration calculations
+  const mcqTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.mcq.count) || 0);
+    const m = Math.max(0, Number(questionConfig.mcq.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.mcq]);
+
+  const shortTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.short.count) || 0);
+    const m = Math.max(0, Number(questionConfig.short.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.short]);
+
+  const creativeTotal = useMemo(() => {
+    const c = Math.max(0, Number(questionConfig.creative.count) || 0);
+    const m = Math.max(0, Number(questionConfig.creative.marksPerQuestion) || 0);
+    return c * m;
+  }, [questionConfig.creative]);
+
+  const configuredGrandTotal = useMemo(() => {
+    return mcqTotal + shortTotal + creativeTotal;
+  }, [mcqTotal, shortTotal, creativeTotal]);
+
+  const marksDiff = useMemo(() => {
+    return Math.abs(configuredGrandTotal - Number(formData.totalMarks));
+  }, [configuredGrandTotal, formData.totalMarks]);
+
+  const isConfigMatched = useMemo(() => {
+    return configuredGrandTotal === Number(formData.totalMarks);
+  }, [configuredGrandTotal, formData.totalMarks]);
 
   // Compute valid subjects based on Class and Group (matching source of truth)
   const availableSubjects = useMemo(() => {
@@ -273,6 +322,27 @@ export default function AdminCreateExam() {
     });
   };
 
+  const handleQuestionConfigChange = (
+    sectionKey: "mcq" | "short" | "creative",
+    field: "count" | "marksPerQuestion",
+    val: number
+  ) => {
+    setQuestionConfig((prev) => ({
+      ...prev,
+      [sectionKey]: {
+        ...prev[sectionKey],
+        [field]: Math.max(0, val)
+      }
+    }));
+  };
+
+  const handleSyncTotalMarks = () => {
+    setFormData((prev) => ({
+      ...prev,
+      totalMarks: configuredGrandTotal
+    }));
+  };
+
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFeedback(null);
@@ -316,6 +386,25 @@ export default function AdminCreateExam() {
       return;
     }
 
+    // Validate Question Configuration against Exam Total Marks
+    if (!isConfigMatched) {
+      const direction = configuredGrandTotal > formData.totalMarks ? "exceeded" : "missing";
+      setFeedback({
+        type: "error",
+        message: `Question paper total must equal the exam total marks. Exam Total: ${formData.totalMarks} | Configured Total: ${configuredGrandTotal} | Difference: ${marksDiff} marks ${direction}.`
+      });
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (configuredGrandTotal === 0) {
+      setFeedback({
+        type: "error",
+        message: "Question paper configuration must have at least one question section with count > 0."
+      });
+      return;
+    }
+
     setLoading(true);
 
     const payload = {
@@ -329,6 +418,23 @@ export default function AdminCreateExam() {
       passMarks: Number(formData.passMarks),
       examDate: formData.examDate,
       duration: formData.duration || "2 Hours 30 Minutes",
+      questionConfiguration: {
+        mcq: {
+          count: Number(questionConfig.mcq.count),
+          marksPerQuestion: Number(questionConfig.mcq.marksPerQuestion),
+          totalMarks: mcqTotal
+        },
+        short: {
+          count: Number(questionConfig.short.count),
+          marksPerQuestion: Number(questionConfig.short.marksPerQuestion),
+          totalMarks: shortTotal
+        },
+        creative: {
+          count: Number(questionConfig.creative.count),
+          marksPerQuestion: Number(questionConfig.creative.marksPerQuestion),
+          totalMarks: creativeTotal
+        }
+      },
       status: formData.status,
       description: formData.description
     };
@@ -364,6 +470,7 @@ export default function AdminCreateExam() {
       });
 
       setFormData(initialFormData);
+      setQuestionConfig(initialQuestionConfig);
 
       // Smooth scroll to top of page to see success message
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -761,6 +868,186 @@ export default function AdminCreateExam() {
                 onChange={handleInputChange}
                 className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 resize-none"
               />
+            </div>
+          </div>
+
+          {/* Question Paper Configuration Section (AI Blueprint) */}
+          <div className="mt-8 rounded-2xl border border-purple-200 bg-purple-50/30 p-5 md:p-6 space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-purple-100 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                  <Sparkles className="h-4 w-4 text-purple-600" />
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Question Paper Structure Configuration
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Define the exact question count and marks. AI will strictly follow this structure.
+                  </p>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-xs font-semibold text-slate-500">Configured Total:</span>{" "}
+                <span className={`text-sm font-extrabold ${isConfigMatched ? "text-emerald-700" : "text-purple-700"}`}>
+                  {configuredGrandTotal} Marks
+                </span>
+              </div>
+            </div>
+
+            {/* 3 Section Config Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* MCQ / Objective */}
+              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">MCQ / Objective</span>
+                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                    {mcqTotal} Marks
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.mcq.count}
+                      onChange={(e) => handleQuestionConfigChange("mcq", "count", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.mcq.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("mcq", "marksPerQuestion", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                  {questionConfig.mcq.count} × {questionConfig.mcq.marksPerQuestion} = {mcqTotal} Marks
+                </div>
+              </div>
+
+              {/* Short Questions */}
+              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">Short Questions</span>
+                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                    {shortTotal} Marks
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.short.count}
+                      onChange={(e) => handleQuestionConfigChange("short", "count", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.short.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("short", "marksPerQuestion", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                  {questionConfig.short.count} × {questionConfig.short.marksPerQuestion} = {shortTotal} Marks
+                </div>
+              </div>
+
+              {/* Creative / Broad Questions */}
+              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-800">Creative / Broad</span>
+                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                    {creativeTotal} Marks
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Number of Questions</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={questionConfig.creative.count}
+                      onChange={(e) => handleQuestionConfigChange("creative", "count", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-medium text-slate-500">Marks Per Question</label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={questionConfig.creative.marksPerQuestion}
+                      onChange={(e) => handleQuestionConfigChange("creative", "marksPerQuestion", Number(e.target.value))}
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                    />
+                  </div>
+                </div>
+                <div className="text-[11px] text-slate-400 text-center font-medium pt-1 border-t border-slate-50">
+                  {questionConfig.creative.count} × {questionConfig.creative.marksPerQuestion} = {creativeTotal} Marks
+                </div>
+              </div>
+            </div>
+
+            {/* Validation Feedback & Sync CTA */}
+            <div
+              className={`rounded-xl p-3.5 text-xs font-medium flex flex-wrap items-center justify-between gap-3 border ${
+                isConfigMatched
+                  ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                  : "bg-amber-50 text-amber-900 border-amber-200"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                {isConfigMatched ? (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+                )}
+                <span>
+                  {isConfigMatched ? (
+                    <>
+                      Question paper configuration matches Exam Total Marks:{" "}
+                      <strong>
+                        MCQ ({mcqTotal}) + Short ({shortTotal}) + Creative ({creativeTotal}) = {configuredGrandTotal} Marks
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      Question paper total must equal the exam total marks. Exam Total:{" "}
+                      <strong>{formData.totalMarks}</strong> | Configured Total:{" "}
+                      <strong>{configuredGrandTotal}</strong> | Difference:{" "}
+                      <strong>
+                        {marksDiff} marks {configuredGrandTotal > formData.totalMarks ? "exceeded" : "missing"}
+                      </strong>
+                    </>
+                  )}
+                </span>
+              </div>
+
+              {!isConfigMatched && (
+                <button
+                  type="button"
+                  onClick={handleSyncTotalMarks}
+                  className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 text-xs font-semibold shadow-xs transition"
+                >
+                  Set Exam Total to {configuredGrandTotal} Marks
+                </button>
+              )}
             </div>
           </div>
 
