@@ -1034,7 +1034,7 @@ export default function TeacherCreateExam() {
               ) : (
                 <>
                   <Plus size={16} />
-                  <span>Schedule Exam</span>
+                  <span>Save Exam</span>
                 </>
               )}
             </button>
