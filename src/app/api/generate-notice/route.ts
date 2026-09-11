@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 import Groq from 'groq-sdk';
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-
 export async function POST(req: Request) {
   try {
+    const apiKey = process.env.GROQ_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'GROQ_API_KEY is not configured.' }, { status: 500 });
+    }
+    const groq = new Groq({ apiKey });
     const { prompt, issuerName, issuerDesignation, issuerEmail, issuerContact } = await req.json();
 
     const systemPrompt = `You are an administrative AI assistant. Generate a notice based on the request.
