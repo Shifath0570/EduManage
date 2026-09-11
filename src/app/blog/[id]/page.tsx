@@ -45,18 +45,19 @@ export default function BlogDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState(false);
 
-    const API_BASE =
-        process.env.NEXT_PUBLIC_API_URL ||
-        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
-            ? "https://edu-manage-server-blush.vercel.app"
-            : "http://localhost:5000");
-
     useEffect(() => {
         async function fetchBlog() {
             if (!id) return;
             setLoading(true);
             try {
-                const res = await fetch(`${API_BASE}/api/blogs/${id}`);
+                let res = await fetch(`/api/blogs/${id}`);
+                if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
+                    try {
+                        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`);
+                    } catch {
+                        // ignore
+                    }
+                }
                 const data = await res.json();
                 if (data.success && data.data) {
                     setBlog(data.data);
@@ -101,7 +102,7 @@ export default function BlogDetailsPage() {
         }
 
         fetchBlog();
-    }, [id, API_BASE]);
+    }, [id]);
 
     const handleShare = () => {
         if (typeof window !== "undefined") {
