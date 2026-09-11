@@ -62,7 +62,7 @@
 //   return (
 //     <header className="sticky top-0 z-50 w-full bg-[#03204c] text-white border-b border-blue-900/40 shadow-md">
 //       <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
-        
+
 //         {/* Left Section: Brand Logo */}
 //         <Link href="/" className="flex items-center gap-2.5 focus:outline-none">
 //           <div className="relative flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-b from-blue-400 to-blue-600 text-white shadow-sm">
@@ -228,6 +228,9 @@
 
 
 
+
+
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -235,7 +238,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Spinner, Avatar, AvatarImage, AvatarFallback } from "@heroui/react";
-import { BookOpen, LogOut, Menu, X, ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { BookOpen, LogOut, Menu, X, ArrowRight, ShieldCheck, Sparkles, Home } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
 
 const baseNavItems = [
@@ -260,16 +263,22 @@ export default function Navbar() {
   const router = useRouter();
 
   const { data: session, isPending } = useSession();
-  const user = session?.user as { 
-    name?: string; 
-    email?: string; 
-    image?: string; 
-    role?: string 
+  const user = session?.user as {
+    name?: string;
+    email?: string;
+    image?: string;
+    role?: string;
   } | undefined;
   const isAuthenticated = !!user;
 
   const userRole = user?.role || "student";
   const dashboardHref = dashboardLinks[userRole] || "/student";
+
+  // Check if current route is within a dashboard section
+  const isDashboardPage =
+    pathname.startsWith("/student") ||
+    pathname.startsWith("/teacher") ||
+    pathname.startsWith("/admin");
 
   const navItems = isAuthenticated
     ? [...baseNavItems, { label: "Dashboard", href: dashboardHref }]
@@ -283,6 +292,13 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Close mobile menu automatically when route changes to a dashboard page
+  useEffect(() => {
+    if (isDashboardPage) {
+      setIsMenuOpen(false);
+    }
+  }, [isDashboardPage]);
+
   const handleLogout = async () => {
     setIsMenuOpen(false);
     await signOut({
@@ -295,26 +311,49 @@ export default function Navbar() {
     router.push("/");
   };
 
-  const userInitial = user?.name?.charAt(0).toUpperCase() || 
-                      user?.email?.charAt(0).toUpperCase() || "U";
+  const userInitial =
+    user?.name?.charAt(0).toUpperCase() ||
+    user?.email?.charAt(0).toUpperCase() ||
+    "U";
 
+  // Render ONLY the Home Link when on a dashboard page
+  if (isDashboardPage) {
+    return (
+      <motion.header
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="fixed top-0 right-0 z-50 p-4"
+      >
+        <Link
+          href="/"
+          aria-label="Home"
+          className="flex h-10 w-10 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50/80 text-emerald-700 shadow-sm backdrop-blur-md transition-all hover:bg-emerald-500 hover:text-white"
+        >
+          <Home className="h-5 w-5" />
+        </Link>
+      </motion.header>
+    );
+  }
+
+  // Render full Navbar on standard pages (!isDashboardPage)
   return (
-    <motion.header 
+    <motion.header
       initial={{ y: -100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
       className="fixed top-0 left-0 right-0 z-50 px-4 pt-4"
     >
-      <div 
+      <div
         className={`mx-auto flex h-16 max-w-7xl items-center justify-between rounded-full px-6 transition-all duration-300 border ${
-          scrolled 
-            ? "bg-white/85 backdrop-blur-xl border-white/80 shadow-lg shadow-teal-900/5" 
+          scrolled
+            ? "bg-white/85 backdrop-blur-xl border-white/80 shadow-lg shadow-teal-900/5"
             : "bg-white/70 backdrop-blur-md border-white/60 shadow-sm"
         }`}
       >
         {/* Brand Logo */}
         <Link href="/" className="group flex items-center gap-3 focus:outline-none">
-          <motion.div 
+          <motion.div
             whileHover={{ rotate: 10, scale: 1.05 }}
             className="relative flex h-10 w-10 items-center justify-center rounded-xl text-emerald-600"
           >
@@ -326,7 +365,7 @@ export default function Navbar() {
               Edu<span className="text-emerald-500">Manage</span>
             </span>
             <span className="text-[10px] font-semibold tracking-wider text-slate-600">
-              Enterprise
+              Platform
             </span>
           </div>
         </Link>
@@ -358,7 +397,7 @@ export default function Navbar() {
           })}
         </nav>
 
-        {/* Right Action Section */}
+        {/* Right Action Section (Desktop Auth + Mobile Menu Toggle) */}
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex items-center gap-3">
             {isPending ? (
@@ -402,7 +441,7 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu Toggle Button */}
           <button
             type="button"
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
@@ -414,7 +453,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Drawer with AnimatePresence */}
+      {/* Mobile Drawer */}
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div
@@ -487,7 +526,3 @@ export default function Navbar() {
     </motion.header>
   );
 }
-
-
-
-
