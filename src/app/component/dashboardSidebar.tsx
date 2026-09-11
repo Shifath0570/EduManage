@@ -228,7 +228,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { redirect, usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import { Avatar, AvatarImage, AvatarFallback, Chip, Button, Spinner } from "@heroui/react";
 import {
@@ -319,6 +319,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
 
   const handleLogout = async () => {
     await signOut();
+    redirect('/')
   };
 
   const content = (
