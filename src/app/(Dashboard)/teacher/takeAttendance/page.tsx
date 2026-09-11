@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
 import {
     Calendar,
@@ -27,42 +27,37 @@ interface StudentRecord {
     remarks?: string;
 }
 
-const CLASS_OPTIONS = [
-    { value: "1", label: "Class 1" },
-    { value: "2", label: "Class 2" },
-    { value: "3", label: "Class 3" },
-    { value: "4", label: "Class 4" },
-    { value: "5", label: "Class 5" },
-    { value: "6", label: "Class 6" },
-    { value: "7", label: "Class 7" },
-    { value: "8", label: "Class 8" },
-    { value: "9", label: "Class 9" },
-    { value: "10", label: "Class 10" },
-];
+interface AssignmentItem {
+    _id: string;
+    classId: string;
+    sectionId: string;
+    subjectId: string;
+    groupId?: string;
+    academicYear?: string;
+    status?: string;
+}
 
-const SECTION_OPTIONS = ["A", "B", "C", "D"];
+const normalizeClassNumber = (className: string) => {
+    if (!className) return "";
+    const match = String(className).match(/\d+/);
+    return match ? match[0] : "";
+};
 
-// Dynamic curriculum subject mapping by educational class tier
-const SUBJECT_MAP: Record<string, string[]> = {
-    "1": ["Bangla", "English", "Mathematics", "General Science", "Drawing"],
-    "2": ["Bangla", "English", "Mathematics", "General Science", "Drawing"],
-    "3": ["Bangla", "English", "Mathematics", "Elementary Science", "Bangladesh & Global Studies", "Islam & Moral Education", "Hindu & Moral Education"],
-    "4": ["Bangla", "English", "Mathematics", "Elementary Science", "Bangladesh & Global Studies", "Islam & Moral Education", "Hindu & Moral Education"],
-    "5": ["Bangla", "English", "Mathematics", "Elementary Science", "Bangladesh & Global Studies", "Islam & Moral Education", "Hindu & Moral Education"],
-    "6": ["Bangla", "English", "Mathematics", "General Science", "Social Science", "ICT", "Islam & Moral Education", "Hindu & Moral Education"],
-    "7": ["Bangla", "English", "Mathematics", "General Science", "Social Science", "ICT", "Islam & Moral Education", "Hindu & Moral Education"],
-    "8": ["Bangla", "English", "Mathematics", "General Science", "Bangladesh & Global Studies", "ICT", "Islam & Moral Education", "Hindu & Moral Education"],
-    "9": ["Bangla", "English", "Mathematics", "Physics", "Chemistry", "Biology", "Higher Mathematics", "Accounting", "Business Entrepreneurship", "Finance & Banking", "History", "Geography", "ICT"],
-    "10": ["Bangla", "English", "Mathematics", "Physics", "Chemistry", "Biology", "Higher Mathematics", "Accounting", "Business Entrepreneurship", "Finance & Banking", "History", "Geography", "ICT"],
+const normalizeSectionName = (sec: string) => {
+    if (!sec) return "A";
+    return String(sec).toUpperCase().replace(/^SECTION/i, "").replace(/^SEC[-_]/i, "").trim();
 };
 
 export default function TeacherTakeAttendance() {
     const { data: session } = useSession();
     const user = session?.user;
 
-    const [selectedClass, setSelectedClass] = useState<string>("1");
+    const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
+    const [loadingAssignments, setLoadingAssignments] = useState(true);
+
+    const [selectedClass, setSelectedClass] = useState<string>("");
     const [selectedSection, setSelectedSection] = useState<string>("A");
-    const [selectedSubject, setSelectedSubject] = useState<string>("Mathematics");
+    const [selectedSubject, setSelectedSubject] = useState<string>("");
     const [selectedDate, setSelectedDate] = useState<string>(
         new Date().toISOString().split("T")[0]
     );
@@ -72,24 +67,118 @@ export default function TeacherTakeAttendance() {
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
 
-    const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+    const API_BASE =
+        process.env.NEXT_PUBLIC_API_URL ||
+        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
+            ? "https://edu-manage-server-blush.vercel.app"
+            : "http://localhost:5000");
 
-    // Dynamic subjects based on selected class
-    const availableSubjects = SUBJECT_MAP[selectedClass] || [
-        "Mathematics",
-        "Science",
-        "English",
-        "Bangla",
-        "ICT",
-        "Social Studies"
-    ];
-
-    // Ensure subject is in available subjects when class changes
+    // Fetch Teacher's active assignments
     useEffect(() => {
-        if (!availableSubjects.includes(selectedSubject)) {
-            setSelectedSubject(availableSubjects[0] || "Mathematics");
+        async function fetchTeacherAssignments() {
+            if (!user?.email) {
+                setLoadingAssignments(false);
+                return;
+            }
+
+            setLoadingAssignments(true);
+            try {
+                const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+
+                if (data.success && Array.isArray(data.data) && data.data.length > 0) {
+                    setAssignments(data.data);
+
+                    const first = data.data[0];
+                    const firstClass = normalizeClassNumber(first.classId) || "1";
+                    const firstSec = normalizeSectionName(first.sectionId) || "A";
+                    const firstSub = first.subjectId || "";
+
+                    setSelectedClass(firstClass);
+                    setSelectedSection(firstSec);
+                    setSelectedSubject(firstSub);
+                } else {
+                    setAssignments([]);
+                }
+            } catch (err) {
+                console.error("Failed to load teacher assignments:", err);
+                setAssignments([]);
+            } finally {
+                setLoadingAssignments(false);
+            }
         }
-    }, [selectedClass, availableSubjects, selectedSubject]);
+
+        fetchTeacherAssignments();
+    }, [user?.email, API_BASE]);
+
+    // Unique assigned classes for this teacher
+    const assignedClassOptions = useMemo(() => {
+        const classMap = new Map<string, string>();
+        assignments.forEach((a) => {
+            const classNum = normalizeClassNumber(a.classId);
+            if (classNum) {
+                classMap.set(classNum, `Class ${classNum}`);
+            }
+        });
+        return Array.from(classMap.entries())
+            .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10))
+            .map(([value, label]) => ({ value, label }));
+    }, [assignments]);
+
+    // Assigned sections for selected class
+    const assignedSectionOptions = useMemo(() => {
+        const sectionSet = new Set<string>();
+        assignments
+            .filter((a) => normalizeClassNumber(a.classId) === selectedClass)
+            .forEach((a) => {
+                const sec = normalizeSectionName(a.sectionId);
+                if (sec && sec !== "ALL") {
+                    sectionSet.add(sec);
+                } else if (sec === "ALL") {
+                    ["A", "B", "C", "D"].forEach((s) => sectionSet.add(s));
+                }
+            });
+        const list = Array.from(sectionSet).sort();
+        return list.length > 0 ? list : ["A"];
+    }, [assignments, selectedClass]);
+
+    // Assigned subjects for selected class (and section)
+    const assignedSubjectOptions = useMemo(() => {
+        const subjectSet = new Set<string>();
+        assignments
+            .filter((a) => normalizeClassNumber(a.classId) === selectedClass)
+            .forEach((a) => {
+                if (a.subjectId && a.subjectId !== "All") {
+                    subjectSet.add(a.subjectId);
+                }
+            });
+        return Array.from(subjectSet);
+    }, [assignments, selectedClass]);
+
+    // Handle class change with auto-selection of valid section and subject
+    const handleClassChange = (newClass: string) => {
+        setSelectedClass(newClass);
+        const matching = assignments.filter((a) => normalizeClassNumber(a.classId) === newClass);
+        if (matching.length > 0) {
+            const firstSec = normalizeSectionName(matching[0].sectionId) || "A";
+            const firstSub = matching[0].subjectId || "";
+            setSelectedSection(firstSec);
+            setSelectedSubject(firstSub);
+        }
+    };
+
+    // Handle section change
+    const handleSectionChange = (newSection: string) => {
+        setSelectedSection(newSection);
+        const matching = assignments.filter(
+            (a) =>
+                normalizeClassNumber(a.classId) === selectedClass &&
+                (normalizeSectionName(a.sectionId) === newSection || a.sectionId === "All")
+        );
+        if (matching.length > 0 && !matching.some((m) => m.subjectId === selectedSubject)) {
+            setSelectedSubject(matching[0].subjectId);
+        }
+    };
 
     // Load student roster dynamically from MongoDB backend
     const loadRoster = useCallback(async () => {
@@ -100,7 +189,7 @@ export default function TeacherTakeAttendance() {
         try {
             // First check if an attendance session already exists for this date, class, section, subject
             const attRes = await fetch(
-                `${API_BASE}/api/attendance?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&subject=${encodeURIComponent(selectedSubject)}&date=${encodeURIComponent(selectedDate)}`
+                `${API_BASE}/api/attendance?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&subject=${encodeURIComponent(selectedSubject)}&date=${encodeURIComponent(selectedDate)}&userRole=teacher&teacherEmail=${encodeURIComponent(user?.email || "")}`
             );
             const attData = await attRes.json();
 
@@ -142,7 +231,6 @@ export default function TeacherTakeAttendance() {
                 }));
                 setStudents(formatted);
             } else {
-                // Absolutely no static fake data - dynamic database truth
                 setStudents([]);
                 setMessage({
                     type: "info",
@@ -159,7 +247,7 @@ export default function TeacherTakeAttendance() {
         } finally {
             setLoadingStudents(false);
         }
-    }, [selectedClass, selectedSection, selectedSubject, selectedDate, API_BASE]);
+    }, [selectedClass, selectedSection, selectedSubject, selectedDate, user?.email, API_BASE]);
 
     useEffect(() => {
         loadRoster();
@@ -187,6 +275,14 @@ export default function TeacherTakeAttendance() {
             return;
         }
 
+        if (!selectedClass || !selectedSubject) {
+            setMessage({
+                type: "error",
+                text: "Please select an assigned class and subject."
+            });
+            return;
+        }
+
         setSaving(true);
         setMessage(null);
         try {
@@ -195,15 +291,18 @@ export default function TeacherTakeAttendance() {
                 section: selectedSection,
                 subject: selectedSubject,
                 date: selectedDate,
-                teacherEmail: user?.email || "teacher@edumanage.com",
+                teacherEmail: user?.email || "",
                 teacherName: user?.name || "Teacher",
+                teacherRole: "teacher",
                 records: students
             };
 
             const res = await fetch(`${API_BASE}/api/attendance`, {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "x-user-role": "teacher",
+                    "x-user-email": user?.email || ""
                 },
                 body: JSON.stringify(payload)
             });
@@ -257,62 +356,82 @@ export default function TeacherTakeAttendance() {
                             </h1>
                         </div>
                         <p className="mt-1 text-sm text-slate-500">
-                            Select any class from 1 to 10 and mark daily student attendance dynamically.
+                            Mark daily student attendance for your assigned classes and subjects.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/80 px-3.5 py-2 text-xs font-semibold text-blue-800">
                         <Users className="h-4 w-4 text-blue-600 shrink-0" />
-                        <span>Dynamic Database Roster (Class 1–10)</span>
+                        <span>Teacher Portal • Assigned Classes Only</span>
                     </div>
                 </div>
+
+                {/* No Assignment Warning */}
+                {!loadingAssignments && assignments.length === 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-6 text-center shadow-xs">
+                        <AlertCircle className="mx-auto h-10 w-10 text-amber-600 mb-3" />
+                        <h3 className="text-base font-bold text-amber-900">No Class or Subject Assigned</h3>
+                        <p className="mt-1 text-sm text-amber-700 max-w-lg mx-auto">
+                            You are not currently assigned to any class or subject. You can only record attendance for classes and subjects officially assigned to you by the administration.
+                        </p>
+                    </div>
+                )}
 
                 {/* Selection Configuration Bar */}
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
                             <Layers className="h-4 w-4 text-[#03204c]" />
-                            Class & Session Selection
+                            Assigned Class & Session Selection
                         </h2>
                         <button
                             type="button"
                             onClick={loadRoster}
-                            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#03204c] transition"
+                            disabled={!selectedClass || assignedClassOptions.length === 0}
+                            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#03204c] transition disabled:opacity-40"
                         >
                             <RotateCcw className="h-3.5 w-3.5" /> Reload Roster
                         </button>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        {/* Class 1 to 10 */}
+                        {/* Assigned Classes */}
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                                Select Class
+                                Assigned Class
                             </label>
                             <select
                                 value={selectedClass}
-                                onChange={(e) => setSelectedClass(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20"
+                                onChange={(e) => handleClassChange(e.target.value)}
+                                disabled={loadingAssignments || assignedClassOptions.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
                             >
-                                {CLASS_OPTIONS.map((c) => (
-                                    <option key={c.value} value={c.value}>
-                                        {c.label}
-                                    </option>
-                                ))}
+                                {loadingAssignments ? (
+                                    <option value="">Loading assignments...</option>
+                                ) : assignedClassOptions.length === 0 ? (
+                                    <option value="">No Assigned Classes</option>
+                                ) : (
+                                    assignedClassOptions.map((c) => (
+                                        <option key={c.value} value={c.value}>
+                                            {c.label}
+                                        </option>
+                                    ))
+                                )}
                             </select>
                         </div>
 
-                        {/* Section */}
+                        {/* Assigned Section */}
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                                Select Section
+                                Assigned Section
                             </label>
                             <select
                                 value={selectedSection}
-                                onChange={(e) => setSelectedSection(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20"
+                                onChange={(e) => handleSectionChange(e.target.value)}
+                                disabled={loadingAssignments || assignedSectionOptions.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
                             >
-                                {SECTION_OPTIONS.map((sec) => (
+                                {assignedSectionOptions.map((sec) => (
                                     <option key={sec} value={sec}>
                                         Section {sec}
                                     </option>
@@ -320,21 +439,26 @@ export default function TeacherTakeAttendance() {
                             </select>
                         </div>
 
-                        {/* Subject */}
+                        {/* Assigned Subject */}
                         <div>
                             <label className="mb-1.5 block text-xs font-semibold text-slate-700">
-                                Subject
+                                Assigned Subject
                             </label>
                             <select
                                 value={selectedSubject}
                                 onChange={(e) => setSelectedSubject(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20"
+                                disabled={loadingAssignments || assignedSubjectOptions.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
                             >
-                                {availableSubjects.map((sub, idx) => (
-                                    <option key={idx} value={sub}>
-                                        {sub}
-                                    </option>
-                                ))}
+                                {assignedSubjectOptions.length === 0 ? (
+                                    <option value="">No Assigned Subjects</option>
+                                ) : (
+                                    assignedSubjectOptions.map((sub, idx) => (
+                                        <option key={idx} value={sub}>
+                                            {sub}
+                                        </option>
+                                    ))
+                                )}
                             </select>
                         </div>
 
