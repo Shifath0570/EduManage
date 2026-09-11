@@ -47,13 +47,6 @@ export default function BlogPage() {
     const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState<string>("All");
     const [searchQuery, setSearchQuery] = useState<string>("");
-
-    const API_BASE =
-        process.env.NEXT_PUBLIC_API_URL ||
-        (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
-            ? "https://edu-manage-server-blush.vercel.app"
-            : "http://localhost:5000");
-
     const categories = [
         {
             title: "All",
@@ -89,7 +82,14 @@ export default function BlogPage() {
             if (selectedCategory !== "All") params.append("category", selectedCategory);
             if (searchQuery.trim()) params.append("search", searchQuery.trim());
 
-            const res = await fetch(`${API_BASE}/api/blogs?${params.toString()}`);
+            let res = await fetch(`/api/blogs?${params.toString()}`);
+            if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
+                try {
+                    res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`);
+                } catch {
+                    // fallback
+                }
+            }
             const data = await res.json();
             if (data.success && Array.isArray(data.data) && data.data.length > 0) {
                 setBlogs(data.data);
@@ -126,7 +126,7 @@ export default function BlogPage() {
         } finally {
             setLoading(false);
         }
-    }, [API_BASE, selectedCategory, searchQuery]);
+    }, [selectedCategory, searchQuery]);
 
     useEffect(() => {
         fetchBlogs();

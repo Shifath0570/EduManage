@@ -149,14 +149,15 @@ import {
 } from "react-icons/fa";
 import { getNotices } from "../lib/data";
 import { NoticeItem } from "@/types/types";
+import { getDatabase } from "../lib/mongodb";
 
 export default async function Notice() {
   const noticesData = await getNotices();
   const notice = Array.isArray(noticesData) ? noticesData.slice(0, 5) : [];
 
-  const blogPosts = [
+  let blogPosts = [
     {
-      id: 1,
+      id: "1",
       title: "10 Effective Study Tips for Students",
       description:
         "Discover practical study tips that help students improve focus and academic performance.",
@@ -166,7 +167,7 @@ export default async function Notice() {
       category: "Academic Excellence",
     },
     {
-      id: 2,
+      id: "2",
       title: "How to Prepare for Exams",
       description:
         "Learn effective exam preparation strategies that reduce stress and improve results.",
@@ -176,7 +177,7 @@ export default async function Notice() {
       category: "Exam Strategies",
     },
     {
-      id: 3,
+      id: "3",
       title: "The Future of Education Technology",
       description:
         "Explore how technology is transforming the way students learn and teachers teach.",
@@ -186,6 +187,30 @@ export default async function Notice() {
       category: "EdTech Insights",
     },
   ];
+
+  try {
+    const db = await getDatabase();
+    const liveBlogs = await db
+      .collection("Blogs")
+      .find({ status: "published" })
+      .sort({ featured: -1, createdAt: -1 })
+      .limit(3)
+      .toArray();
+
+    if (liveBlogs && liveBlogs.length > 0) {
+      blogPosts = liveBlogs.map((b: any) => ({
+        id: String(b._id),
+        title: b.title,
+        description: b.description || b.content?.slice(0, 120) + "...",
+        date: b.createdAt ? new Date(b.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "Recent",
+        image: b.image || "/images/Blog1.jpg",
+        slug: b.slug || String(b._id),
+        category: b.category || "Education",
+      }));
+    }
+  } catch (err) {
+    console.error("Notice section dynamic blogs fetch error:", err);
+  }
 
   return (
     <section className="relative overflow-hidden bg-slate-50 py-16 md:py-24 border-t border-slate-200/60">
@@ -314,7 +339,7 @@ export default async function Notice() {
                       fill
                       sizes="(max-width: 768px) 100vw, 300px"
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
-                      priority={post.id === 1}
+                      priority={String(post.id) === "1"}
                     />
                     <div className="absolute top-3 left-3 rounded-md bg-slate-900/70 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-md">
                       {post.category}
