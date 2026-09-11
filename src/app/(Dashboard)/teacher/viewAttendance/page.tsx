@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
 import {
     Calendar,
@@ -15,7 +15,9 @@ import {
     Eye,
     BookOpen,
     Users,
-    Sparkles
+    Sparkles,
+    AlertTriangle,
+    ShieldAlert
 } from "lucide-react";
 
 interface AttendanceRecordItem {
@@ -44,44 +46,49 @@ interface AttendanceSession {
     createdAt?: string;
 }
 
-const CLASS_OPTIONS = [
-    { value: "All", label: "All Classes" },
-    { value: "1", label: "Class 1" },
-    { value: "2", label: "Class 2" },
-    { value: "3", label: "Class 3" },
-    { value: "4", label: "Class 4" },
-    { value: "5", label: "Class 5" },
-    { value: "6", label: "Class 6" },
-    { value: "7", label: "Class 7" },
-    { value: "8", label: "Class 8" },
-    { value: "9", label: "Class 9" },
-    { value: "10", label: "Class 10" },
-];
+interface AssignmentItem {
+    _id: string;
+    classId: string;
+    sectionId: string;
+    subjectId: string;
+    groupId?: string;
+    academicYear?: string;
+    status?: string;
+}
 
-const SECTION_OPTIONS = ["All", "A", "B", "C", "D"];
+interface AIAttendanceNoticeResult {
+    _id?: string;
+    studentName: string;
+    roll?: string;
+    className: string;
+    section: string;
+    subject: string;
+    date: string;
+    attendancePercentage: number;
+    threshold: number;
+    isEligibleForExam: boolean;
+    title: string;
+    message: string;
+    teacherName: string;
+}
 
-// Standard institutional attendance threshold target (75%)
-const ATTENDANCE_THRESHOLD_PERCENTAGE = 75;
+const normalizeClassNumber = (className: string) => {
+    if (!className) return "";
+    const match = String(className).match(/\d+/);
+    return match ? match[0] : "";
+};
 
-const SUBJECT_OPTIONS = [
-    "All",
-    "Mathematics",
-    "English",
-    "Bangla",
-    "General Science",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Higher Mathematics",
-    "ICT",
-    "Social Science",
-    "Accounting",
-    "Business Entrepreneurship"
-];
+const normalizeSectionName = (sec: string) => {
+    if (!sec) return "A";
+    return String(sec).toUpperCase().replace(/^SECTION/i, "").replace(/^SEC[-_]/i, "").trim();
+};
 
 export default function TeacherViewAttendance() {
     const { data: session } = useSession();
     const user = session?.user;
+
+    const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
+    const [loadingAssignments, setLoadingAssignments] = useState(true);
 
     const [sessions, setSessions] = useState<AttendanceSession[]>([]);
     const [loading, setLoading] = useState(true);
@@ -94,16 +101,104 @@ export default function TeacherViewAttendance() {
     const [filterMonth, setFilterMonth] = useState<string>("");
     const [selectedSession, setSelectedSession] = useState<AttendanceSession | null>(null);
 
+    const [generatingStudentId, setGeneratingStudentId] = useState<string | null>(null);
+    const [aiResultNotice, setAiResultNotice] = useState<AIAttendanceNoticeResult | null>(null);
+
     const API_BASE =
         process.env.NEXT_PUBLIC_API_URL ||
         (typeof window !== "undefined" && window.location.hostname !== "localhost" && window.location.hostname !== "127.0.0.1"
             ? "https://edu-manage-server-blush.vercel.app"
             : "http://localhost:5000");
 
+    // Fetch Teacher's active assignments
+    useEffect(() => {
+        async function fetchTeacherAssignments() {
+            if (!user?.email) {
+                setLoadingAssignments(false);
+                return;
+            }
+
+            setLoadingAssignments(true);
+            try {
+                const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
+                const data = await res.json();
+
+                if (data.success && Array.isArray(data.data)) {
+                    setAssignments(data.data);
+                } else {
+                    setAssignments([]);
+                }
+            } catch (err) {
+                console.error("Failed to load teacher assignments:", err);
+                setAssignments([]);
+            } finally {
+                setLoadingAssignments(false);
+            }
+        }
+
+        fetchTeacherAssignments();
+    }, [user?.email, API_BASE]);
+
+    // Unique assigned classes for dropdown filter
+    const assignedClassOptions = useMemo(() => {
+        const classMap = new Map<string, string>();
+        assignments.forEach((a) => {
+            const classNum = normalizeClassNumber(a.classId);
+            if (classNum) {
+                classMap.set(classNum, `Class ${classNum}`);
+            }
+        });
+        const list = Array.from(classMap.entries())
+            .sort((a, b) => parseInt(a[0], 10) - parseInt(b[0], 10))
+            .map(([value, label]) => ({ value, label }));
+        return [{ value: "All", label: "All Assigned Classes" }, ...list];
+    }, [assignments]);
+
+    // Assigned sections for dropdown filter
+    const assignedSectionOptions = useMemo(() => {
+        const sectionSet = new Set<string>();
+        const relevantAssignments =
+            filterClass === "All"
+                ? assignments
+                : assignments.filter((a) => normalizeClassNumber(a.classId) === filterClass);
+
+        relevantAssignments.forEach((a) => {
+            const sec = normalizeSectionName(a.sectionId);
+            if (sec && sec !== "ALL") {
+                sectionSet.add(sec);
+            } else if (sec === "ALL") {
+                ["A", "B", "C", "D"].forEach((s) => sectionSet.add(s));
+            }
+        });
+        const list = Array.from(sectionSet).sort();
+        return ["All", ...list];
+    }, [assignments, filterClass]);
+
+    // Assigned subjects for dropdown filter
+    const assignedSubjectOptions = useMemo(() => {
+        const subjectSet = new Set<string>();
+        const relevantAssignments =
+            filterClass === "All"
+                ? assignments
+                : assignments.filter((a) => normalizeClassNumber(a.classId) === filterClass);
+
+        relevantAssignments.forEach((a) => {
+            if (a.subjectId && a.subjectId !== "All") {
+                subjectSet.add(a.subjectId);
+            }
+        });
+        const list = Array.from(subjectSet);
+        return ["All", ...list];
+    }, [assignments, filterClass]);
+
     const fetchAttendanceData = useCallback(async () => {
+        if (!user?.email && loadingAssignments) return;
+
         setLoading(true);
         try {
             const params = new URLSearchParams();
+            params.append("userRole", "teacher");
+            if (user?.email) params.append("teacherEmail", user.email);
             if (filterClass !== "All") params.append("className", filterClass);
             if (filterSection !== "All") params.append("section", filterSection);
             if (filterSubject !== "All") params.append("subject", filterSubject);
@@ -111,7 +206,12 @@ export default function TeacherViewAttendance() {
             if (filterDate) params.append("date", filterDate);
             if (filterMonth) params.append("month", filterMonth);
 
-            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`);
+            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`, {
+                headers: {
+                    "x-user-role": "teacher",
+                    "x-user-email": user?.email || ""
+                }
+            });
             const data = await res.json();
             if (data.success && Array.isArray(data.data)) {
                 setSessions(data.data);
@@ -124,7 +224,7 @@ export default function TeacherViewAttendance() {
         } finally {
             setLoading(false);
         }
-    }, [filterClass, filterSection, filterSubject, filterSearch, filterDate, filterMonth, API_BASE]);
+    }, [filterClass, filterSection, filterSubject, filterSearch, filterDate, filterMonth, user?.email, loadingAssignments, API_BASE]);
 
     useEffect(() => {
         fetchAttendanceData();
@@ -137,6 +237,48 @@ export default function TeacherViewAttendance() {
         setFilterSearch("");
         setFilterDate("");
         setFilterMonth("");
+    };
+
+    const handleSendAiWarning = async (record: AttendanceRecordItem) => {
+        if (!selectedSession) return;
+        setGeneratingStudentId(record.studentId);
+        try {
+            const payload = {
+                studentId: record.studentId,
+                studentName: record.studentName,
+                studentEmail: record.studentEmail || "",
+                roll: record.roll,
+                className: selectedSession.className,
+                section: selectedSession.section,
+                subject: selectedSession.subject,
+                date: selectedSession.date,
+                teacherName: user?.name || selectedSession.teacherName || "Teacher",
+                teacherEmail: user?.email || selectedSession.teacherEmail || ""
+            };
+
+            const res = await fetch(`${API_BASE}/api/attendance/ai-warning`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-user-role": "teacher",
+                    "x-user-email": user?.email || ""
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await res.json();
+            if (data.success && data.data) {
+                setAiResultNotice(data.data);
+            } else {
+                alert(data.message || "Failed to generate AI attendance notice.");
+            }
+        } catch (err: unknown) {
+            const errorMsg = err instanceof Error ? err.message : "Failed to connect to backend server.";
+            console.error("AI Warning Error:", err);
+            alert(errorMsg);
+        } finally {
+            setGeneratingStudentId(null);
+        }
     };
 
     // Calculate aggregated metrics
@@ -162,19 +304,29 @@ export default function TeacherViewAttendance() {
                                 <UserCheck className="h-5 w-5" />
                             </span>
                             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                                Class Attendance Records
+                                Assigned Class Attendance Records
                             </h1>
                         </div>
                         <p className="mt-1 text-sm text-slate-500">
-                            View and inspect recorded attendance sessions dynamically across Class 1 to 10.
+                            View and inspect recorded attendance sessions for your assigned classes and subjects.
                         </p>
                     </div>
 
                     <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs">
                         <Users className="h-4 w-4 text-[#03204c]" />
-                        <span>Teacher Portal • Class 1 to 10</span>
+                        <span>Teacher Portal • Assigned Classes Only</span>
                     </div>
                 </div>
+
+                {/* No Assignment Notice */}
+                {!loadingAssignments && assignments.length === 0 && (
+                    <div className="rounded-2xl border border-amber-200 bg-amber-50/90 p-6 text-center shadow-xs">
+                        <h3 className="text-base font-bold text-amber-900">No Assigned Classes or Subjects</h3>
+                        <p className="mt-1 text-sm text-amber-700 max-w-lg mx-auto">
+                            You currently have no class or subject assignments. Attendance records will be visible here once an administrator assigns classes to you.
+                        </p>
+                    </div>
+                )}
 
                 {/* KPI Metrics */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -217,7 +369,7 @@ export default function TeacherViewAttendance() {
                 <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                            <Filter className="h-3.5 w-3.5 text-[#03204c]" /> Filter Records (Class 1–10)
+                            <Filter className="h-3.5 w-3.5 text-[#03204c]" /> Filter Assigned Records
                         </h2>
                         <button
                             type="button"
@@ -229,15 +381,20 @@ export default function TeacherViewAttendance() {
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
-                        {/* Class filter: 1 to 10 */}
+                        {/* Assigned Class Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Class</label>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Class</label>
                             <select
                                 value={filterClass}
-                                onChange={(e) => setFilterClass(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c]"
+                                onChange={(e) => {
+                                    setFilterClass(e.target.value);
+                                    setFilterSection("All");
+                                    setFilterSubject("All");
+                                }}
+                                disabled={loadingAssignments || assignments.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
                             >
-                                {CLASS_OPTIONS.map((c) => (
+                                {assignedClassOptions.map((c) => (
                                     <option key={c.value} value={c.value}>
                                         {c.label}
                                     </option>
@@ -245,15 +402,16 @@ export default function TeacherViewAttendance() {
                             </select>
                         </div>
 
-                        {/* Section filter */}
+                        {/* Assigned Section Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Section</label>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Section</label>
                             <select
                                 value={filterSection}
                                 onChange={(e) => setFilterSection(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c]"
+                                disabled={loadingAssignments || assignments.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
                             >
-                                {SECTION_OPTIONS.map((s) => (
+                                {assignedSectionOptions.map((s) => (
                                     <option key={s} value={s}>
                                         {s === "All" ? "All Sections" : `Section ${s}`}
                                     </option>
@@ -261,15 +419,16 @@ export default function TeacherViewAttendance() {
                             </select>
                         </div>
 
-                        {/* Subject filter */}
+                        {/* Assigned Subject Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Subject</label>
+                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Subject</label>
                             <select
                                 value={filterSubject}
                                 onChange={(e) => setFilterSubject(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c]"
+                                disabled={loadingAssignments || assignments.length === 0}
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
                             >
-                                {SUBJECT_OPTIONS.map((sub) => (
+                                {assignedSubjectOptions.map((sub) => (
                                     <option key={sub} value={sub}>
                                         {sub === "All" ? "All Subjects" : sub}
                                     </option>
@@ -419,22 +578,22 @@ export default function TeacherViewAttendance() {
                     </div>
                 </div>
 
-                {/* Student Breakdown Modal */}
+                {/* Student Breakdown Modal with AI 75% Warning */}
                 {selectedSession && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-xs p-4">
-                        <div className="w-full max-w-2xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
-                            <div className="flex items-center justify-between border-b border-slate-100 p-5 bg-slate-50/50">
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
+                        <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
+                            <div className="flex items-center justify-between border-b border-slate-100 p-5 bg-slate-50/70">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900">
                                         Attendance Detail • Class {selectedSession.className}-{selectedSession.section}
                                     </h3>
                                     <p className="text-xs text-slate-500">
-                                        Subject: {selectedSession.subject} | Date: {selectedSession.date} | Recorded By: {selectedSession.teacherName}
+                                        Subject: <span className="font-semibold text-slate-700">{selectedSession.subject}</span> | Date: <span className="font-semibold text-slate-700">{selectedSession.date}</span> | Recorded By: <span className="font-semibold text-slate-700">{selectedSession.teacherName}</span>
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="rounded-lg p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 font-bold"
+                                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 font-bold transition"
                                 >
                                     ✕
                                 </button>
@@ -447,13 +606,14 @@ export default function TeacherViewAttendance() {
                                             <th className="py-2.5 px-3">Roll</th>
                                             <th className="py-2.5 px-3">Student Name</th>
                                             <th className="py-2.5 px-3 text-center">Status</th>
+                                            <th className="py-2.5 px-3 text-center">AI 75% Advisory Action</th>
                                             <th className="py-2.5 px-3">Remarks</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-slate-100">
                                         {selectedSession.records && selectedSession.records.length > 0 ? (
                                             selectedSession.records.map((r, idx) => (
-                                                <tr key={idx} className="hover:bg-slate-50/50">
+                                                <tr key={idx} className="hover:bg-slate-50/50 transition">
                                                     <td className="py-2.5 px-3 font-bold text-slate-700">{r.roll}</td>
                                                     <td className="py-2.5 px-3 font-semibold text-slate-900">
                                                         <div>{r.studentName}</div>
@@ -476,12 +636,29 @@ export default function TeacherViewAttendance() {
                                                             {r.status}
                                                         </span>
                                                     </td>
+                                                    <td className="py-2.5 px-3 text-center">
+                                                        {r.status === "ABSENT" ? (
+                                                            <button
+                                                                type="button"
+                                                                disabled={generatingStudentId === r.studentId}
+                                                                onClick={() => handleSendAiWarning(r)}
+                                                                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-rose-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-rose-700 transition disabled:opacity-50"
+                                                            >
+                                                                <Sparkles className="h-3.5 w-3.5" />
+                                                                {generatingStudentId === r.studentId
+                                                                    ? "Evaluating & Sending..."
+                                                                    : "AI 75% Notice"}
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-xs text-slate-400">—</span>
+                                                        )}
+                                                    </td>
                                                     <td className="py-2.5 px-3 text-xs text-slate-500">{r.remarks || "—"}</td>
                                                 </tr>
                                             ))
                                         ) : (
                                             <tr>
-                                                <td colSpan={4} className="py-6 text-center text-slate-400">
+                                                <td colSpan={5} className="py-6 text-center text-slate-400">
                                                     No individual student records stored in this session.
                                                 </td>
                                             </tr>
@@ -496,6 +673,91 @@ export default function TeacherViewAttendance() {
                                     className="rounded-xl bg-[#03204c] px-5 py-2 text-xs font-bold text-white hover:bg-[#02183a] transition"
                                 >
                                     Close
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* AI Warning Result Modal */}
+                {aiResultNotice && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
+                        <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
+                            {/* Modal Header */}
+                            <div className={`p-5 flex items-start justify-between border-b ${
+                                !aiResultNotice.isEligibleForExam
+                                    ? "bg-rose-50/80 border-rose-100 text-rose-950"
+                                    : "bg-emerald-50/80 border-emerald-100 text-emerald-950"
+                            }`}>
+                                <div className="flex items-center gap-3">
+                                    <span className={`p-2 rounded-xl ${
+                                        !aiResultNotice.isEligibleForExam ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
+                                    }`}>
+                                        <Sparkles className="h-5 w-5" />
+                                    </span>
+                                    <div>
+                                        <h3 className="text-base font-bold">
+                                            {aiResultNotice.title || "AI Attendance Advisory Notice"}
+                                        </h3>
+                                        <p className="text-xs opacity-80">
+                                            Recipient: {aiResultNotice.studentName} (Roll: {aiResultNotice.roll || "N/A"})
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    onClick={() => setAiResultNotice(null)}
+                                    className="rounded-lg p-1 text-slate-400 hover:bg-white/60 hover:text-slate-700 font-bold"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+
+                            {/* Eligibility Banner */}
+                            <div className="p-5 space-y-4">
+                                <div className={`flex items-center justify-between p-3.5 rounded-xl border text-xs font-bold ${
+                                    !aiResultNotice.isEligibleForExam
+                                        ? "bg-rose-50 text-rose-800 border-rose-200"
+                                        : "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                }`}>
+                                    <div className="flex items-center gap-2">
+                                        {!aiResultNotice.isEligibleForExam ? (
+                                            <ShieldAlert className="h-4 w-4 text-rose-600 shrink-0" />
+                                        ) : (
+                                            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                                        )}
+                                        <span>
+                                            Attendance Rate: <strong>{aiResultNotice.attendancePercentage}%</strong> (Min Threshold: 75%)
+                                        </span>
+                                    </div>
+                                    <span className={`px-2.5 py-1 rounded-full text-[11px] uppercase ${
+                                        !aiResultNotice.isEligibleForExam
+                                            ? "bg-rose-600 text-white"
+                                            : "bg-emerald-600 text-white"
+                                    }`}>
+                                        {!aiResultNotice.isEligibleForExam ? "❌ Ineligible for Exam" : "✅ Exam Eligible"}
+                                    </span>
+                                </div>
+
+                                {/* AI Message Body */}
+                                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-700 leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-wrap font-sans shadow-2xs">
+                                    {aiResultNotice.message}
+                                </div>
+
+                                <div className="flex items-center gap-2 rounded-xl bg-blue-50 p-3 text-xs text-blue-800 border border-blue-200">
+                                    <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                                    <span>
+                                        This official advisory has been generated with Gemini AI and dispatched directly to the student&apos;s attendance dashboard.
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Modal Footer */}
+                            <div className="flex justify-end border-t border-slate-100 p-4 bg-slate-50/50">
+                                <button
+                                    onClick={() => setAiResultNotice(null)}
+                                    className="rounded-xl bg-[#03204c] px-5 py-2 text-xs font-bold text-white hover:bg-[#02183a] transition shadow-xs"
+                                >
+                                    Dismiss
                                 </button>
                             </div>
                         </div>
