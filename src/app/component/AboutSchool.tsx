@@ -71,8 +71,13 @@
 //   );
 // }
 
+
+
+"use client";
+
 import React from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { Users, Building2, HeartHandshake, GraduationCap, Sparkles } from "lucide-react";
 
 export function AboutSchool() {
@@ -85,21 +90,21 @@ export function AboutSchool() {
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF9EE] via-[#EBFBFA]/50 to-white py-16 md:py-24">
-      {/* Decorative Pastel Background Glows */}
       <div className="absolute top-1/2 left-0 h-80 w-80 -translate-y-1/2 rounded-full bg-emerald-200/30 blur-3xl pointer-events-none" />
       <div className="absolute bottom-10 right-10 h-72 w-72 rounded-full bg-sky-200/30 blur-3xl pointer-events-none" />
-
-      {/* Subtle Diamond Decorative Accent */}
-      <div className="absolute top-12 right-24 h-2.5 w-2.5 rotate-45 bg-emerald-400 opacity-60" />
-
+      
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
         <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
           
-          {/* Left Column: Glassmorphic Image Frame */}
-          <div className="relative flex justify-center">
+          {/* Scroll-triggered image reveal */}
+          <motion.div 
+            initial={{ opacity: 0, x: -40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7 }}
+            className="relative flex justify-center"
+          >
             <div className="relative w-full max-w-[550px]">
-              
-              {/* Outer Border Glow Frame matching Hero Section */}
               <div className="relative rounded-3xl border-2 border-emerald-400/30 bg-white/40 p-3.5 backdrop-blur-md shadow-xl">
                 <div className="relative overflow-hidden rounded-2xl">
                   <Image
@@ -111,34 +116,37 @@ export function AboutSchool() {
                   />
                 </div>
 
-                {/* Corner Decorative Badge */}
-                <div className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-emerald-500 shadow-md border border-emerald-100">
+                <motion.div 
+                  animate={{ rotate: [0, 15, -15, 0] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute -top-3 -right-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-white text-emerald-500 shadow-md border border-emerald-100"
+                >
                   <Sparkles className="h-5 w-5 fill-emerald-400" />
-                </div>
+                </motion.div>
               </div>
-
             </div>
-          </div>
+          </motion.div>
 
-          {/* Right Column: About Content */}
-          <div className="flex flex-col justify-center">
-            
-            {/* Section Tag */}
+          {/* Right Column Content */}
+          <motion.div 
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.7 }}
+            className="flex flex-col justify-center"
+          >
             <div className="inline-flex items-center gap-2 w-max rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600">
               <Sparkles className="h-3.5 w-3.5 fill-emerald-500 text-emerald-500" />
               <span>About School</span>
             </div>
 
-            {/* Heading */}
             <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl lg:text-5xl leading-[1.18]">
               Shaping Future Leaders <br className="hidden sm:inline" />
               With <span className="text-emerald-500">Quality Education</span>
             </h2>
 
-            {/* Decorative Underline Accent */}
             <div className="mt-3 h-1.5 w-16 rounded-full bg-emerald-500" />
 
-            {/* Description */}
             <p className="mt-6 text-base leading-relaxed text-slate-600 sm:text-lg">
               Our institution is dedicated to providing a safe, inclusive, and
               inspiring environment where students can grow academically,
@@ -146,14 +154,19 @@ export function AboutSchool() {
               foundation for lifelong learning and responsible citizenship.
             </p>
 
-            {/* Highlights Grid */}
+            {/* Staggered Features List */}
             <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4">
               {features.map((feature, index) => {
                 const Icon = feature.icon;
                 return (
-                  <div
+                  <motion.div
                     key={index}
-                    className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 backdrop-blur-md shadow-xs transition-all hover:bg-white hover:shadow-md hover:border-emerald-200"
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.5 }}
+                    whileHover={{ y: -4 }}
+                    className="flex items-center gap-3 rounded-2xl border border-white/80 bg-white/70 p-3 backdrop-blur-md shadow-xs transition-colors hover:bg-white hover:border-emerald-200 hover:shadow-md"
                   >
                     <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
                       <Icon className="h-5 w-5 stroke-[2.2]" />
@@ -166,19 +179,17 @@ export function AboutSchool() {
                         {feature.subtitle}
                       </p>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
 
-          </div>
+          </motion.div>
 
         </div>
       </div>
     </section>
   );
 }
-
-
 
 
