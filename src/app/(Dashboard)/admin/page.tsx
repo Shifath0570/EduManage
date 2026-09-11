@@ -101,7 +101,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalTeachers: 0,
-    totalClasses: 32,
+    totalClasses: 114,
     totalSubjects: 25,
     studentGrowth: "12% this month",
     teacherGrowth: "5% this month",

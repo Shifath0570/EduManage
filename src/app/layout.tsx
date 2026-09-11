@@ -4,7 +4,6 @@ import "./globals.css";
 import Footer from "./component/Footer";
 import Navbar from "./component/Navbar";
 import { Toaster } from "react-hot-toast";
-import TopBar from "./component/TopBar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,7 +27,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <TopBar></TopBar>
         <Navbar></Navbar>
         <main className="flex-1">
           {children}
