@@ -11,7 +11,10 @@ import {
     BookOpen,
     Sparkles,
     Filter,
-    RotateCcw
+    RotateCcw,
+    AlertTriangle,
+    Bell,
+    ShieldAlert
 } from "lucide-react";
 
 interface SubjectStat {
@@ -35,6 +38,24 @@ interface AttendanceHistoryItem {
     remarks?: string;
 }
 
+interface AttendanceNoticeItem {
+    _id: string;
+    studentName: string;
+    roll?: string;
+    className: string;
+    section: string;
+    subject: string;
+    date: string;
+    teacherName: string;
+    attendancePercentage: number;
+    threshold: number;
+    isEligibleForExam: boolean;
+    status: "EXAM_INELIGIBLE_WARNING" | "ATTENDANCE_WARNING" | "REGULARITY_ADVISORY";
+    title: string;
+    message: string;
+    createdAt: string;
+}
+
 export default function StudentViewAttendance() {
     const { data: session } = useSession();
     const user = session?.user;
@@ -50,6 +71,7 @@ export default function StudentViewAttendance() {
 
     const [subjectBreakdown, setSubjectBreakdown] = useState<SubjectStat[]>([]);
     const [history, setHistory] = useState<AttendanceHistoryItem[]>([]);
+    const [notices, setNotices] = useState<AttendanceNoticeItem[]>([]);
     const [loading, setLoading] = useState(true);
 
     const [selectedSubjectFilter, setSelectedSubjectFilter] = useState<string>("All");
@@ -70,6 +92,8 @@ export default function StudentViewAttendance() {
         setLoading(true);
         try {
             const identifier = user.email || user.name || "";
+            
+            // 1. Fetch attendance summary & history
             const res = await fetch(`${API_BASE}/api/attendance/student/${encodeURIComponent(identifier)}`);
             const data = await res.json();
 
@@ -96,8 +120,17 @@ export default function StudentViewAttendance() {
                 setSubjectBreakdown([]);
                 setHistory([]);
             }
+
+            // 2. Fetch AI attendance advisory notices
+            const noticesRes = await fetch(`${API_BASE}/api/attendance/notices/student/${encodeURIComponent(identifier)}`);
+            const noticesData = await noticesRes.json();
+            if (noticesData.success && Array.isArray(noticesData.data)) {
+                setNotices(noticesData.data);
+            } else {
+                setNotices([]);
+            }
         } catch (err) {
-            console.error("Error fetching student attendance:", err);
+            console.error("Error fetching student attendance data:", err);
             setSummary({
                 totalClasses: 0,
                 present: 0,
@@ -108,6 +141,7 @@ export default function StudentViewAttendance() {
             });
             setSubjectBreakdown([]);
             setHistory([]);
+            setNotices([]);
         } finally {
             setLoading(false);
         }
@@ -227,6 +261,97 @@ export default function StudentViewAttendance() {
                             style={{ width: `${Math.min(summary.attendancePercentage, 100)}%` }}
                         />
                     </div>
+                </div>
+
+                {/* AI Attendance Advisories & Notices Section */}
+                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+                    <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div className="flex items-center gap-2">
+                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                                <Bell className="h-4 w-4" />
+                            </span>
+                            <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+                                Official Attendance Notices &amp; AI Advisories
+                            </h2>
+                        </div>
+                        <span className="text-xs font-semibold text-slate-400">
+                            {notices.length} {notices.length === 1 ? "Notice" : "Notices"} Received
+                        </span>
+                    </div>
+
+                    {notices.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-xs text-slate-500">
+                            <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-500 mb-1.5" />
+                            <p className="font-semibold text-slate-700">No Attendance Warnings</p>
+                            <p className="mt-0.5 text-slate-400">You do not have any active attendance warnings or exam ineligibility notices. Keep attending classes regularly!</p>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {notices.map((n) => (
+                                <div
+                                    key={n._id}
+                                    className={`rounded-2xl border p-5 shadow-xs transition ${
+                                        !n.isEligibleForExam
+                                            ? "border-rose-300 bg-gradient-to-br from-rose-50/90 via-white to-amber-50/50 text-rose-950"
+                                            : "border-blue-200 bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 text-blue-950"
+                                    }`}
+                                >
+                                    {/* Notice Header */}
+                                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200/60 pb-3">
+                                        <div className="flex items-center gap-2.5">
+                                            {!n.isEligibleForExam ? (
+                                                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-600 text-white shadow-xs">
+                                                    <ShieldAlert className="h-4 w-4" />
+                                                </span>
+                                            ) : (
+                                                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xs">
+                                                    <Sparkles className="h-4 w-4" />
+                                                </span>
+                                            )}
+                                            <div>
+                                                <h3 className="text-sm font-bold text-slate-900">{n.title}</h3>
+                                                <div className="text-[11px] text-slate-500 flex flex-wrap gap-x-3 gap-y-0.5 mt-0.5">
+                                                    <span>Subject: <strong className="text-slate-700">{n.subject}</strong></span>
+                                                    <span>Class: <strong className="text-slate-700">{n.className}-{n.section}</strong></span>
+                                                    <span>Date Marked: <strong className="text-slate-700">{n.date}</strong></span>
+                                                    <span>Teacher: <strong className="text-slate-700">{n.teacherName}</strong></span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Status Badge */}
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs font-extrabold uppercase shadow-xs ${
+                                                    !n.isEligibleForExam
+                                                        ? "bg-rose-600 text-white"
+                                                        : "bg-emerald-600 text-white"
+                                                }`}
+                                            >
+                                                {!n.isEligibleForExam ? "❌ Exam Ineligible (< 75%)" : "✅ Exam Eligible (≥ 75%)"}
+                                            </span>
+                                            <span className="rounded-full bg-white px-2.5 py-1 text-xs font-bold text-slate-700 border border-slate-200">
+                                                Rate: {n.attendancePercentage}%
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Notice Message Body */}
+                                    <div className="mt-3.5 rounded-xl border border-slate-200/80 bg-white/90 p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-wrap font-sans shadow-2xs">
+                                        {n.message}
+                                    </div>
+
+                                    {/* Action Footnote */}
+                                    {!n.isEligibleForExam && (
+                                        <div className="mt-3 flex items-center gap-2 rounded-xl bg-rose-100/70 px-3.5 py-2 text-[11px] font-bold text-rose-800 border border-rose-200/80">
+                                            <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                                            <span>Important: You must attend all remaining classes regularly and contact your teacher immediately to improve your standing.</span>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
                 {/* Subject-Wise Breakdown */}
