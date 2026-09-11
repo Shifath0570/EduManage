@@ -52,6 +52,7 @@ const adminNavItems: NavItem[] = [
   { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <UserCheck2 className="w-5 h-5" /> },
   { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Users className="w-5 h-5" /> },
   { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Users className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },
   { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-5 h-5" /> },
