@@ -123,6 +123,7 @@ export default function AdminViewAttendance() {
         setLoading(true);
         try {
             const params = new URLSearchParams();
+            params.append("userRole", "admin");
             if (filterClass !== "All") params.append("className", filterClass);
             if (filterSection !== "All") params.append("section", filterSection);
             if (filterSubject !== "All") params.append("subject", filterSubject);
@@ -131,7 +132,11 @@ export default function AdminViewAttendance() {
             if (filterDate) params.append("date", filterDate);
             if (filterMonth) params.append("month", filterMonth);
 
-            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`);
+            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`, {
+                headers: {
+                    "x-user-role": "admin"
+                }
+            });
             const data = await res.json();
             if (data.success && Array.isArray(data.data)) {
                 setSessions(data.data);

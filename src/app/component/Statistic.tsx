@@ -1,31 +1,38 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
+import { BookOpen, Users, Award, Layers } from "lucide-react";
 
-const Statistics = () => {
-    const [articles, setArticles] = useState(0);
-    const [writers, setWriters] = useState(0);
-    const [readers, setReaders] = useState(0);
-    const [categories, setCategories] = useState(0);
+interface StatItemProps {
+    targetValue: number;
+    suffix?: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    delay: number;
+    inView: boolean;
+}
+
+function StatCard({
+    targetValue,
+    suffix = "",
+    label,
+    icon: Icon,
+    delay,
+    inView,
+}: StatItemProps) {
+    const [count, setCount] = useState(0);
 
     useEffect(() => {
+        if (!inView) return;
+
         const duration = 1800;
         const startTime = performance.now();
 
         const animate = (currentTime: number) => {
-            const progress = Math.min(
-                (currentTime - startTime) / duration,
-                1
-            );
-
-            // Smooth ease-out
-            const easedProgress =
-                1 - Math.pow(1 - progress, 3);
-
-            setArticles(Math.floor(50 * easedProgress));
-            setWriters(Math.floor(10 * easedProgress));
-            setReaders(Math.floor(15 * easedProgress));
-            setCategories(Math.floor(8 * easedProgress));
+            const progress = Math.min((currentTime - startTime) / duration, 1);
+            const easedProgress = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.floor(targetValue * easedProgress));
 
             if (progress < 1) {
                 requestAnimationFrame(animate);
@@ -33,67 +40,86 @@ const Statistics = () => {
         };
 
         requestAnimationFrame(animate);
-
-        return () => {
-            // Animation cleanup handled by browser
-        };
-    }, []);
+    }, [inView, targetValue]);
 
     return (
-        <section className="px-5 py-10 md:px-8">
-            <div className="mx-auto grid max-w-6xl grid-cols-2 overflow-hidden rounded-2xl bg-white shadow-sm md:grid-cols-4">
+        <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay }}
+            whileHover={{ y: -6 }}
+            className="group relative flex flex-col items-center justify-center rounded-3xl border border-white/80 bg-white/80 p-6 text-center backdrop-blur-md shadow-lg shadow-slate-200/50 transition-all duration-300 hover:border-emerald-300/60 hover:bg-white hover:shadow-2xl hover:shadow-emerald-900/10"
+        >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-emerald-100/80 bg-emerald-50 text-emerald-600 shadow-xs transition-all duration-300 group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white">
+                <Icon className="h-7 w-7" />
+            </div>
 
-                {/* Published Articles */}
-                <div className="border-b border-slate-100 p-6 text-center md:border-b-0 md:border-r">
-                    <h3 className="text-3xl font-bold text-blue-600">
-                        {articles}+
-                    </h3>
+            <div className="mt-4 flex items-baseline justify-center gap-0.5">
+                <span className="text-3xl font-extrabold tracking-tight text-slate-900 transition-colors group-hover:text-emerald-600 sm:text-4xl">
+                    {count}
+                </span>
+                <span className="text-2xl font-extrabold text-emerald-500 sm:text-3xl">
+                    {suffix}
+                </span>
+            </div>
 
-                    <p className="mt-2 text-sm text-slate-500">
-                        Published Articles
-                    </p>
+            <p className="mt-1 text-xs font-semibold text-slate-600 sm:text-sm">
+                {label}
+            </p>
+        </motion.div>
+    );
+}
+
+const Statistics = () => {
+    const containerRef = useRef(null);
+    const isInView = useInView(containerRef, { once: true, margin: "-60px" });
+
+    const stats = [
+        {
+            label: "Published Articles",
+            targetValue: 50,
+            suffix: "+",
+            icon: BookOpen,
+        },
+        {
+            label: "Expert Writers",
+            targetValue: 12,
+            suffix: "+",
+            icon: Award,
+        },
+        {
+            label: "Monthly Readers",
+            targetValue: 25,
+            suffix: "K+",
+            icon: Users,
+        },
+        {
+            label: "Topics & Categories",
+            targetValue: 8,
+            suffix: "+",
+            icon: Layers,
+        },
+    ];
+
+    return (
+        <section ref={containerRef} className="relative z-10 -mt-8 px-5 md:px-8">
+            <div className="mx-auto max-w-7xl">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
+                    {stats.map((item, idx) => (
+                        <StatCard
+                            key={item.label}
+                            label={item.label}
+                            targetValue={item.targetValue}
+                            suffix={item.suffix}
+                            icon={item.icon}
+                            delay={idx * 0.1}
+                            inView={isInView}
+                        />
+                    ))}
                 </div>
-
-                {/* Expert Writers */}
-                <div className="border-b border-slate-100 p-6 text-center md:border-b-0 md:border-r">
-                    <h3 className="text-3xl font-bold text-blue-600">
-                        {writers}+
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                        Expert Writers
-                    </p>
-                </div>
-
-                {/* Monthly Readers */}
-                <div className="border-r-0 border-slate-100 p-6 text-center md:border-r">
-                    <h3 className="text-3xl font-bold text-blue-600">
-                        {readers}K+
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                        Monthly Readers
-                    </p>
-                </div>
-
-                {/* Categories */}
-                <div className="p-6 text-center">
-                    <h3 className="text-3xl font-bold text-blue-600">
-                        {categories}+
-                    </h3>
-
-                    <p className="mt-2 text-sm text-slate-500">
-                        Categories
-                    </p>
-                </div>
-
             </div>
         </section>
     );
 };
 
 export default Statistics;
-
-
-
-
