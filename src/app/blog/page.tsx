@@ -13,8 +13,7 @@ import {
 } from "lucide-react";
 
 import { blogs } from "./blogData";
-
-import Statistics from "../component/Statictic";
+import Statistics from "../component/Statistic";
 
 
 const BlogPage = () => {
@@ -97,7 +96,7 @@ const BlogPage = () => {
                         </p>
 
                         <h2 className="mt-2 text-3xl font-bold text-slate-900">
-                            Editor's Pick
+                            Editors Pick
                         </h2>
                     </div>
 

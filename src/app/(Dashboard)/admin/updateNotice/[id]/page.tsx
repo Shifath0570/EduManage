@@ -1,10 +1,8 @@
 "use client";
 import { useState, useEffect, FormEvent, ChangeEvent } from "react";
 import { useParams, useRouter } from "next/navigation";
-
-// ============================================
-// INTERFACES
-// ============================================
+import { ArrowLeft, Home, FileText, AlertCircle } from 'lucide-react';
+import toast from "react-hot-toast";
 
 interface IssuedBy {
   name: string;
@@ -55,14 +53,10 @@ interface ApiError {
   error?: string;
 }
 
-// ============================================
-// COMPONENT
-// ============================================
-
-const Page = () => {
+const UpdateNotice = () => {
   const params = useParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = params?.id as string;
 
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(true);
@@ -120,7 +114,9 @@ const Page = () => {
   // Fetch notice data when id is available
   useEffect(() => {
     const fetchNotice = async () => {
+      // Check if id exists
       if (!id) {
+        console.error("No notice ID found in params");
         setMessage({
           type: 'error',
           text: "Notice ID is required",
@@ -138,7 +134,8 @@ const Page = () => {
           throw new Error("API URL is not configured");
         }
 
-        const response = await fetch(`${apiUrl}api/notices/${id}`);
+        console.log("Fetching notice with ID:", id);
+        const response = await fetch(`${apiUrl}/api/notices/${id}`);
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -152,7 +149,6 @@ const Page = () => {
         if (result.success && result.data) {
           const data = result.data;
 
-          // ✅ SET FORM VALUES FROM FETCHED DATA
           setFormData({
             title: data.title || "",
             issuedBy: {
@@ -195,7 +191,7 @@ const Page = () => {
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value, type } = e.target;
-    
+
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData((prev) => ({
@@ -236,7 +232,7 @@ const Page = () => {
     if (!formData.issuedBy.contactNumber.trim()) errors.push("Contact number is required");
     if (!formData.effectiveDate) errors.push("Effective date is required");
     if (!formData.expiryDate) errors.push("Expiry date is required");
-    
+
     if (formData.effectiveDate && formData.expiryDate) {
       if (new Date(formData.expiryDate) <= new Date(formData.effectiveDate)) {
         errors.push("Expiry date must be after effective date");
@@ -291,8 +287,7 @@ const Page = () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-      // ✅ PUT REQUEST TO UPDATE NOTICE
-      const response = await fetch(`${apiUrl}api/notices/${id}`, {
+      const response = await fetch(`${apiUrl}/api/notices/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -309,14 +304,22 @@ const Page = () => {
           type: 'success',
           text: "Notice updated successfully!",
         });
-        
+
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Redirect after 2 seconds
+
+        toast.success("Notice updated successfully!", {
+          duration: 3000,
+          position: "top-right",
+        });
+        
         setTimeout(() => {
           router.push('/notice');
         }, 2000);
-        
+
+
+
+
       } else {
         let errorMessage = `Failed to update notice (Status: ${response.status})`;
         try {
@@ -330,18 +333,18 @@ const Page = () => {
             if (response.statusText) errorMessage = response.statusText;
           }
         }
-        
+
         setMessage({ type: 'error', text: errorMessage });
       }
     } catch (error: any) {
       console.error("Error updating notice:", error);
-      
+
       if (error.name === 'AbortError') {
         setMessage({ type: 'error', text: "Request timed out. Please try again." });
       } else {
-        setMessage({ 
-          type: 'error', 
-          text: error.message || "An unexpected error occurred while updating the notice" 
+        setMessage({
+          type: 'error',
+          text: error.message || "An unexpected error occurred while updating the notice"
         });
       }
     } finally {
@@ -355,14 +358,14 @@ const Page = () => {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL;
       if (!apiUrl) return;
 
-      const response = await fetch(`${apiUrl}api/notices/${id}`);
+      const response = await fetch(`${apiUrl}/api/notices/${id}`);
 
       if (response.ok) {
         const result: ApiResponse = await response.json();
-        
+
         if (result.success && result.data) {
           const data = result.data;
-          
+
           setFormData({
             title: data.title || "",
             issuedBy: {
@@ -390,6 +393,16 @@ const Page = () => {
     }
   };
 
+  // Handle go back
+  const handleGoBack = () => {
+    router.back();
+  };
+
+  // Handle go home
+  const handleGoHome = () => {
+    router.push('/');
+  };
+
   // Loading state
   if (fetchLoading) {
     return (
@@ -413,11 +426,10 @@ const Page = () => {
       </div>
 
       {message && (
-        <div className={`p-4 rounded-lg mb-6 ${
-          message.type === 'success' 
-            ? "bg-green-50 border border-green-200 text-green-800"
-            : "bg-red-50 border border-red-200 text-red-800"
-        }`}>
+        <div className={`p-4 rounded-lg mb-6 ${message.type === 'success'
+          ? "bg-green-50 border border-green-200 text-green-800"
+          : "bg-red-50 border border-red-200 text-red-800"
+          }`}>
           {message.text}
         </div>
       )}
@@ -536,7 +548,7 @@ const Page = () => {
             <div className="bg-white p-3 rounded-lg border border-gray-200">
               <div className="flex items-center justify-between mb-1">
                 <label htmlFor="content.summary" className="block text-sm font-medium text-gray-700">
-                  Summary *
+                  Summary
                 </label>
                 <span className="text-xs text-gray-400">{formData.content.summary.length || 0}/500 characters</span>
               </div>
@@ -639,12 +651,11 @@ const Page = () => {
               <label htmlFor="status" className="block text-sm font-medium text-gray-700">
                 Status
               </label>
-              <span className={`text-xs px-2 py-0.5 rounded-full ${
-                formData.status === 'published' ? 'bg-green-100 text-green-800' :
+              <span className={`text-xs px-2 py-0.5 rounded-full ${formData.status === 'published' ? 'bg-green-100 text-green-800' :
                 formData.status === 'draft' ? 'bg-gray-100 text-gray-800' :
-                formData.status === 'archived' ? 'bg-yellow-100 text-yellow-800' :
-                'bg-red-100 text-red-800'
-              }`}>
+                  formData.status === 'archived' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                }`}>
                 {formData.status || "Not set"}
               </span>
             </div>
@@ -675,9 +686,8 @@ const Page = () => {
                 Active Notice
               </label>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full ${
-              formData.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`}>
+            <span className={`text-xs px-2 py-0.5 rounded-full ${formData.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+              }`}>
               {formData.isActive ? 'Active' : 'Inactive'}
             </span>
           </div>
@@ -709,7 +719,7 @@ const Page = () => {
           </button>
           <button
             type="button"
-            onClick={() => router.back()}
+            onClick={handleGoBack}
             className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Cancel
@@ -723,7 +733,7 @@ const Page = () => {
               <span className="font-medium">API URL:</span> {process.env.NEXT_PUBLIC_API_URL || 'Not configured'}
             </p>
             <p className="text-xs text-gray-400 break-all mt-1">
-              <span className="font-medium">Notice ID:</span> {id}
+              <span className="font-medium">Notice ID:</span> {id || 'No ID found'}
             </p>
           </div>
         )}
@@ -732,4 +742,4 @@ const Page = () => {
   );
 };
 
-export default Page;
+export default UpdateNotice;

@@ -1,3 +1,4 @@
+
 "use client";
 
 import React from "react";
@@ -5,22 +6,25 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarImage, AvatarFallback, Chip, Button, Spinner } from "@heroui/react";
 import {
-  Home,
+  LayoutDashboard,
+  Users,
+  UserCheck,
+  ClipboardList,
+  FileCheck,
+  FileSpreadsheet,
+  GraduationCap,
+  Award,
+  Megaphone,
+  UserPlus,
+  UserCheck2,
+  ListOrdered,
+  CreditCard,
   BookOpen,
-  Plus,
-  Bookmark,
-  Compass,
-  Clock,
-  User,
   Shield,
-  SquarePlus,
-  PencilLine,
-  Eye,
   LogOut,
   X,
 } from "lucide-react";
 import { signOut, useSession } from "../lib/auth-client";
-import { LuNotebook } from "react-icons/lu";
 
 export interface NavItem {
   id: string;
@@ -32,37 +36,35 @@ export interface NavItem {
 export type UserRole = "teacher" | "admin" | "student";
 
 const teacherNavItems: NavItem[] = [
-  { id: "overview", href: "/teacher", label: "Overview", icon: <Home className="w-5 h-5" /> },
-  { id: "manageStudents", href: "/teacher/manageStudents", label: "Manage Students", icon: <Clock className="w-5 h-5" /> },
-  { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
-  { id: "createAssingment", href: "/teacher/createAssingment", label: "Create Assingment", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },  
-  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <PencilLine className="w-5 h-5" /> }, 
-  { id: "viewResuls", href: "/teacher/viewResuls", label: "View Resuls", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/teacher/viewNotice", label: "View Notice", icon: <LuNotebook className="w-5 h-5" /> },
+  { id: "overview", href: "/teacher", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <UserCheck className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
+  { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },
+  { id: "allExams", href: "/teacher/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
+  { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/teacher/viewResuls", label: "View Results", icon: <Award className="w-5 h-5" /> },
+  { id: "teacherSalary", href: "/teacher/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const adminNavItems: NavItem[] = [
-  { id: "overview", href: "/admin", label: "Overview", icon: <Home className="w-5 h-5" /> },
-  { id: "createStudent", href: "/admin/createStudent", label: "Create Student", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <BookOpen className="w-5 h-5" /> },
-  { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Plus className="w-5 h-5" /> },
-  { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Bookmark className="w-5 h-5" /> },
-  { id: "manageClasses", href: "/admin/manageClasses", label: "Manage Classes", icon: <Compass className="w-5 h-5" /> },
-  { id: "manageSubjects", href: "/admin/manageSubjects", label: "Manage Subjects", icon: <Compass className="w-5 h-5" /> },
-  { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <Compass className="w-5 h-5" /> },
-  { id: "createAssingment", href: "/admin/createAssingment", label: "Create Assingment", icon: <Compass className="w-5 h-5" /> },
-  { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <SquarePlus className="w-5 h-5" /> },
-  { id: "enterMarks", href: "/admin/enterMarks", label: "Enter Marks", icon: <Compass className="w-5 h-5" /> },
-  { id: "viewResult", href: "/admin/viewResult", label: "View Result", icon: <Eye className="w-5 h-5" /> },  
-  { id: "createNotice", href: "/admin/createNotice", label: "Create Notice", icon: <Compass className="w-5 h-5" /> },
-  { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <LuNotebook className="w-5 h-5" /> },
+  { id: "overview", href: "/admin", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { id: "createStudent", href: "/admin/createStudent/student", label: "Create Student", icon: <UserPlus className="w-5 h-5" /> },
+  { id: "createTeacher", href: "/admin/createTeacher/teacher", label: "Create Teacher", icon: <UserCheck2 className="w-5 h-5" /> },
+  { id: "manageTeachers", href: "/admin/manageTeachers", label: "Manage Teachers", icon: <Users className="w-5 h-5" /> },
+  { id: "manageStudents", href: "/admin/manageStudents", label: "Manage Students", icon: <Users className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/admin/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
+  { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <GraduationCap className="w-5 h-5" /> },
+  { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-5 h-5" /> },
+  { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-5 h-5" /> },
+  { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
+  { id: "teacherSalary", href: "/admin/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const studentNavItems: NavItem[] = [
-  { id: "overview", href: "/student", label: "Overview", icon: <Home className="w-5 h-5" /> },
-  { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <User className="w-5 h-5" /> },
+  { id: "overview", href: "/student", label: "Overview", icon: <LayoutDashboard className="w-5 h-5" /> },
+  { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-5 h-5" /> },
+  { id: "viewResuls", href: "/student/viewResuls", label: "View Results", icon: <Award className="w-5 h-5" /> },
+  { id: "feeCollection", href: "/student/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-5 h-5" /> },
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {
@@ -221,3 +223,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
     </>
   );
 }
+
+
+
+
