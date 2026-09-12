@@ -22,7 +22,8 @@ import {
   ChevronRight,
   X,
   Inbox,
-  AlertCircle
+  AlertCircle,
+  Download
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -180,6 +181,36 @@ export default function AdminContactMessagesPage() {
     return <Headphones className="h-3.5 w-3.5 text-blue-600" />;
   };
 
+  // Export inquiries to CSV
+  const handleExportCsv = () => {
+    if (messages.length === 0) {
+      toast.error("No messages available to export.");
+      return;
+    }
+    const headers = ["ID", "Name", "Email", "Phone", "Role", "Subject", "Message", "Status", "Created At"];
+    const rows = filteredMessages.map((m) => [
+      `"${m._id}"`,
+      `"${(m.name || "").replace(/"/g, '""')}"`,
+      `"${(m.email || "").replace(/"/g, '""')}"`,
+      `"${(m.phone || "").replace(/"/g, '""')}"`,
+      `"${(m.role || "").replace(/"/g, '""')}"`,
+      `"${(m.subject || "").replace(/"/g, '""')}"`,
+      `"${(m.message || "").replace(/"/g, '""')}"`,
+      `"${m.status}"`,
+      `"${new Date(m.createdAt).toLocaleString()}"`,
+    ]);
+
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `edumanage_inquiries_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success("Inquiries exported successfully!");
+  };
+
   if (!isPending && !isAdmin && user?.role) {
     return (
       <div className="p-8 text-center bg-white rounded-3xl border border-rose-200 text-rose-700 m-6">
@@ -210,16 +241,28 @@ export default function AdminContactMessagesPage() {
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={fetchMessages}
-          disabled={loading}
-          className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:border-emerald-300 hover:bg-slate-50 hover:text-emerald-700 shadow-2xs transition active:scale-95"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
-          <span>Refresh Inbox</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:border-emerald-300 hover:bg-slate-50 hover:text-emerald-700 shadow-2xs transition active:scale-95"
+            title="Export filtered inquiries to CSV"
+          >
+            <Download className="h-3.5 w-3.5 text-slate-500" />
+            <span>Export CSV</span>
+          </button>
+          <button
+            type="button"
+            onClick={fetchMessages}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-bold text-slate-700 hover:border-emerald-300 hover:bg-slate-50 hover:text-emerald-700 shadow-2xs transition active:scale-95"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+            <span>Refresh Inbox</span>
+          </button>
+        </div>
       </div>
+
 
       {/* =====================================================
           METRICS OVERVIEW CARDS
