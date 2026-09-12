@@ -14,6 +14,7 @@ import {
   Calendar,
   FileText,
   Menu,
+  Mail,
 } from "lucide-react";
 import {
   PieChart,
@@ -183,15 +184,25 @@ export default function AdminDashboardPage() {
     setTeacherGender({ male: maleCount, female: femaleCount });
   }
 
+  const [unreadInquiries, setUnreadInquiries] = useState<number>(0);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
 
-        const [studentsRes, teachersRes] = await Promise.allSettled([
+        const [studentsRes, teachersRes, contactRes] = await Promise.allSettled([
           fetch(`${apiURL}/api/students`),
           fetch(`${apiURL}/api/teachers`),
+          fetch(`/api/contact?userRole=admin&limit=1`, { headers: { "x-user-role": "admin" } }),
         ]);
+
+        if (contactRes.status === "fulfilled" && contactRes.value.ok) {
+          const contactData = await contactRes.value.json();
+          if (contactData.success && typeof contactData.unreadCount === "number") {
+            setUnreadInquiries(contactData.unreadCount);
+          }
+        }
 
         if (studentsRes.status === "fulfilled" && studentsRes.value.ok) {
           const data = await studentsRes.value.json();
@@ -266,6 +277,31 @@ export default function AdminDashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Unread Contact Inquiries Alert Banner */}
+      {unreadInquiries > 0 && (
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-amber-900 shadow-2xs animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+              <Mail className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold">
+                You have {unreadInquiries} unread website contact {unreadInquiries === 1 ? "inquiry" : "inquiries"}!
+              </p>
+              <p className="text-[11px] text-amber-700">
+                Review messages submitted by school administrators, teachers, and parents.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/contactMessages"
+            className="shrink-0 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-700 transition shadow-xs"
+          >
+            View Inbox →
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">

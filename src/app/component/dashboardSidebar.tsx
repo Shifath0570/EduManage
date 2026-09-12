@@ -245,6 +245,7 @@ import {
   ListOrdered,
   CreditCard,
   BookOpen,
+  Mail,
   LogOut,
   X,
   Sparkles,
@@ -282,6 +283,7 @@ const adminNavItems: NavItem[] = [
   { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-4 h-4" /> },
   { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-4 h-4" /> },
   { id: "manageBlogs", href: "/admin/manageBlogs", label: "Manage Blogs", icon: <BookOpen className="w-4 h-4" /> },
+  { id: "contactMessages", href: "/admin/contactMessages", label: "Contact Messages", icon: <Mail className="w-4 h-4" /> },
   { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-4 h-4" /> },
   { id: "teacherSalary", href: "/admin/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-4 h-4" /> },
 ];
