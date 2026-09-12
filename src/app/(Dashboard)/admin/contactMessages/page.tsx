@@ -199,7 +199,7 @@ export default function AdminContactMessagesPage() {
       return;
     }
     const headers = ["ID", "Name", "Email", "Phone", "Role", "Subject", "Message", "Status", "Created At"];
-    const rows = filteredMessages.map((m) => [
+    const rows = messages.map((m: ContactMessageItem) => [
       `"${m._id}"`,
       `"${(m.name || "").replace(/"/g, '""')}"`,
       `"${(m.email || "").replace(/"/g, '""')}"`,
@@ -211,7 +211,7 @@ export default function AdminContactMessagesPage() {
       `"${new Date(m.createdAt).toLocaleString()}"`,
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
+    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((e: string[]) => e.join(","))].join("\n");
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
