@@ -22,6 +22,7 @@ import {
   HelpCircle
 } from "lucide-react";
 import toast from "react-hot-toast";
+import { validateContactForm } from "@/utils/contactValidation";
 
 export default function ContactSection() {
   const [formData, setFormData] = useState({
@@ -69,8 +70,18 @@ export default function ContactSection() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim() || !formData.email.trim() || !formData.subject.trim() || !formData.message.trim()) {
-      toast.error("Please fill in all required fields.");
+    const validation = validateContactForm({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      subject: formData.subject,
+      message: formData.message,
+      role: formData.role,
+    });
+
+    if (!validation.isValid) {
+      const firstError = Object.values(validation.errors)[0] || "Please check the form for errors.";
+      toast.error(firstError);
       return;
     }
 
