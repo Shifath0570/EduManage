@@ -312,12 +312,14 @@ export default function BlogPage() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder="Search articles by topic, title, keyword (e.g. AI, Education)..."
+                                aria-label="Search articles by title or tags"
                                 className="w-full text-sm font-medium text-slate-800 outline-none bg-transparent placeholder:text-slate-400 py-1.5"
                             />
                             {searchQuery && (
                                 <button
                                     type="button"
                                     onClick={handleClearSearch}
+                                    aria-label="Clear search query"
                                     className="px-3 py-1 text-xs font-bold text-slate-400 hover:text-slate-600 transition shrink-0"
                                     title="Clear search"
                                 >
