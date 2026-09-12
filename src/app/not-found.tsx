@@ -16,12 +16,12 @@ export default function NotFound() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-green-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-teal-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10"></div>
       </div>
 
       <div className="max-w-2xl w-full relative z-10">
@@ -32,28 +32,28 @@ export default function NotFound() {
             <div className="flex flex-col items-center text-center">
               {/* Animated 404 */}
               <div className="relative mb-8">
-                <div className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-cyan-400 animate-pulse">
+                <div className="text-8xl md:text-9xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400 animate-pulse">
                   404
                 </div>
                 <div className="absolute -top-4 -right-4 md:-top-6 md:-right-6">
-                  <Compass className="w-12 h-12 text-blue-200 animate-spin-slow" />
+                  <Compass className="w-12 h-12 text-emerald-200 animate-spin-slow" />
                 </div>
               </div>
 
               {/* Icon */}
               <div className="mb-6 p-4 bg-white/10 rounded-full backdrop-blur-sm border border-white/20">
-                <GraduationCap className="w-12 h-12 text-blue-300" />
+                <GraduationCap className="w-12 h-12 text-emerald-300" />
               </div>
 
               <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
                 Page Not Found
               </h1>
               
-              <p className="text-blue-200 text-lg mb-2">
+              <p className="text-emerald-200 text-lg mb-2">
                 Oops! Looks like you've taken a wrong turn.
               </p>
               
-              <p className="text-blue-300/70 text-sm mb-8 max-w-md">
+              <p className="text-emerald-300/70 text-sm mb-8 max-w-md">
                 The page you're looking for might have been moved, deleted, or never existed in the first place.
               </p>
 
@@ -71,7 +71,7 @@ export default function NotFound() {
                 {/* Go Back Home Button */}
                 <button
                   onClick={handleGoHome}
-                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg"
+                  className="flex-1 flex items-center justify-center gap-2 px-6 py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white font-medium rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-2xl shadow-lg"
                 >
                   <Home className="w-5 h-5" />
                   Back Home
@@ -80,11 +80,11 @@ export default function NotFound() {
 
               {/* Decorative Divider */}
               <div className="mt-8 w-full max-w-xs">
-                <div className="h-px bg-gradient-to-r from-transparent via-blue-400/50 to-transparent"></div>
+                <div className="h-px bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent"></div>
               </div>
 
               {/* Help Text */}
-              <p className="mt-6 text-blue-300/50 text-sm">
+              <p className="mt-6 text-emerald-300/50 text-sm">
                 Need assistance? Contact our support team
               </p>
             </div>
@@ -95,8 +95,8 @@ export default function NotFound() {
         <div className="mt-6 flex justify-center">
           <div className="flex items-center gap-3 px-4 py-2 bg-white/5 backdrop-blur-sm rounded-full border border-white/10">
             <span className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-green-400"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-400"></span>
             </span>
             <span className="text-white/60 text-sm">System Online</span>
             <span className="w-px h-4 bg-white/10"></span>
