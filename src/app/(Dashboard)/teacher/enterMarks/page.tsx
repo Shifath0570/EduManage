@@ -9,14 +9,7 @@ import {
   Save,
   Layers,
   ChevronDown,
-  GraduationCap,
-  BookOpen,
-  UserCheck,
-  ShieldAlert,
   Loader2,
-  Sparkles,
-  Award,
-  Users,
   Check,
   Lock
 } from "lucide-react";
@@ -33,17 +26,10 @@ interface ExamOption {
   subject?: string;
   totalMarks?: number;
   passMarks?: number;
+  createdBy?: string;
   createdByEmail?: string;
-}
-
-interface TeacherAssignment {
-  _id?: string;
-  id?: string;
-  classId: string;
-  groupId?: string;
-  sectionId?: string;
-  subjectId: string;
-  teacherEmail?: string;
+  createdByName?: string;
+  createdByRole?: string;
 }
 
 interface StudentItem {
@@ -85,10 +71,9 @@ export default function TeacherEnterMarks() {
   const initialExamId = searchParams.get("examId") || "";
 
   const { data: session } = useSession();
-  const user = session?.user;
+  const user = session?.user as { id?: string; name?: string; email?: string; image?: string; role?: string } | undefined;
 
   const [exams, setExams] = useState<ExamOption[]>([]);
-  const [assignments, setAssignments] = useState<TeacherAssignment[]>([]);
   const [selectedExamId, setSelectedExamId] = useState<string>(initialExamId);
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedStream, setSelectedStream] = useState<string>("");
@@ -98,68 +83,36 @@ export default function TeacherEnterMarks() {
 
   const [studentRows, setStudentRows] = useState<StudentMarkRow[]>([]);
   const [loadingExams, setLoadingExams] = useState<boolean>(true);
-  const [loadingAssignments, setLoadingAssignments] = useState<boolean>(true);
   const [loadingRoster, setLoadingRoster] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error" | "info"; text: string } | null>(null);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-  // Fetch Teacher Assignments
-  useEffect(() => {
-    async function fetchAssignments() {
-      if (!user?.email) return;
-      setLoadingAssignments(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          setAssignments(data.data);
-        } else {
-          setAssignments([]);
-        }
-      } catch (err) {
-        console.error("Error fetching assignments:", err);
-      } finally {
-        setLoadingAssignments(false);
-      }
-    }
-    fetchAssignments();
-  }, [user?.email, API_BASE]);
-
-  // Check if logged-in teacher is authorized for a specific exam
-  const checkExamAuthorized = (examItem: ExamOption) => {
+  // Check if logged-in teacher is creator / owner of a specific exam
+  const isOwner = (examItem: ExamOption | null) => {
     if (!examItem) return false;
-    // Creator is always authorized
+    if (user?.role === "admin") return true;
+
+    // 1. Email match
     if (examItem.createdByEmail && user?.email && examItem.createdByEmail.toLowerCase() === user.email.toLowerCase()) {
       return true;
     }
-
-    const norm = (str?: string) => (str || "").toLowerCase().replace(/[\s_-]/g, "");
-    const examClassNorm = norm(examItem.className);
-    const examSubNorm = norm(examItem.subject);
-    const examStreamNorm = norm(examItem.stream || examItem.group);
-    const examSecNorm = (examItem.section || "A").toUpperCase().replace("SECTION", "").trim();
-
-    return assignments.some((a) => {
-      const matchClass = norm(a.classId) === examClassNorm;
-      const matchSub = !examSubNorm || examSubNorm === "allsubjects" || norm(a.subjectId) === examSubNorm;
-      const matchGroup =
-        !examStreamNorm ||
-        norm(a.groupId) === examStreamNorm ||
-        norm(a.groupId) === "general" ||
-        !a.groupId ||
-        a.groupId === "N/A";
-      const matchSection = !a.sectionId || a.sectionId === "All" || norm(a.sectionId).toUpperCase().replace("SECTION", "").trim() === examSecNorm;
-
-      return matchClass && matchSub && matchGroup && matchSection;
-    });
+    // 2. User ID match
+    if (examItem.createdBy && user?.id && String(examItem.createdBy) === String(user.id)) {
+      return true;
+    }
+    return false;
   };
 
-  // Filter exams list to only authorized exams for this teacher
-  const authorizedExams = useMemo(() => {
-    return exams.filter((e) => checkExamAuthorized(e));
-  }, [exams, assignments, user]);
+  // Partition exams into owned vs other exams
+  const myExams = useMemo(() => {
+    return exams.filter((e) => isOwner(e));
+  }, [exams, user]);
+
+  const otherExams = useMemo(() => {
+    return exams.filter((e) => !isOwner(e));
+  }, [exams, user]);
 
   // Load Exams from API on mount
   useEffect(() => {
@@ -171,13 +124,16 @@ export default function TeacherEnterMarks() {
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
 
-          // Find target exam (prefer requested initialExamId, or first authorized exam)
+          // Find target exam (prefer requested initialExamId, or first myExam, or first exam)
           let target = initialExamId
             ? data.data.find((e: ExamOption) => e._id === initialExamId) || null
             : null;
 
-          if (!target && data.data.length > 0) {
-            target = data.data[0];
+          if (!target) {
+            const firstMyExam = data.data.find((e: ExamOption) =>
+              e.createdByEmail && user?.email && e.createdByEmail.toLowerCase() === user.email.toLowerCase()
+            );
+            target = firstMyExam || data.data[0];
           }
 
           if (target) {
@@ -203,7 +159,7 @@ export default function TeacherEnterMarks() {
     }
 
     fetchExams();
-  }, [API_BASE, initialExamId]);
+  }, [API_BASE, initialExamId, user?.email]);
 
   // Identify current selected Exam object
   const currentExam = useMemo(() => {
@@ -212,8 +168,8 @@ export default function TeacherEnterMarks() {
 
   // Is current exam authorized?
   const isAuthorized = useMemo(() => {
-    return currentExam ? checkExamAuthorized(currentExam) : false;
-  }, [currentExam, assignments, user]);
+    return currentExam ? isOwner(currentExam) : false;
+  }, [currentExam, user]);
 
   // Constrain Class, Stream, Section, and Subject whenever the selected Exam changes
   useEffect(() => {
@@ -483,7 +439,7 @@ export default function TeacherEnterMarks() {
               </h1>
             </div>
             <p className="mt-1 text-sm text-slate-500">
-              Select an examination within your assigned class and subject scope to enter student marks and compute grades in real time.
+              Enter student marks and compute grades in real time for examinations you created.
             </p>
           </div>
         </div>
@@ -513,17 +469,30 @@ export default function TeacherEnterMarks() {
                   ) : exams.length === 0 ? (
                     <option value="">No exams scheduled</option>
                   ) : (
-                    exams.map((ex) => {
-                      const isAuth = checkExamAuthorized(ex);
-                      return (
-                        <option key={ex._id} value={ex._id}>
-                          {isAuth ? "✓ " : "🔒 "}
-                          {ex.examName} ({ex.className}
-                          {ex.stream ? ` - ${ex.stream}` : ""}
-                          {ex.section ? ` Sec ${ex.section}` : ""}) - {ex.subject}
-                        </option>
-                      );
-                    })
+                    <>
+                      {myExams.length > 0 && (
+                        <optgroup label="My Created Exams (Mark Entry Enabled)">
+                          {myExams.map((ex) => (
+                            <option key={ex._id} value={ex._id}>
+                              ✓ {ex.examName} ({ex.className}
+                              {ex.stream ? ` - ${ex.stream}` : ""}
+                              {ex.section ? ` Sec ${ex.section}` : ""}) - {ex.subject}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {otherExams.length > 0 && (
+                        <optgroup label="Other Exams (Restricted - View Only)">
+                          {otherExams.map((ex) => (
+                            <option key={ex._id} value={ex._id}>
+                              🔒 {ex.examName} ({ex.className}
+                              {ex.stream ? ` - ${ex.stream}` : ""}
+                              {ex.section ? ` Sec ${ex.section}` : ""}) - {ex.subject}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </>
                   )}
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
@@ -585,15 +554,13 @@ export default function TeacherEnterMarks() {
             </div>
 
             <div>
-              {loadingAssignments ? (
-                <span className="text-xs text-slate-400">Verifying teacher authorization...</span>
-              ) : isAuthorized ? (
+              {isAuthorized ? (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  <Check size={13} /> Authorized for this Class & Subject
+                  <Check size={13} /> You Created This Exam • Mark Entry Enabled
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200">
-                  <ShieldAlert size={13} /> Unauthorized (Not Assigned to You)
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                  <Lock size={13} /> Restricted • Created by {currentExam?.createdByName || currentExam?.createdByEmail || "Another Teacher"} (View Only)
                 </span>
               )}
             </div>
