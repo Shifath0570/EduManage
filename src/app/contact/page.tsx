@@ -1,6 +1,5 @@
 import React from "react";
 import ContactSection from "../component/ContactSection";
-import QuestionsSection from "../component/QuestionsSection";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,9 +9,8 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <main className="min-h-screen flex flex-col bg-[#FAFDFA]">
       <ContactSection />
-      <QuestionsSection />
-    </div>
+    </main>
   );
 }
