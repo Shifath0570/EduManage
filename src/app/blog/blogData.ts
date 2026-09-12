@@ -6,6 +6,7 @@ export interface Blog {
     date: string;
     author: string;
     image: string;
+    tags?: string[];
     content: string[];
 }
 
@@ -18,6 +19,7 @@ export const blogs: Blog[] = [
         category: "Education",
         date: "August 15, 2026",
         author: "School Administration",
+        tags: ["Education", "Learning", "Academic", "Future", "Growth", "School"],
         image:
             "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=1200&auto=format&fit=crop",
         content: [
@@ -31,20 +33,21 @@ export const blogs: Blog[] = [
 
     {
         id: 2,
-        title: "How Technology Is Changing Education",
+        title: "How Technology & AI Are Changing Education",
         description:
-            "Learn how modern technology is transforming classrooms and creating better learning experiences for students.",
+            "Learn how modern technology, AI tools, and smart digital classrooms are transforming learning experiences for students.",
         category: "Technology",
         date: "August 12, 2026",
         author: "Technology Department",
+        tags: ["Technology", "AI", "Artificial Intelligence", "EdTech", "Digital Learning", "Smart Classroom", "Innovation"],
         image:
             "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200&auto=format&fit=crop",
         content: [
-            "Technology has become an important part of modern education. Digital tools are helping teachers provide more interactive and engaging learning experiences.",
-            "Online resources, digital classrooms, smart boards, educational applications, and learning management systems allow students to access educational materials more easily.",
-            "Technology also makes it easier for teachers to monitor student performance and identify areas where students may need additional support.",
-            "However, technology should be used as a tool to support teachers and students rather than completely replacing traditional learning methods.",
-            "Our goal is to use technology responsibly to make education more accessible, engaging, and effective for every student.",
+            "Technology and artificial intelligence (AI) have become an important part of modern education. Digital tools and AI-driven platforms are helping teachers provide more interactive and personalized learning experiences.",
+            "Online resources, digital classrooms, smart boards, educational applications, AI study assistants, and learning management systems allow students to access educational materials more easily.",
+            "Technology also makes it easier for teachers to monitor student performance, detect learning gaps early, and identify areas where students may need additional support.",
+            "However, technology and AI should be used as tools to empower teachers and students rather than completely replacing human interaction and traditional learning methods.",
+            "Our goal is to use modern AI and technology responsibly to make education more accessible, engaging, and effective for every student.",
         ],
     },
 
@@ -56,6 +59,7 @@ export const blogs: Blog[] = [
         category: "Learning",
         date: "August 10, 2026",
         author: "Academic Department",
+        tags: ["Learning", "Classroom", "Motivation", "Wellbeing", "Environment", "Student Life"],
         image:
             "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=1200&auto=format&fit=crop",
         content: [
@@ -75,6 +79,7 @@ export const blogs: Blog[] = [
         category: "Teachers",
         date: "August 7, 2026",
         author: "Teacher Development Team",
+        tags: ["Teachers", "Faculty", "Mentorship", "Pedagogy", "Inspiration", "Teaching"],
         image:
             "https://images.unsplash.com/photo-1577896851231-70ef18881754?q=80&w=1200&auto=format&fit=crop",
         content: [
@@ -88,18 +93,19 @@ export const blogs: Blog[] = [
 
     {
         id: 5,
-        title: "Preparing Students for the Future",
+        title: "Preparing Students for the Future & AI Era",
         description:
-            "Explore how schools can prepare students with the skills they need to succeed in a rapidly changing world.",
+            "Explore how schools can prepare students with the critical skills and digital literacy needed to succeed in a rapidly changing world.",
         category: "Future",
         date: "August 5, 2026",
         author: "Career Development Team",
+        tags: ["Future", "Career", "Innovation", "Digital Literacy", "AI", "Skills"],
         image:
             "https://images.unsplash.com/photo-1529390079861-591de354faf5?q=80&w=1200&auto=format&fit=crop",
         content: [
-            "The world is changing rapidly, and students need more than traditional academic knowledge to succeed in the future.",
+            "The world is changing rapidly with advancements in technology, AI, and automation, and students need more than traditional academic knowledge to succeed in the future.",
             "Schools should help students develop communication, creativity, critical thinking, collaboration, digital literacy, and problem-solving skills.",
-            "Students should also get opportunities to participate in projects, competitions, clubs, presentations, and other practical activities.",
+            "Students should also get opportunities to participate in projects, competitions, coding clubs, presentations, and other practical activities.",
             "Career guidance can help students understand different career opportunities and make informed decisions about their future.",
             "Our education system aims to prepare students not only for examinations but also for real-world challenges and opportunities.",
         ],
@@ -110,10 +116,12 @@ export const blogs: Blog[] = [
         title: "Why Extracurricular Activities Matter",
         description:
             "Extracurricular activities help students develop teamwork, leadership, communication, and creativity.",
-        category: "Activities",
+        category: "Student Life",
         date: "August 2, 2026",
         author: "Student Activities Department",
-        image:"https://images.unsplash.com/photo-1636202339022-7d67f7447e3a?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+        tags: ["Student Life", "Activities", "Sports", "Arts", "Teamwork", "Clubs"],
+        image:
+            "https://images.unsplash.com/photo-1636202339022-7d67f7447e3a?q=80&w=1471&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
         content: [
             "Extracurricular activities are an important part of a student's overall development. They provide opportunities to learn outside the traditional classroom.",
             "Sports, cultural programs, debates, science clubs, programming clubs, art, music, and volunteer activities can help students discover their interests and talents.",
