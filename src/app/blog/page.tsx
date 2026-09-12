@@ -25,6 +25,9 @@ import {
 import { blogs as defaultFallbackBlogs } from "./blogData";
 import Statistics from "../component/Statistic";
 
+/**
+ * Represents a published or draft blog item.
+ */
 interface BlogItem {
     _id: string;
     id?: number | string;
