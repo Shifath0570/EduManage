@@ -44,6 +44,14 @@ interface BlogItem {
 
 const POPULAR_SEARCHES = ["AI", "Technology", "Quality Education", "Teachers", "Student Life", "Future Skills"];
 
+/**
+ * Fallback in-memory filtering function for Blog articles.
+ * Strictly checks category match and keyword presence in article title or tags.
+ *
+ * @param category - Selected topic category ('All', 'Education', etc.)
+ * @param query - User search query string
+ * @returns Filtered list of BlogItem objects
+ */
 const filterFallbackBlogs = (category: string, query: string): BlogItem[] => {
     const rawList: BlogItem[] = defaultFallbackBlogs.map(b => ({
         _id: String(b.id),
