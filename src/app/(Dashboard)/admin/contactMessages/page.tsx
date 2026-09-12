@@ -96,6 +96,17 @@ export default function AdminContactMessagesPage() {
     fetchMessages();
   }, [fetchMessages]);
 
+  // Keyboard shortcut: close modal on Escape
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && selectedMessage) {
+        setSelectedMessage(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedMessage]);
+
   // Update status
   const handleUpdateStatus = async (id: string, newStatus: "unread" | "read" | "replied") => {
     setActionLoading(true);
