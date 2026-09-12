@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { blogs as defaultFallbackBlogs } from "./blogData";
 import Statistics from "../component/Statistic";
+import { matchesQuery, matchesTags } from "@/utils/searchFilter";
 
 /**
  * Represents a published or draft blog item.
