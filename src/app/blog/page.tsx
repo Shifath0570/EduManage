@@ -42,6 +42,53 @@ interface BlogItem {
     tags?: string[];
 }
 
+const POPULAR_SEARCHES = ["AI", "Technology", "Quality Education", "Teachers", "Student Life", "Future Skills"];
+
+const filterFallbackBlogs = (category: string, query: string): BlogItem[] => {
+    const rawList: BlogItem[] = defaultFallbackBlogs.map(b => ({
+        _id: String(b.id),
+        id: b.id,
+        title: b.title,
+        description: b.description,
+        content: b.content,
+        category: b.category,
+        date: b.date,
+        author: b.author,
+        image: b.image,
+        tags: b.tags || [b.category, "Education"],
+        featured: b.id === 1
+    }));
+
+    return rawList.filter(blog => {
+        // Category filter
+        if (category && category !== "All") {
+            const catLower = category.toLowerCase().trim();
+            const blogCatLower = blog.category.toLowerCase().trim();
+            const isStudentLifeMatch =
+                (catLower === "student life" || catLower === "activities") &&
+                (blogCatLower === "student life" || blogCatLower === "activities");
+            if (blogCatLower !== catLower && !isStudentLifeMatch) {
+                return false;
+            }
+        }
+
+        // Search query filter: ONLY match title or tags
+        if (!query || !query.trim()) return true;
+
+        const q = query.trim().toLowerCase();
+        const words = q.split(/\s+/).filter(Boolean);
+
+        const titleStr = (blog.title || "").toLowerCase();
+        const tagsList = (blog.tags || []).map(t => t.toLowerCase());
+
+        // Match if search query or any word matches title or any tag
+        const matchesTitle = titleStr.includes(q) || words.some(w => titleStr.includes(w));
+        const matchesTags = tagsList.some(tag => tag.includes(q) || words.some(w => tag.includes(w)));
+
+        return matchesTitle || matchesTags;
+    });
+};
+
 export default function BlogPage() {
     const [blogs, setBlogs] = useState<BlogItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -75,62 +122,103 @@ export default function BlogPage() {
         },
     ];
 
-    const fetchBlogs = useCallback(async () => {
+    const fetchBlogs = useCallback(async (targetQuery?: string, targetCat?: string) => {
+        const cat = targetCat !== undefined ? targetCat : selectedCategory;
+        const query = targetQuery !== undefined ? targetQuery : searchQuery;
+
         setLoading(true);
         try {
             const params = new URLSearchParams();
-            if (selectedCategory !== "All") params.append("category", selectedCategory);
-            if (searchQuery.trim()) params.append("search", searchQuery.trim());
+            if (cat !== "All") params.append("category", cat);
+            if (query.trim()) params.append("search", query.trim());
 
             let res = await fetch(`/api/blogs?${params.toString()}`);
             if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
                 try {
                     res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`);
                 } catch {
-                    // fallback
+                    // ignore
                 }
             }
-            const data = await res.json();
-            if (data.success && Array.isArray(data.data) && data.data.length > 0) {
-                setBlogs(data.data);
-            } else if (selectedCategory === "All" && !searchQuery.trim()) {
-                setBlogs(defaultFallbackBlogs.map(b => ({
-                    _id: String(b.id),
-                    id: b.id,
-                    title: b.title,
-                    description: b.description,
-                    content: b.content,
-                    category: b.category,
-                    date: b.date,
-                    author: b.author,
-                    image: b.image,
-                    featured: b.id === 1
-                })));
-            } else {
-                setBlogs([]);
+
+            if (res.ok) {
+                const data = await res.json();
+                if (data.success && Array.isArray(data.data)) {
+                    if (query.trim()) {
+                        const q = query.trim().toLowerCase();
+                        const words = q.split(/\s+/).filter(Boolean);
+                        const matchedData = data.data.filter((blog: BlogItem) => {
+                            const titleStr = (blog.title || "").toLowerCase();
+                            const tagsList = (blog.tags || []).map(t => t.toLowerCase());
+                            const matchesTitle = titleStr.includes(q) || words.some(w => titleStr.includes(w));
+                            const matchesTags = tagsList.some(tag => tag.includes(q) || words.some(w => tag.includes(w)));
+                            return matchesTitle || matchesTags;
+                        });
+
+                        if (matchedData.length > 0) {
+                            setBlogs(matchedData);
+                            return;
+                        } else {
+                            const localMatches = filterFallbackBlogs(cat, query);
+                            setBlogs(localMatches);
+                            return;
+                        }
+                    } else {
+                        if (data.data.length > 0) {
+                            setBlogs(data.data);
+                            return;
+                        } else {
+                            const localMatches = filterFallbackBlogs(cat, query);
+                            setBlogs(localMatches);
+                            return;
+                        }
+                    }
+                }
             }
+
+            // Fallback to local filter strictly matching title or tags
+            const localMatches = filterFallbackBlogs(cat, query);
+            setBlogs(localMatches);
         } catch (err) {
             console.error("Error fetching blogs:", err);
-            setBlogs(defaultFallbackBlogs.map(b => ({
-                _id: String(b.id),
-                id: b.id,
-                title: b.title,
-                description: b.description,
-                content: b.content,
-                category: b.category,
-                date: b.date,
-                author: b.author,
-                image: b.image,
-                featured: b.id === 1
-            })));
+            const localMatches = filterFallbackBlogs(cat, query);
+            setBlogs(localMatches);
         } finally {
             setLoading(false);
         }
     }, [selectedCategory, searchQuery]);
 
+    // Debounced search on input change
     useEffect(() => {
-        fetchBlogs();
-    }, [fetchBlogs]);
+        const timer = setTimeout(() => {
+            fetchBlogs(searchQuery, selectedCategory);
+        }, 250);
+        return () => clearTimeout(timer);
+    }, [searchQuery, selectedCategory, fetchBlogs]);
+
+    const handleSearchSubmit = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+        fetchBlogs(searchQuery, selectedCategory);
+        const section = document.getElementById("articles-section");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    const handleClearSearch = () => {
+        setSearchQuery("");
+        fetchBlogs("", selectedCategory);
+    };
+
+    const handlePopularClick = (term: string) => {
+        setSearchQuery(term);
+        setSelectedCategory("All");
+        fetchBlogs(term, "All");
+        const section = document.getElementById("articles-section");
+        if (section) {
+            section.scrollIntoView({ behavior: "smooth" });
+        }
+    };
 
     const featuredBlog = blogs.find(b => b.featured) || blogs[0];
 
@@ -202,30 +290,59 @@ export default function BlogPage() {
                         transition={{ duration: 0.6, delay: 0.3 }}
                         className="mx-auto mt-8 max-w-2xl"
                     >
-                        <div className="relative flex items-center shadow-xl shadow-emerald-900/5 rounded-full overflow-hidden border border-emerald-200/80 bg-white/95 p-1.5 pl-6 backdrop-blur-md transition-all focus-within:border-emerald-500 focus-within:shadow-2xl">
-                            <Search className="h-5 w-5 text-emerald-600 shrink-0 mr-3" />
+                        <form
+                            onSubmit={handleSearchSubmit}
+                            role="search"
+                            className="relative flex items-center shadow-xl shadow-emerald-900/5 rounded-full overflow-hidden border border-emerald-200/80 bg-white/95 p-1.5 pl-5 backdrop-blur-md transition-all focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-400/20 focus-within:shadow-2xl"
+                        >
+                            <Search className="h-5 w-5 text-emerald-600 shrink-0 mr-2.5" />
                             <input
                                 type="text"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                placeholder="Search articles by topic, title, keyword..."
-                                className="w-full text-sm font-medium text-slate-800 outline-none bg-transparent placeholder:text-slate-400"
+                                placeholder="Search articles by topic, title, keyword (e.g. AI, Education)..."
+                                className="w-full text-sm font-medium text-slate-800 outline-none bg-transparent placeholder:text-slate-400 py-1.5"
                             />
                             {searchQuery && (
                                 <button
-                                    onClick={() => setSearchQuery("")}
-                                    className="px-3 text-xs font-bold text-slate-400 hover:text-slate-600"
+                                    type="button"
+                                    onClick={handleClearSearch}
+                                    className="px-3 py-1 text-xs font-bold text-slate-400 hover:text-slate-600 transition shrink-0"
+                                    title="Clear search"
                                 >
                                     Clear
                                 </button>
                             )}
                             <button
-                                type="button"
-                                onClick={() => fetchBlogs()}
-                                className="hidden sm:inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-600 transition hover:scale-105"
+                                type="submit"
+                                className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-6 py-3 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-600 transition hover:scale-105 active:scale-95 shrink-0"
                             >
                                 Explore
                             </button>
+                        </form>
+
+                        {/* Popular Quick Searches */}
+                        <div className="mt-4 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+                            <span className="font-semibold text-slate-600 flex items-center gap-1 text-[11px]">
+                                <Sparkles className="h-3 w-3 text-emerald-600" /> Popular:
+                            </span>
+                            {POPULAR_SEARCHES.map((chip) => {
+                                const isCurrent = searchQuery.trim().toLowerCase() === chip.toLowerCase();
+                                return (
+                                    <button
+                                        key={chip}
+                                        type="button"
+                                        onClick={() => handlePopularClick(chip)}
+                                        className={`rounded-full px-3 py-1 text-[11px] font-semibold transition ${
+                                            isCurrent
+                                                ? "bg-emerald-500 text-white shadow-xs"
+                                                : "bg-white/80 border border-emerald-100 text-slate-700 hover:bg-emerald-50 hover:border-emerald-300 shadow-2xs"
+                                        }`}
+                                    >
+                                        #{chip}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </motion.div>
 
@@ -238,9 +355,9 @@ export default function BlogPage() {
             <Statistics />
 
             {/* =====================================================
-                FEATURED ARTICLE (Editor's Pick)
+                FEATURED ARTICLE (Editor's Pick - Only when not searching)
             ====================================================== */}
-            {featuredBlog && (
+            {featuredBlog && !searchQuery.trim() && (
                 <section className="px-5 py-14 md:px-8 md:py-20 relative overflow-hidden bg-gradient-to-b from-white via-[#EBFBFA]/30 to-[#FFF9EE]/40">
                     <div className="mx-auto max-w-7xl">
                         
@@ -372,33 +489,60 @@ export default function BlogPage() {
             {/* =====================================================
                 LATEST ARTICLES GRID (Matching Notice/Blog Card Style)
             ====================================================== */}
-            <section className="px-5 py-16 md:px-8 md:py-24 bg-gradient-to-b from-white via-[#EBFBFA]/20 to-[#FAFDFA]">
+            <section id="articles-section" className="px-5 py-16 md:px-8 md:py-24 bg-gradient-to-b from-white via-[#EBFBFA]/20 to-[#FAFDFA]">
                 <div className="mx-auto max-w-7xl">
                     
                     <div className="mb-12 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
                         <div>
                             <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 py-1 text-xs font-bold text-emerald-700 mb-2">
                                 <BookOpen className="h-3.5 w-3.5" />
-                                <span>Recent Stories</span>
+                                <span>{searchQuery.trim() ? "Search Results" : "Recent Stories"}</span>
                             </div>
                             <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
-                                {selectedCategory === "All" ? "Latest Articles" : `${selectedCategory} Articles`}
+                                {searchQuery.trim() ? (
+                                    <>
+                                        Results for <span className="text-emerald-600">"{searchQuery.trim()}"</span>
+                                    </>
+                                ) : selectedCategory === "All" ? (
+                                    "Latest Articles"
+                                ) : (
+                                    `${selectedCategory} Articles`
+                                )}
                                 <span className="ml-3 text-lg font-semibold text-slate-400">({blogs.length})</span>
                             </h2>
                         </div>
+
+                        {(searchQuery.trim() || selectedCategory !== "All") && (
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setSelectedCategory("All");
+                                    setSearchQuery("");
+                                }}
+                                className="self-start sm:self-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-rose-600 transition shadow-2xs"
+                            >
+                                Reset Filters
+                            </button>
+                        )}
                     </div>
 
                     {loading ? (
                         <div className="py-24 text-center text-slate-400 text-sm">
                             <div className="h-10 w-10 animate-spin rounded-full border-3 border-emerald-500 border-t-transparent mx-auto mb-3" />
-                            Loading published articles...
+                            Searching published articles...
                         </div>
                     ) : blogs.length === 0 ? (
                         <div className="rounded-3xl border border-slate-200/80 bg-white p-16 text-center space-y-4 shadow-sm">
                             <BookOpen className="h-12 w-12 text-emerald-300 mx-auto" />
-                            <h3 className="text-lg font-bold text-slate-800">No articles found in this category</h3>
+                            <h3 className="text-lg font-bold text-slate-800">
+                                {searchQuery.trim()
+                                    ? `No articles found matching "${searchQuery}"`
+                                    : "No articles found in this category"}
+                            </h3>
                             <p className="text-xs text-slate-500 max-w-md mx-auto">
-                                Try searching for another topic or reset the category filter to view all articles.
+                                {searchQuery.trim()
+                                    ? "We couldn't find any articles with titles or tags matching your search. Try searching for topics like \"AI\", \"Technology\", \"Teachers\", or click a popular tag above."
+                                    : "Try searching for another keyword or reset your filters to view all articles."}
                             </p>
                             <button
                                 type="button"
