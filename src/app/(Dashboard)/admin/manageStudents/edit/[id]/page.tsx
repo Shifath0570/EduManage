@@ -191,6 +191,11 @@
 //   const params = useParams();
 //   const studentIdParam = params?.id as string;
 
+//   // Check if current class requires a group select (Class 9 & 10)
+//   const isGroupRequired = useMemo(() => {
+//     return formData.className === "class_9" || formData.className === "class_10";
+//   }, [formData.className]);
+
 //   // Fetch initial student details on component mount
 //   useEffect(() => {
 //     if (!studentIdParam) return;
@@ -207,6 +212,18 @@
 
 //         const student = data.data || data;
 
+//         // Extract base class and group if class name contains group info (e.g. "class_9_science")
+//         let parsedClassName = student.className || "";
+//         let parsedStream = student.stream || "";
+
+//         if (parsedClassName.startsWith("class_9_") || parsedClassName.startsWith("class_10_")) {
+//           const parts = parsedClassName.split("_");
+//           parsedClassName = `${parts[0]}_${parts[1]}`; // "class_9" or "class_10"
+//           if (!parsedStream && parts[2]) {
+//             parsedStream = parts[2]; // "science", "businessStudies", "humanities"
+//           }
+//         }
+
 //         // Populate state with retrieved data
 //         setFormData({
 //           name: student.name || "",
@@ -217,13 +234,13 @@
 //           address: student.address || "",
 //           guardianName: student.guardianName || "",
 //           guardianPhone: student.guardianPhone || "",
-//           className: student.className || "",
+//           className: parsedClassName,
 //           section: student.section || "",
 //           studentId: student.studentId || "",
 //           roll: student.roll || "",
 //           admissionDate: student.admissionDate ? student.admissionDate.split("T")[0] : "",
 //           profileImage: student.profileImage || "",
-//           stream: student.stream || "",
+//           stream: parsedStream,
 //         });
 
 //         if (student.profileImage) {
@@ -241,11 +258,18 @@
 //     fetchStudentData();
 //   }, [studentIdParam, router]);
 
-//   // Directly derive subjects from CLASS_SUBJECTS_MAP using className key
+//   // Derive subjects dynamically from CLASS_SUBJECTS_MAP using computed key
 //   const computedSubjects = useMemo(() => {
 //     if (!formData.className) return [];
+
+//     if (isGroupRequired) {
+//       if (!formData.stream) return [];
+//       const classKey = `${formData.className}_${formData.stream}`;
+//       return CLASS_SUBJECTS_MAP[classKey] || [];
+//     }
+
 //     return CLASS_SUBJECTS_MAP[formData.className] || [];
-//   }, [formData.className]);
+//   }, [formData.className, formData.stream, isGroupRequired]);
 
 //   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
 //     const { name, value } = e.target;
@@ -253,18 +277,13 @@
 //     setFormData((prev) => {
 //       const updated = { ...prev, [name]: value };
 
-//       // Auto-populate stream property when a class with stream is chosen
+//       // Reset stream if user switches to a non-group class (class 1-8)
 //       if (name === "className") {
-//         if (value.includes("science")) {
-//           updated.stream = "science";
-//         } else if (value.includes("businessStudies")) {
-//           updated.stream = "businessStudies";
-//         } else if (value.includes("humanities")) {
-//           updated.stream = "humanities";
-//         } else {
+//         if (value !== "class_9" && value !== "class_10") {
 //           updated.stream = "";
 //         }
 //       }
+
 //       return updated;
 //     });
 //   };
@@ -311,10 +330,21 @@
 
 //   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 //     e.preventDefault();
+
+//     if (isGroupRequired && !formData.stream) {
+//       alert("Please select a group for Class 9/10.");
+//       return;
+//     }
+
 //     setLoading(true);
+
+//     const fullClassName = isGroupRequired
+//       ? `${formData.className}_${formData.stream}`
+//       : formData.className;
 
 //     const payload = {
 //       ...formData,
+//       className: fullClassName,
 //       subjects: computedSubjects,
 //       metadata: {
 //         updatedAt: new Date().toISOString(),
@@ -455,7 +485,7 @@
 //                   name="dateOfBirth"
 //                   value={formData.dateOfBirth}
 //                   onChange={handleInputChange}
-//                   className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+//                   className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
 //                 />
 //                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 //               </div>
@@ -552,16 +582,38 @@
 //                   <option value="class_6">Class 6</option>
 //                   <option value="class_7">Class 7</option>
 //                   <option value="class_8">Class 8</option>
-//                   <option value="class_9_science">Class 9 (Science)</option>
-//                   <option value="class_9_businessStudies">Class 9 (Business Studies)</option>
-//                   <option value="class_9_humanities">Class 9 (Humanities)</option>
-//                   <option value="class_10_science">Class 10 (Science)</option>
-//                   <option value="class_10_businessStudies">Class 10 (Business Studies)</option>
-//                   <option value="class_10_humanities">Class 10 (Humanities)</option>
+//                   <option value="class_9">Class 9</option>
+//                   <option value="class_10">Class 10</option>
 //                 </select>
 //                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 //               </div>
 //             </div>
+
+//             {/* Extra Group / Stream Selection Input for Class 9 & 10 */}
+//             {isGroupRequired && (
+//               <div className="flex flex-col gap-2">
+//                 <label className="text-xs font-semibold text-slate-700">
+//                   Group / Stream <span className="text-red-500">*</span>
+//                 </label>
+//                 <div className="relative">
+//                   <select
+//                     required
+//                     name="stream"
+//                     value={formData.stream || ""}
+//                     onChange={handleInputChange}
+//                     className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+//                   >
+//                     <option value="" disabled>
+//                       Select group
+//                     </option>
+//                     <option value="science">Science</option>
+//                     <option value="businessStudies">Business Studies</option>
+//                     <option value="humanities">Humanities</option>
+//                   </select>
+//                   <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+//                 </div>
+//               </div>
+//             )}
 
 //             <div className="flex flex-col gap-2">
 //               <label className="text-xs font-semibold text-slate-700">
@@ -627,7 +679,7 @@
 //                   name="admissionDate"
 //                   value={formData.admissionDate}
 //                   onChange={handleInputChange}
-//                   className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+//                   className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
 //                 />
 //                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
 //               </div>
@@ -873,12 +925,10 @@ export default function EditStudent() {
   const params = useParams();
   const studentIdParam = params?.id as string;
 
-  // Check if current class requires a group select (Class 9 & 10)
   const isGroupRequired = useMemo(() => {
     return formData.className === "class_9" || formData.className === "class_10";
   }, [formData.className]);
 
-  // Fetch initial student details on component mount
   useEffect(() => {
     if (!studentIdParam) return;
 
@@ -894,19 +944,17 @@ export default function EditStudent() {
 
         const student = data.data || data;
 
-        // Extract base class and group if class name contains group info (e.g. "class_9_science")
         let parsedClassName = student.className || "";
         let parsedStream = student.stream || "";
 
         if (parsedClassName.startsWith("class_9_") || parsedClassName.startsWith("class_10_")) {
           const parts = parsedClassName.split("_");
-          parsedClassName = `${parts[0]}_${parts[1]}`; // "class_9" or "class_10"
+          parsedClassName = `${parts[0]}_${parts[1]}`;
           if (!parsedStream && parts[2]) {
-            parsedStream = parts[2]; // "science", "businessStudies", "humanities"
+            parsedStream = parts[2];
           }
         }
 
-        // Populate state with retrieved data
         setFormData({
           name: student.name || "",
           email: student.email || "",
@@ -940,7 +988,6 @@ export default function EditStudent() {
     fetchStudentData();
   }, [studentIdParam, router]);
 
-  // Derive subjects dynamically from CLASS_SUBJECTS_MAP using computed key
   const computedSubjects = useMemo(() => {
     if (!formData.className) return [];
 
@@ -959,7 +1006,6 @@ export default function EditStudent() {
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
 
-      // Reset stream if user switches to a non-group class (class 1-8)
       if (name === "className") {
         if (value !== "class_9" && value !== "class_10") {
           updated.stream = "";
@@ -1059,11 +1105,19 @@ export default function EditStudent() {
     }
   };
 
+  if (fetching) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <Spinner size="lg"/>
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto w-[90%] px-6 py-10">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-extrabold text-[#081838]">Edit Student Details</h1>
+          <h1 className="text-3xl font-bold text-slate-900">Edit Student Details</h1>
           <p className="mt-1 text-sm text-slate-500">
             Update profile and academic information for {formData.name || "this student"}.
           </p>
@@ -1071,26 +1125,26 @@ export default function EditStudent() {
         <Button
           type="button"
           onClick={() => router.back()}
-          className="w-fit bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200"
+          className="w-fit bg-slate-100 font-semibold text-slate-700 transition-colors hover:bg-slate-200"
         >
           <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Button>
       </div>
 
-      <Card className="border border-slate-100 bg-white p-8 shadow-xs rounded-2xl">
-        <CardHeader className="mb-6 p-0">
-          <h2 className="text-lg font-bold text-[#081838]">Update Student Information</h2>
+      <Card className="border border-slate-200/80 bg-white p-8 shadow-sm rounded-2xl">
+        <CardHeader className="mb-6 p-0 border-b border-slate-100 pb-4">
+          <h2 className="text-lg font-bold text-slate-800">Update Student Information</h2>
         </CardHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="mb-6 flex flex-col items-center gap-4 sm:flex-row">
-            <Avatar className="h-20 w-20 ring-2 ring-purple-500/20">
+            <Avatar className="h-20 w-20 ring-4 ring-indigo-50">
               {avatarPreview && <AvatarImage src={avatarPreview} alt="Profile preview" />}
-              <AvatarFallback>ST</AvatarFallback>
+              <AvatarFallback className="bg-indigo-100 text-indigo-700 font-bold">ST</AvatarFallback>
             </Avatar>
             <div className="flex flex-col items-center gap-2 sm:items-start">
               <span className="text-xs font-semibold text-slate-600">Change Profile Picture</span>
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-purple-50 px-4 py-2 text-xs font-bold text-purple-600 transition-colors hover:bg-purple-100">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl bg-indigo-50 px-4 py-2 text-xs font-bold text-indigo-600 transition-colors hover:bg-indigo-100">
                 {uploadingImage ? (
                   <>
                     <Spinner size="sm" color="current" />
@@ -1116,7 +1170,7 @@ export default function EditStudent() {
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Name <span className="text-red-500">*</span>
+                Name <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1125,7 +1179,7 @@ export default function EditStudent() {
                 placeholder="Enter full name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
@@ -1137,13 +1191,13 @@ export default function EditStudent() {
                 placeholder="Enter email address"
                 value={formData.email}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Phone <span className="text-red-500">*</span>
+                Phone <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1152,13 +1206,13 @@ export default function EditStudent() {
                 placeholder="Enter phone number"
                 value={formData.phone}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Date of Birth <span className="text-red-500">*</span>
+                Date of Birth <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -1167,7 +1221,7 @@ export default function EditStudent() {
                   name="dateOfBirth"
                   value={formData.dateOfBirth}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -1175,7 +1229,7 @@ export default function EditStudent() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Gender <span className="text-red-500">*</span>
+                Gender <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -1183,7 +1237,7 @@ export default function EditStudent() {
                   name="gender"
                   value={formData.gender}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
                 >
                   <option value="" disabled>
                     Select gender
@@ -1198,7 +1252,7 @@ export default function EditStudent() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Address <span className="text-red-500">*</span>
+                Address <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1207,13 +1261,13 @@ export default function EditStudent() {
                 placeholder="Enter full address"
                 value={formData.address}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Guardian Name <span className="text-red-500">*</span>
+                Guardian Name <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1222,13 +1276,13 @@ export default function EditStudent() {
                 placeholder="Enter guardian name"
                 value={formData.guardianName}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Guardian Phone <span className="text-red-500">*</span>
+                Guardian Phone <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1237,13 +1291,13 @@ export default function EditStudent() {
                 placeholder="Enter guardian phone number"
                 value={formData.guardianPhone}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Class <span className="text-red-500">*</span>
+                Class <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -1251,7 +1305,7 @@ export default function EditStudent() {
                   name="className"
                   value={formData.className}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
                 >
                   <option value="" disabled>
                     Select class
@@ -1271,11 +1325,10 @@ export default function EditStudent() {
               </div>
             </div>
 
-            {/* Extra Group / Stream Selection Input for Class 9 & 10 */}
             {isGroupRequired && (
               <div className="flex flex-col gap-2">
                 <label className="text-xs font-semibold text-slate-700">
-                  Group / Stream <span className="text-red-500">*</span>
+                  Group / Stream <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <select
@@ -1283,7 +1336,7 @@ export default function EditStudent() {
                     name="stream"
                     value={formData.stream || ""}
                     onChange={handleInputChange}
-                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                    className="w-full appearance-none rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
                   >
                     <option value="" disabled>
                       Select group
@@ -1299,7 +1352,7 @@ export default function EditStudent() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Section <span className="text-red-500">*</span>
+                Section <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <select
@@ -1307,7 +1360,7 @@ export default function EditStudent() {
                   name="section"
                   value={formData.section}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
                 >
                   <option value="" disabled>
                     Select section
@@ -1322,7 +1375,7 @@ export default function EditStudent() {
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Student ID <span className="text-red-500">*</span>
+                Student ID <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1331,13 +1384,13 @@ export default function EditStudent() {
                 placeholder="Enter student ID"
                 value={formData.studentId}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Roll Number <span className="text-red-500">*</span>
+                Roll Number <span className="text-rose-500">*</span>
               </label>
               <input
                 required
@@ -1346,13 +1399,13 @@ export default function EditStudent() {
                 placeholder="Enter roll number"
                 value={formData.roll}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20"
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <label className="text-xs font-semibold text-slate-700">
-                Admission Date <span className="text-red-500">*</span>
+                Admission Date <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
                 <input
@@ -1361,16 +1414,15 @@ export default function EditStudent() {
                   name="admissionDate"
                   value={formData.admissionDate}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/60 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-purple-500 focus:bg-white focus:ring-2 focus:ring-purple-500/20 [color-scheme:light]"
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-4 py-3 text-sm text-slate-900 outline-none transition-all focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/20 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
             </div>
           </div>
 
-          {/* Assigned Subjects Preview */}
           {computedSubjects.length > 0 && (
-            <div className="mt-6 rounded-xl border border-slate-200/80 bg-slate-50/50 p-4">
+            <div className="mt-6 rounded-xl border border-indigo-100 bg-indigo-50/40 p-4">
               <h3 className="mb-2 text-xs font-semibold text-slate-700">
                 Auto-assigned Subjects ({computedSubjects.length})
               </h3>
@@ -1378,7 +1430,7 @@ export default function EditStudent() {
                 {computedSubjects.map((subject, idx) => (
                   <span
                     key={idx}
-                    className="inline-block rounded-lg border border-purple-200/60 bg-purple-50 px-2.5 py-1 text-xs font-medium text-purple-700"
+                    className="inline-block rounded-lg border border-indigo-200/60 bg-white px-2.5 py-1 text-xs font-medium text-indigo-700 shadow-2xs"
                   >
                     {subject}
                   </span>
@@ -1387,18 +1439,18 @@ export default function EditStudent() {
             </div>
           )}
 
-          <div className="mt-8 flex items-center justify-end gap-3 pt-4">
+          <div className="mt-8 flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
             <Button
               type="button"
               onClick={() => router.push("/admin/manageStudents")}
-              className="bg-slate-100 font-semibold text-slate-700 hover:bg-slate-200"
+              className="bg-slate-100 font-semibold text-slate-700 transition-colors hover:bg-slate-200"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               isDisabled={loading || uploadingImage}
-              className="bg-[#6348eb] font-semibold text-white shadow-md shadow-purple-500/20 hover:bg-[#5238d6]"
+              className="bg-indigo-600 font-semibold text-white shadow-md shadow-indigo-500/20 transition-colors hover:bg-indigo-700"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />
@@ -1414,7 +1466,6 @@ export default function EditStudent() {
     </div>
   );
 }
-
 
 
 
