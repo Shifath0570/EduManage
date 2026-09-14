@@ -9,3 +9,4 @@ const leaveManagement = () => {
 };
 
 export default leaveManagement;
+
