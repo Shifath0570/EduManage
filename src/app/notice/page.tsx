@@ -1,7 +1,7 @@
 import { NoticeItem } from '@/types/types';
 import { getNotices } from '../lib/data';
 import Link from 'next/link';
-import { HiSpeakerphone } from 'react-icons/hi';
+import { FaBullhorn, FaCalendarAlt, FaChevronRight } from 'react-icons/fa';
 
 // Forces dynamic server rendering so Next.js build doesn't crash if backend is offline
 export const dynamic = 'force-dynamic';
@@ -10,79 +10,117 @@ export default async function HomePage() {
   const notices: NoticeItem[] = await getNotices();
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 bg-white rounded-2xl shadow-xl border border-gray-100">
-      {/* Section Heading */}
-      <div className="mb-12">
-        <div className="flex flex-col items-center justify-between gap-4 md:flex-row md:gap-0">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-900 md:text-4xl">
-              📢 Notices
-            </h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Stay connected with school updates
-            </p>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-25 ">
+      <div className="flex flex-col rounded-3xl border border-slate-200/80 bg-white shadow-xl shadow-slate-200/50">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-slate-100 p-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 text-emerald-600">
+              <FaBullhorn className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold tracking-tight text-slate-900">
+                Notice Board
+              </h3>
+              <p className="text-xs text-slate-500">
+                Latest announcements & updates
+              </p>
+            </div>
           </div>
 
+          <div className="flex items-center gap-3">
+            {/* Notice Counter */}
+            <div className="hidden sm:flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
+              <span>{notices.length} Notices</span>
+            </div>
 
-          {/* show total notice here */}
-          <div className="flex items-center gap-2 rounded-full bg-blue-50 px-4 py-2">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-400 opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-500" />
-            </span>
-            <span className="text-sm font-medium text-blue-600">{notices.length} notices</span>
+            <Link
+              href="/notice"
+              className="group inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-100"
+            >
+              <span>View All</span>
+              <FaChevronRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-0.5" />
+            </Link>
           </div>
-
-
         </div>
-        <div className="mt-4 h-0.5 w-full bg-gradient-to-r from-transparent via-blue-200 to-transparent" />
-      </div>
 
-      {notices.length > 0 ? (
-        <ul className="divide-y divide-gray-100">
-          {notices.map((notice: NoticeItem) => (
-            <li key={notice._id}>
-              <div className="flex items-center justify-between gap-4 sm:gap-5 p-4 sm:p-5 hover:bg-gray-50 transition duration-150 ease-in-out">
-                <div className="flex items-center gap-4 sm:gap-5 min-w-0 flex-1">
-                  <span className="flex-shrink-0 text-blue-500 text-2xl sm:text-3xl">
-                    <HiSpeakerphone />
-                  </span>
-                  <p className="text-sm sm:text-base lg:text-lg font-semibold text-gray-800 truncate">
-                    {notice.title}
-                  </p>
-                </div>
+        {/* Content List */}
+        <div className="flex-1 divide-y divide-slate-100 p-3">
+          {notices.length > 0 ? (
+            notices.map((item: NoticeItem) => {
+              const dateObj = item.issuedDate ? new Date(item.issuedDate) : null;
+              const day = dateObj ? dateObj.getDate() : "--";
+              const month = dateObj
+                ? dateObj.toLocaleString("en-IN", { month: "short" })
+                : "N/A";
 
-                <div className="flex-shrink-0 ml-4 flex items-center gap-2">
-
-                  <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium 
-                      ${notice.status === 'published' && 'bg-green-100 text-green-800'}
-                      ${notice.status === 'draft' && 'bg-gray-100 text-gray-800'}
-                      ${notice.status === 'archived' && 'bg-purple-100 text-purple-800'}
-                      ${notice.status === 'expired' && 'bg-red-100 text-red-800'}
-                    `}>
-                    {notice.status}
-                  </span>
-                  <Link href={`/notice/${notice._id}`}>
-                    <span className="text-sm font-semibold text-blue-600 transition hover:text-blue-800 sm:text-base lg:text-lg">
-                      View Details →
+              return (
+                <Link
+                  href={`/notice/${item._id}`}
+                  key={item._id}
+                  className="group flex items-start gap-4 rounded-2xl p-3.5 transition-all duration-200 hover:bg-slate-50/80 hover:shadow-xs"
+                >
+                  {/* Date Badge */}
+                  <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-slate-100 text-slate-700 transition-colors group-hover:bg-emerald-600 group-hover:text-white">
+                    <span className="text-sm font-extrabold leading-none">
+                      {day}
                     </span>
-                  </Link>
-                </div>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-16 sm:py-24">
-          <div className="bg-gray-50 rounded-full p-6 mb-4">
-            <HiSpeakerphone className="text-4xl text-gray-300" />
-          </div>
-          <p className="text-gray-400 text-lg font-medium">No notices available</p>
-          <p className="text-gray-300 text-sm mt-1">Check back later for updates</p>
+                    <span className="mt-0.5 text-[10px] font-bold uppercase tracking-wider">
+                      {month}
+                    </span>
+                  </div>
+
+                  {/* Item Details */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-semibold text-slate-800 truncate transition-colors group-hover:text-emerald-600">
+                        {item.title}
+                      </h4>
+                      {item.status && (
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            item.status === 'published'
+                              ? 'bg-emerald-100 text-emerald-800'
+                              : item.status === 'draft'
+                              ? 'bg-slate-100 text-slate-700'
+                              : item.status === 'archived'
+                              ? 'bg-purple-100 text-purple-800'
+                              : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="mt-1.5 flex items-center gap-2 text-xs text-slate-400">
+                      <FaCalendarAlt className="h-3 w-3 text-slate-400" />
+                      <span>
+                        {item.issuedDate
+                          ? new Date(item.issuedDate).toLocaleDateString("en-IN", {
+                              day: "2-digit",
+                              month: "short",
+                              year: "numeric",
+                            })
+                          : "No Date"}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          ) : (
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400">
+              <FaBullhorn className="h-8 w-8 text-slate-300" />
+              <p className="mt-2 text-sm font-medium">No notices published yet</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
-
-

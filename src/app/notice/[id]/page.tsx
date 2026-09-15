@@ -51,7 +51,7 @@ export default async function Page({ params }: PageProps) {
         {/* Back Button */}
         <Link 
           href="/notice" 
-          className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-green-600 hover:text-green-800 transition-colors mb-6"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
             <path fillRule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clipRule="evenodd" />
@@ -62,7 +62,7 @@ export default async function Page({ params }: PageProps) {
         {/* Main Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {/* Header with Status Badge */}
-          <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-6 sm:px-8 py-6 sm:py-8">
+          <div className="bg-gradient-to-r from-green-600 to-green-500 px-6 sm:px-8 py-6 sm:py-8">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -83,7 +83,7 @@ export default async function Page({ params }: PageProps) {
                   {notice.title}
                 </h1>
                 {notice.content?.subject && (
-                  <p className="text-blue-100 mt-2 text-sm sm:text-base">
+                  <p className="text-green-100 mt-2 text-sm sm:text-base">
                     {notice.content.subject}
                   </p>
                 )}
@@ -101,8 +101,8 @@ export default async function Page({ params }: PageProps) {
           <div className="p-6 sm:p-8 space-y-8">
             {/* Summary Section */}
             {notice.content?.summary && (
-              <div className="bg-blue-50 rounded-xl p-4 sm:p-6 border border-blue-100">
-                <h2 className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-2">
+              <div className="bg-green-50 rounded-xl p-4 sm:p-6 border border-green-100">
+                <h2 className="text-sm font-semibold text-green-600 uppercase tracking-wider mb-2">
                   Summary
                 </h2>
                 <p className="text-gray-700 text-base sm:text-lg font-medium">
@@ -118,7 +118,7 @@ export default async function Page({ params }: PageProps) {
                   <FileTextIcon className="h-4 w-4" />
                   Full Notice
                 </h2>
-                <div className="prose prose-blue max-w-none">
+                <div className="prose prose-green max-w-none">
                   <p className="text-gray-700 whitespace-pre-line text-base leading-relaxed">
                     {notice.content.fullText}
                   </p>
@@ -136,14 +136,14 @@ export default async function Page({ params }: PageProps) {
                 <div className="bg-gray-50 rounded-xl p-4 sm:p-6 border border-gray-100">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="flex items-start gap-3">
-                      <UserIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <UserIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Name</p>
                         <p className="font-medium text-gray-900">{notice.issuedBy.name || 'N/A'}</p>
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0h8v12H6V4z" clipRule="evenodd" />
                         <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                       </svg>
@@ -153,11 +153,11 @@ export default async function Page({ params }: PageProps) {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <MailIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <MailIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Email</p>
                         {notice.issuedBy.email ? (
-                          <a href={`mailto:${notice.issuedBy.email}`} className="font-medium text-blue-600 hover:text-blue-800 transition-colors">
+                          <a href={`mailto:${notice.issuedBy.email}`} className="font-medium text-green-600 hover:text-green-800 transition-colors">
                             {notice.issuedBy.email}
                           </a>
                         ) : (
@@ -166,11 +166,11 @@ export default async function Page({ params }: PageProps) {
                       </div>
                     </div>
                     <div className="flex items-start gap-3">
-                      <PhoneIcon className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <PhoneIcon className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <div>
                         <p className="text-sm text-gray-500">Contact</p>
                         {notice.issuedBy.contactNumber ? (
-                          <a href={`tel:${notice.issuedBy.contactNumber}`} className="font-medium text-gray-900 hover:text-blue-600 transition-colors">
+                          <a href={`tel:${notice.issuedBy.contactNumber}`} className="font-medium text-green-600 hover:text-green-800 transition-colors">
                             {notice.issuedBy.contactNumber}
                           </a>
                         ) : (

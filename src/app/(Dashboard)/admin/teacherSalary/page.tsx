@@ -149,7 +149,7 @@ export default function TeacherSalaryPage() {
       <div className="max-w-7xl mx-auto space-y-6">
         <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Teacher Payroll Management</h1>
+            <h1 className="text-2xl font-bold text-emerald-700">Teacher Payroll Management</h1>
             <p className="text-slate-500 text-sm">Disburse salaries, view payment logs, and manage monthly dues</p>
           </div>
         </header>
@@ -183,18 +183,18 @@ export default function TeacherSalaryPage() {
               placeholder="Search ID, Name, Phone..."
               value={search}
               onChange={(e) => handleFilterChange(setSearch, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none border-slate-300"
             />
             <input
               type="month"
               value={month}
               onChange={(e) => handleFilterChange(setMonth, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none border-slate-300"
             />
             <select
               value={paymentStatus}
               onChange={(e) => handleFilterChange(setPaymentStatus, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none border-slate-300"
             >
               <option value="">All Statuses</option>
               <option value="Paid">Paid</option>
@@ -261,7 +261,7 @@ export default function TeacherSalaryPage() {
                               setPayAmount(teacher.dueAmount > 0 ? teacher.dueAmount : 15000);
                             }}
                             disabled={teacher.dueAmount === 0}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-xs disabled:opacity-40"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs disabled:opacity-40"
                           >
                             Pay Salary
                           </button>
@@ -288,10 +288,10 @@ export default function TeacherSalaryPage() {
                     previousLabel="< Prev"
                     forcePage={currentPage}
                     containerClassName="flex items-center gap-1 text-sm font-medium"
-                    pageClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                    activeClassName="!bg-indigo-600 !text-white !border-indigo-600"
-                    previousClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                    nextClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
+                    pageClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer"
+                    activeClassName="!bg-emerald-600 !text-white !border-emerald-600"
+                    previousClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer"
+                    nextClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 cursor-pointer"
                     disabledClassName="opacity-40 cursor-not-allowed pointer-events-none"
                     breakClassName="px-2 py-1 text-slate-400"
                   />
@@ -319,7 +319,7 @@ export default function TeacherSalaryPage() {
                   required
                   value={payAmount}
                   onChange={(e) => setPayAmount(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none"
                 />
               </div>
               <div>
@@ -327,7 +327,7 @@ export default function TeacherSalaryPage() {
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none"
                 >
                   <option value="Bank Transfer">Bank Transfer</option>
                   <option value="Bkash">Bkash</option>
@@ -342,7 +342,7 @@ export default function TeacherSalaryPage() {
                   placeholder="Optional notes (e.g. Transaction ID)"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-600 outline-none"
                 />
               </div>
 
@@ -357,7 +357,7 @@ export default function TeacherSalaryPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
                 >
                   {submitting ? "Processing..." : "Disburse Payment"}
                 </button>

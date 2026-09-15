@@ -407,7 +407,7 @@ const UpdateNotice = () => {
   if (fetchLoading) {
     return (
       <div className="max-w-4xl mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-6">Update Notice</h1>
+        <h1 className="text-2xl font-bold mb-6 text-green-500">Update Notice</h1>
         <div className="flex items-center justify-center p-8">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -421,7 +421,7 @@ const UpdateNotice = () => {
   return (
     <div className="max-w-4xl mx-auto p-4">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Update Notice</h1>
+        <h1 className="text-2xl font-bold text-green-500">Update Notice</h1>
         <span className="text-sm text-gray-500">Fields marked with * are required</span>
       </div>
 
@@ -698,7 +698,7 @@ const UpdateNotice = () => {
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <span className="flex items-center justify-center">
@@ -720,7 +720,7 @@ const UpdateNotice = () => {
           <button
             type="button"
             onClick={handleGoBack}
-            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-200 transition-colors"
+            className="flex-1 bg-gray-100 text-gray-700 py-2 px-4 rounded-lg hover:bg-red-500 transition-colors hover:text-white"
           >
             Cancel
           </button>

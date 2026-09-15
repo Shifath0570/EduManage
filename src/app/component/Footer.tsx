@@ -264,7 +264,7 @@ export default function Footer() {
   ];
 
   const supportLinks = [
-    { label: "Help Center", href: "/help" },
+    { label: "Help Center", href: "/contact" },
     { label: "Documentation", href: "/docs" },
     { label: "Privacy Policy", href: "/privacy" },
     { label: "Terms & Conditions", href: "/terms" },
@@ -428,7 +428,7 @@ export default function Footer() {
               <li className="flex items-center gap-3">
                 <FaGlobe className="h-3.5 w-3.5 shrink-0 text-emerald-400" />
                 <a
-                  href="https://www.edumanage.com"
+                  href="https://edu-manage-umber-two.vercel.app"
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-1.5 transition-colors hover:text-emerald-400"

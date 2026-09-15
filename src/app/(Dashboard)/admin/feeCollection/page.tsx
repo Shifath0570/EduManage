@@ -175,8 +175,8 @@ export default function FeeManagementPage() {
             <span className="text-slate-500 text-xs font-semibold uppercase tracking-wider">Total Expected</span>
             <p className="text-2xl font-bold text-slate-800 mt-1">${summary.totalExpectedFees.toLocaleString()}</p>
           </div>
-          <div className="bg-white p-5 rounded-xl border border-emerald-100 bg-emerald-50/20 shadow-sm">
-            <span className="text-emerald-600 text-xs font-semibold uppercase tracking-wider">Total Collected</span>
+          <div className="bg-white p-5 rounded-xl border border-emerald-200 bg-emerald-50/40 shadow-sm">
+            <span className="text-emerald-700 text-xs font-semibold uppercase tracking-wider">Total Collected</span>
             <p className="text-2xl font-bold text-emerald-700 mt-1">${summary.totalPaidFees.toLocaleString()}</p>
           </div>
           <div className="bg-white p-5 rounded-xl border border-rose-100 bg-rose-50/20 shadow-sm">
@@ -194,12 +194,12 @@ export default function FeeManagementPage() {
               placeholder="Search ID, Name..."
               value={search}
               onChange={(e) => handleFilterChange(setSearch, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             />
             <select
               value={className}
               onChange={(e) => handleFilterChange(setClassName, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             >
               <option value="">All Classes</option>
               {CLASS_OPTIONS.map((c) => (
@@ -211,12 +211,12 @@ export default function FeeManagementPage() {
               placeholder="Section (e.g. A)"
               value={section}
               onChange={(e) => handleFilterChange(setSection, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             />
             <select
               value={paymentStatus}
               onChange={(e) => handleFilterChange(setPaymentStatus, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             >
               <option value="">All Statuses</option>
               <option value="Paid">Paid</option>
@@ -227,13 +227,13 @@ export default function FeeManagementPage() {
               type="date"
               value={startDate}
               onChange={(e) => handleFilterChange(setStartDate, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             />
             <input
               type="date"
               value={endDate}
               onChange={(e) => handleFilterChange(setEndDate, e.target.value)}
-              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none border-slate-300"
+              className="px-3 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none border-slate-300"
             />
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function FeeManagementPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-sm">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 font-semibold">
+                    <tr className="bg-emerald-50/50 border-b border-slate-200 text-emerald-900 font-semibold">
                       <th className="p-4">Student</th>
                       <th className="p-4">Class / Sec</th>
                       <th className="p-4">Total Fee</th>
@@ -263,7 +263,7 @@ export default function FeeManagementPage() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {students.map((student) => (
-                      <tr key={student._id} className="hover:bg-slate-50/50">
+                      <tr key={student._id} className="hover:bg-emerald-50/30">
                         <td className="p-4">
                           <div className="font-semibold text-slate-800">{student.name}</div>
                           <div className="text-xs text-slate-400">ID: {student.studentId} | Roll: {student.roll}</div>
@@ -274,7 +274,7 @@ export default function FeeManagementPage() {
                         <td className="p-4 text-rose-600 font-medium">${student.dueAmount}</td>
                         <td className="p-4">
                           <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            student.paymentStatus === "Paid" ? "bg-emerald-100 text-emerald-700" :
+                            student.paymentStatus === "Paid" ? "bg-emerald-100 text-emerald-800" :
                             student.paymentStatus === "Partial" ? "bg-amber-100 text-amber-700" :
                             "bg-rose-100 text-rose-700"
                           }`}>
@@ -285,7 +285,7 @@ export default function FeeManagementPage() {
                           <button
                             onClick={() => setSelectedStudent(student)}
                             disabled={student.dueAmount === 0}
-                            className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg text-xs disabled:opacity-40"
+                            className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg text-xs disabled:opacity-40 transition-colors"
                           >
                             Collect
                           </button>
@@ -312,10 +312,10 @@ export default function FeeManagementPage() {
                     previousLabel="< Prev"
                     forcePage={currentPage}
                     containerClassName="flex items-center gap-1 text-sm font-medium"
-                    pageClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                    activeClassName="!bg-indigo-600 !text-white !border-indigo-600"
-                    previousClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
-                    nextClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer"
+                    pageClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer transition-colors"
+                    activeClassName="!bg-emerald-600 !text-white !border-emerald-600"
+                    previousClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer transition-colors"
+                    nextClassName="px-3 py-1 rounded-md border border-slate-200 text-slate-600 hover:bg-emerald-50 hover:border-emerald-200 cursor-pointer transition-colors"
                     disabledClassName="opacity-40 cursor-not-allowed pointer-events-none"
                     breakClassName="px-2 py-1 text-slate-400"
                   />
@@ -343,7 +343,7 @@ export default function FeeManagementPage() {
                   required
                   value={collectAmount}
                   onChange={(e) => setCollectAmount(Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
               </div>
               <div>
@@ -351,7 +351,7 @@ export default function FeeManagementPage() {
                 <select
                   value={paymentMethod}
                   onChange={(e) => setPaymentMethod(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 >
                   <option value="Cash">Cash</option>
                   <option value="Bkash">Bkash</option>
@@ -366,7 +366,7 @@ export default function FeeManagementPage() {
                   placeholder="Optional notes"
                   value={remarks}
                   onChange={(e) => setRemarks(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none"
                 />
               </div>
 
@@ -374,14 +374,14 @@ export default function FeeManagementPage() {
                 <button
                   type="button"
                   onClick={() => setSelectedStudent(null)}
-                  className="px-4 py-2 border rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-50"
+                  className="px-4 py-2 border rounded-lg text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium disabled:opacity-50"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium disabled:opacity-50 transition-colors"
                 >
                   {submitting ? "Processing..." : "Confirm Payment"}
                 </button>
