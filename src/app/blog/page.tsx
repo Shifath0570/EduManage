@@ -378,7 +378,7 @@ export default function BlogPage() {
                         <div className="mb-8 flex flex-col items-center justify-center text-center">
                             <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50/80 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-emerald-600 mb-2">
                                 <Flame className="h-3.5 w-3.5 text-amber-500" />
-                                <span>Editor's Spotlight</span>
+                                <span>Editor s Spotlight</span>
                             </div>
                             <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900">
                                 Featured <span className="text-emerald-500">Article</span>
@@ -515,7 +515,7 @@ export default function BlogPage() {
                             <h2 className="text-3xl font-extrabold text-slate-900 sm:text-4xl">
                                 {searchQuery.trim() ? (
                                     <>
-                                        Results for <span className="text-emerald-600">"{searchQuery.trim()}"</span>
+                                        Results for <span className="text-emerald-600">{searchQuery.trim()}</span>
                                     </>
                                 ) : selectedCategory === "All" ? (
                                     "Latest Articles"
@@ -675,3 +675,10 @@ export default function BlogPage() {
         </main>
     );
 }
+        
+        
+        
+        
+        
+        
+        
