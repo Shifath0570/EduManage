@@ -23,6 +23,7 @@ import {
   BookMarked
 } from 'lucide-react';
 import { useSession } from '@/app/lib/auth-client';
+import AIPerformanceInsightCard from '@/app/component/AIPerformanceInsightCard';
 
 interface Student {
   _id?: string;
@@ -155,9 +156,15 @@ export default function StudentDetailsPage() {
   }
 
   return (
-    <div className="mx-auto w-[90%] px-6 py-10 space-y-6 font-sans text-slate-800">
+    <div className="mx-auto w-[90%] px-6 py-8 space-y-8 font-sans text-slate-800">
+      {/* AI-Powered Student Performance Insight Card */}
+      <AIPerformanceInsightCard
+        userEmail={student.email || session?.user?.email}
+        userId={student.studentId || student._id || stuId}
+      />
+
       {/* Top Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
         <div className="flex items-center gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
