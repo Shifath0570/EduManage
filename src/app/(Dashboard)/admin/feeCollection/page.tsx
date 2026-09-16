@@ -20,6 +20,7 @@ interface StudentFeeRecord {
   className: string;
   section: string;
   phone: string;
+  profileImage?: string;
   totalFee: number;
   totalPaid: number;
   dueAmount: number;
@@ -63,7 +64,7 @@ export default function FeeManagementPage() {
   const [endDate, setEndDate] = useState<string>("");
 
   // Server Pagination State
-  const [currentPage, setCurrentPage] = useState<number>(0); // 0-indexed for react-paginate
+  const [currentPage, setCurrentPage] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(0);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const itemsPerPage = 10;
@@ -81,7 +82,7 @@ export default function FeeManagementPage() {
     setError(null);
     try {
       const params = new URLSearchParams();
-      params.append("page", (page + 1).toString()); // Backend expects 1-based index
+      params.append("page", (page + 1).toString());
       params.append("limit", itemsPerPage.toString());
 
       if (search) params.append("search", search);
@@ -109,7 +110,6 @@ export default function FeeManagementPage() {
     }
   }, [search, className, section, paymentStatus, startDate, endDate]);
 
-  // Fetch when page or filters change
   useEffect(() => {
     const timer = setTimeout(() => {
       fetchFees(currentPage);
@@ -123,7 +123,7 @@ export default function FeeManagementPage() {
 
   const handleFilterChange = (setter: (val: string) => void, value: string) => {
     setter(value);
-    setCurrentPage(0); // Reset page on filter update
+    setCurrentPage(0);
   };
 
   const handleCollectFee = async (e: FormEvent) => {
@@ -265,8 +265,26 @@ export default function FeeManagementPage() {
                     {students.map((student) => (
                       <tr key={student._id} className="hover:bg-emerald-50/30">
                         <td className="p-4">
-                          <div className="font-semibold text-slate-800">{student.name}</div>
-                          <div className="text-xs text-slate-400">ID: {student.studentId} | Roll: {student.roll}</div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center text-xs font-semibold text-slate-600">
+                              {student.profileImage ? (
+                                <img
+                                  src={student.profileImage}
+                                  alt={student.name}
+                                  className="w-full h-full object-cover"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = "none";
+                                  }}
+                                />
+                              ) : (
+                                student.name?.charAt(0).toUpperCase() || "S"
+                              )}
+                            </div>
+                            <div>
+                              <div className="font-semibold text-slate-800">{student.name}</div>
+                              <div className="text-xs text-slate-400">ID: {student.studentId} | Roll: {student.roll}</div>
+                            </div>
+                          </div>
                         </td>
                         <td className="p-4 capitalize">{student.className.replace(/_/g, " ")} ({student.section})</td>
                         <td className="p-4 font-medium">${student.totalFee}</td>
@@ -330,8 +348,30 @@ export default function FeeManagementPage() {
       {selectedStudent && (
         <div className="fixed inset-0 bg-slate-900/40 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6 space-y-4">
-            <h3 className="text-lg font-bold text-slate-800">Collect Fee - {selectedStudent.name}</h3>
-            <p className="text-xs text-slate-500">Student ID: {selectedStudent.studentId} | Current Due: ${selectedStudent.dueAmount}</p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-full overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0 flex items-center justify-center font-bold text-slate-600">
+                {selectedStudent.profileImage ? (
+                  <img
+                    src={selectedStudent.profileImage}
+                    alt={selectedStudent.name}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  selectedStudent.name?.charAt(0).toUpperCase() || "S"
+                )}
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">
+                  Collect Fee - {selectedStudent.name}
+                </h3>
+                <p className="text-xs text-slate-500">
+                  Student ID: {selectedStudent.studentId} | Current Due: ${selectedStudent.dueAmount}
+                </p>
+              </div>
+            </div>
 
             <form onSubmit={handleCollectFee} className="space-y-3">
               <div>
