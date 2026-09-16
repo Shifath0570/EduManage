@@ -299,21 +299,23 @@ export default function TeacherViewAttendance() {
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <div className="flex items-center gap-2.5">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md shadow-[#03204c]/20">
-                                <UserCheck className="h-5 w-5" />
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20">
+                                <UserCheck className="h-5 w-5 stroke-[2.3]" />
                             </span>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                                Assigned Class Attendance Records
-                            </h1>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                                    Assigned Class Attendance Records
+                                </h1>
+                                <p className="text-xs sm:text-sm font-medium text-slate-500">
+                                    View and inspect recorded attendance sessions for your assigned classes and subjects.
+                                </p>
+                            </div>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
-                            View and inspect recorded attendance sessions for your assigned classes and subjects.
-                        </p>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs">
-                        <Users className="h-4 w-4 text-[#03204c]" />
+                    <div className="flex items-center gap-2 rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-2 text-xs font-bold text-emerald-800 shadow-xs">
+                        <Users className="h-4 w-4 text-emerald-600 shrink-0" />
                         <span>Teacher Portal • Assigned Classes Only</span>
                     </div>
                 </div>
@@ -331,50 +333,50 @@ export default function TeacherViewAttendance() {
                 {/* KPI Metrics */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-slate-500">Total Sessions</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Sessions</span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-slate-900">{totalSessionsRecorded}</span>
+                            <span className="text-2xl font-extrabold text-slate-900">{totalSessionsRecorded}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
-                            <CheckCircle2 className="h-3.5 w-3.5" /> Total Present Marked
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                            <CheckCircle2 className="h-3.5 w-3.5" /> Total Present
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-emerald-700">{totalPresentSum}</span>
+                            <span className="text-2xl font-extrabold text-emerald-700">{totalPresentSum}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-rose-700 flex items-center gap-1">
-                            <XCircle className="h-3.5 w-3.5" /> Total Absent Marked
+                    <div className="rounded-2xl border border-rose-200/80 bg-rose-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1">
+                            <XCircle className="h-3.5 w-3.5" /> Total Absent
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-rose-700">{totalAbsentSum}</span>
+                            <span className="text-2xl font-extrabold text-rose-700">{totalAbsentSum}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-2xl border border-blue-200 bg-blue-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-blue-700 flex items-center gap-1">
-                            <Sparkles className="h-3.5 w-3.5" /> Avg Attendance Rate
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+                            <Sparkles className="h-3.5 w-3.5 text-emerald-600" /> Avg Attendance Rate
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-blue-700">{avgAttendanceRate}%</span>
+                            <span className="text-2xl font-extrabold text-emerald-800">{avgAttendanceRate}%</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Filters Bar */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5 space-y-4">
                     <div className="flex items-center justify-between">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                            <Filter className="h-3.5 w-3.5 text-[#03204c]" /> Filter Assigned Records
+                            <Filter className="h-3.5 w-3.5 text-emerald-600" /> Filter Assigned Records
                         </h2>
                         <button
                             type="button"
                             onClick={handleReset}
-                            className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50 transition"
+                            className="flex items-center gap-1 rounded-xl border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-600 hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 transition"
                         >
                             <RotateCcw className="h-3 w-3" /> Reset Filters
                         </button>
@@ -383,7 +385,7 @@ export default function TeacherViewAttendance() {
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-6">
                         {/* Assigned Class Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Class</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Assigned Class</label>
                             <select
                                 value={filterClass}
                                 onChange={(e) => {
@@ -392,7 +394,7 @@ export default function TeacherViewAttendance() {
                                     setFilterSubject("All");
                                 }}
                                 disabled={loadingAssignments || assignments.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {assignedClassOptions.map((c) => (
                                     <option key={c.value} value={c.value}>
@@ -404,12 +406,12 @@ export default function TeacherViewAttendance() {
 
                         {/* Assigned Section Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Section</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Assigned Section</label>
                             <select
                                 value={filterSection}
                                 onChange={(e) => setFilterSection(e.target.value)}
                                 disabled={loadingAssignments || assignments.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {assignedSectionOptions.map((s) => (
                                     <option key={s} value={s}>
@@ -421,12 +423,12 @@ export default function TeacherViewAttendance() {
 
                         {/* Assigned Subject Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Assigned Subject</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Assigned Subject</label>
                             <select
                                 value={filterSubject}
                                 onChange={(e) => setFilterSubject(e.target.value)}
                                 disabled={loadingAssignments || assignments.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-[#03204c] disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {assignedSubjectOptions.map((sub) => (
                                     <option key={sub} value={sub}>
@@ -438,46 +440,46 @@ export default function TeacherViewAttendance() {
 
                         {/* Search Student / Roll */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Search Student</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Search Student</label>
                             <div className="relative">
-                                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-slate-400" />
                                 <input
                                     type="text"
                                     placeholder="Name or Roll..."
                                     value={filterSearch}
                                     onChange={(e) => setFilterSearch(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/60 pl-8 pr-2.5 py-1.5 text-xs text-slate-700 outline-none focus:border-[#03204c]"
+                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 pl-9 pr-3 py-2 text-xs text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                                 />
                             </div>
                         </div>
 
                         {/* Date Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Specific Date</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Specific Date</label>
                             <input
                                 type="date"
                                 value={filterDate}
                                 onChange={(e) => setFilterDate(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-[#03204c]"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                             />
                         </div>
 
                         {/* Month Filter */}
                         <div>
-                            <label className="mb-1 block text-[11px] font-semibold text-slate-600">Month</label>
+                            <label className="mb-1 block text-xs font-bold uppercase tracking-wider text-slate-600">Month</label>
                             <input
                                 type="month"
                                 value={filterMonth}
                                 onChange={(e) => setFilterMonth(e.target.value)}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-1.5 text-xs text-slate-700 outline-none focus:border-[#03204c]"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-3 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                             />
                         </div>
                     </div>
                 </div>
 
                 {/* Attendance Sessions Table */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-                    <div className="flex items-center justify-between border-b border-slate-100 p-4">
+                <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 overflow-hidden">
+                    <div className="flex items-center justify-between border-b border-slate-100 p-5">
                         <span className="text-sm font-bold text-slate-800">
                             Recorded Attendance Sessions ({sessions.length} sessions found)
                         </span>
@@ -488,7 +490,7 @@ export default function TeacherViewAttendance() {
                             <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                                 <tr>
                                     <th className="py-3.5 px-4">Date</th>
-                                    <th className="py-3.5 px-4">Class & Section</th>
+                                    <th className="py-3.5 px-4">Class &amp; Section</th>
                                     <th className="py-3.5 px-4">Subject</th>
                                     <th className="py-3.5 px-4 text-center">Present</th>
                                     <th className="py-3.5 px-4 text-center">Absent</th>
@@ -513,7 +515,7 @@ export default function TeacherViewAttendance() {
                                 ) : (
                                     sessions.map((item) => {
                                         const rate =
-                                            item.totalStudents > 0
+                                             item.totalStudents > 0
                                                 ? Math.round(
                                                       ((item.presentCount + (item.lateCount || 0)) / item.totalStudents) * 100
                                                   )
@@ -525,7 +527,7 @@ export default function TeacherViewAttendance() {
                                                     {item.date}
                                                 </td>
                                                 <td className="py-3.5 px-4">
-                                                    <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-700 border border-blue-200">
+                                                    <span className="rounded-xl bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 border border-emerald-200">
                                                         Class {item.className}-{item.section}
                                                     </span>
                                                 </td>
@@ -549,7 +551,7 @@ export default function TeacherViewAttendance() {
                                                 </td>
                                                 <td className="py-3.5 px-4 text-center">
                                                     <span
-                                                        className={`text-xs font-bold ${
+                                                        className={`text-xs font-extrabold ${
                                                             rate >= 80
                                                                 ? "text-emerald-600"
                                                                 : rate >= 60
@@ -564,7 +566,7 @@ export default function TeacherViewAttendance() {
                                                     <button
                                                         type="button"
                                                         onClick={() => setSelectedSession(item)}
-                                                        className="inline-flex items-center gap-1 rounded-lg border border-[#03204c]/20 bg-[#03204c]/5 px-2.5 py-1 text-xs font-semibold text-[#03204c] hover:bg-[#03204c]/10 transition"
+                                                        className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100 hover:border-emerald-300 active:scale-95 transition-all shadow-xs"
                                                     >
                                                         <Eye className="h-3.5 w-3.5" /> View Roster
                                                     </button>
@@ -581,19 +583,19 @@ export default function TeacherViewAttendance() {
                 {/* Student Breakdown Modal with AI 75% Warning */}
                 {selectedSession && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4">
-                        <div className="w-full max-w-3xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
+                        <div className="w-full max-w-3xl rounded-3xl bg-white shadow-2xl overflow-hidden border border-slate-200">
                             <div className="flex items-center justify-between border-b border-slate-100 p-5 bg-slate-50/70">
                                 <div>
                                     <h3 className="text-lg font-bold text-slate-900">
                                         Attendance Detail • Class {selectedSession.className}-{selectedSession.section}
                                     </h3>
-                                    <p className="text-xs text-slate-500">
-                                        Subject: <span className="font-semibold text-slate-700">{selectedSession.subject}</span> | Date: <span className="font-semibold text-slate-700">{selectedSession.date}</span> | Recorded By: <span className="font-semibold text-slate-700">{selectedSession.teacherName}</span>
+                                    <p className="text-xs font-medium text-slate-500">
+                                        Subject: <span className="font-bold text-slate-700">{selectedSession.subject}</span> | Date: <span className="font-bold text-slate-700">{selectedSession.date}</span> | Recorded By: <span className="font-bold text-slate-700">{selectedSession.teacherName}</span>
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 font-bold transition"
+                                    className="rounded-xl p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 font-bold transition"
                                 >
                                     ✕
                                 </button>
@@ -642,11 +644,11 @@ export default function TeacherViewAttendance() {
                                                                 type="button"
                                                                 disabled={generatingStudentId === r.studentId}
                                                                 onClick={() => handleSendAiWarning(r)}
-                                                                className="inline-flex items-center gap-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-rose-600 px-3 py-1 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-rose-700 transition disabled:opacity-50"
+                                                                className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-rose-600 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:from-amber-600 hover:to-rose-700 transition active:scale-95 disabled:opacity-50"
                                                             >
                                                                 <Sparkles className="h-3.5 w-3.5" />
                                                                 {generatingStudentId === r.studentId
-                                                                    ? "Evaluating & Sending..."
+                                                                    ? "Evaluating..."
                                                                     : "AI 75% Notice"}
                                                             </button>
                                                         ) : (
@@ -670,7 +672,7 @@ export default function TeacherViewAttendance() {
                             <div className="flex justify-end border-t border-slate-100 p-4 bg-slate-50/50">
                                 <button
                                     onClick={() => setSelectedSession(null)}
-                                    className="rounded-xl bg-[#03204c] px-5 py-2 text-xs font-bold text-white hover:bg-[#02183a] transition"
+                                    className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-700 transition active:scale-95"
                                 >
                                     Close
                                 </button>
@@ -682,7 +684,7 @@ export default function TeacherViewAttendance() {
                 {/* AI Warning Result Modal */}
                 {aiResultNotice && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
-                        <div className="w-full max-w-xl rounded-2xl bg-white shadow-2xl overflow-hidden border border-slate-200">
+                        <div className="w-full max-w-xl rounded-3xl bg-white shadow-2xl overflow-hidden border border-slate-200">
                             {/* Modal Header */}
                             <div className={`p-5 flex items-start justify-between border-b ${
                                 !aiResultNotice.isEligibleForExam
@@ -690,8 +692,8 @@ export default function TeacherViewAttendance() {
                                     : "bg-emerald-50/80 border-emerald-100 text-emerald-950"
                             }`}>
                                 <div className="flex items-center gap-3">
-                                    <span className={`p-2 rounded-xl ${
-                                        !aiResultNotice.isEligibleForExam ? "bg-rose-600 text-white" : "bg-emerald-600 text-white"
+                                    <span className={`p-2.5 rounded-2xl ${
+                                        !aiResultNotice.isEligibleForExam ? "bg-rose-600 text-white shadow-xs" : "bg-emerald-600 text-white shadow-xs"
                                     }`}>
                                         <Sparkles className="h-5 w-5" />
                                     </span>
@@ -706,7 +708,7 @@ export default function TeacherViewAttendance() {
                                 </div>
                                 <button
                                     onClick={() => setAiResultNotice(null)}
-                                    className="rounded-lg p-1 text-slate-400 hover:bg-white/60 hover:text-slate-700 font-bold"
+                                    className="rounded-xl p-1.5 text-slate-400 hover:bg-white/60 hover:text-slate-700 font-bold"
                                 >
                                     ✕
                                 </button>
@@ -714,7 +716,7 @@ export default function TeacherViewAttendance() {
 
                             {/* Eligibility Banner */}
                             <div className="p-5 space-y-4">
-                                <div className={`flex items-center justify-between p-3.5 rounded-xl border text-xs font-bold ${
+                                <div className={`flex items-center justify-between p-3.5 rounded-2xl border text-xs font-bold ${
                                     !aiResultNotice.isEligibleForExam
                                         ? "bg-rose-50 text-rose-800 border-rose-200"
                                         : "bg-emerald-50 text-emerald-800 border-emerald-200"
@@ -729,7 +731,7 @@ export default function TeacherViewAttendance() {
                                             Attendance Rate: <strong>{aiResultNotice.attendancePercentage}%</strong> (Min Threshold: 75%)
                                         </span>
                                     </div>
-                                    <span className={`px-2.5 py-1 rounded-full text-[11px] uppercase ${
+                                    <span className={`px-2.5 py-1 rounded-full text-[11px] uppercase font-extrabold ${
                                         !aiResultNotice.isEligibleForExam
                                             ? "bg-rose-600 text-white"
                                             : "bg-emerald-600 text-white"
@@ -739,12 +741,12 @@ export default function TeacherViewAttendance() {
                                 </div>
 
                                 {/* AI Message Body */}
-                                <div className="rounded-xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-700 leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-wrap font-sans shadow-2xs">
+                                <div className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 text-xs text-slate-700 leading-relaxed max-h-[300px] overflow-y-auto whitespace-pre-wrap font-sans shadow-2xs">
                                     {aiResultNotice.message}
                                 </div>
 
-                                <div className="flex items-center gap-2 rounded-xl bg-blue-50 p-3 text-xs text-blue-800 border border-blue-200">
-                                    <CheckCircle2 className="h-4 w-4 text-blue-600 shrink-0" />
+                                <div className="flex items-center gap-2 rounded-2xl bg-emerald-50 p-3.5 text-xs font-medium text-emerald-900 border border-emerald-200">
+                                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                                     <span>
                                         This official advisory has been generated with Gemini AI and dispatched directly to the student&apos;s attendance dashboard.
                                     </span>
@@ -755,7 +757,7 @@ export default function TeacherViewAttendance() {
                             <div className="flex justify-end border-t border-slate-100 p-4 bg-slate-50/50">
                                 <button
                                     onClick={() => setAiResultNotice(null)}
-                                    className="rounded-xl bg-[#03204c] px-5 py-2 text-xs font-bold text-white hover:bg-[#02183a] transition shadow-xs"
+                                    className="rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-2.5 text-xs font-bold text-white shadow-md shadow-emerald-500/20 hover:from-emerald-600 hover:to-teal-700 transition active:scale-95"
                                 >
                                     Dismiss
                                 </button>
