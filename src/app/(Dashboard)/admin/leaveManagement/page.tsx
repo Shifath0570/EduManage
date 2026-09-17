@@ -41,8 +41,8 @@ export default function AdminLeaveManagementPage() {
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   // Backend Endpoints
-  const TEACHER_API = "http://localhost:5000/api/teacher-leave-requests";
-  const STUDENT_API = "http://localhost:5000/api/student-leave-requests";
+  const TEACHER_API = `${process.env.NEXT_PUBLIC_API_URL}/api/teacher-leave-requests`;
+  const STUDENT_API = `${process.env.NEXT_PUBLIC_API_URL}/api/student-leave-requests`;
 
   // Tab switch handler with state reset
   const handleTabChange = (type: "TEACHER" | "STUDENT") => {
@@ -73,9 +73,8 @@ export default function AdminLeaveManagementPage() {
             identifier:
               applicantType === "TEACHER"
                 ? item.teacher?.subject || item.subject || "N/A"
-                : `${item.student?.grade || item.grade || "N/A"} (Roll: ${
-                    item.student?.rollNumber || item.rollNumber || "N/A"
-                  })`,
+                : `${item.student?.grade || item.grade || "N/A"} (Roll: ${item.student?.rollNumber || item.rollNumber || "N/A"
+                })`,
             email: item.teacher?.email || item.student?.email || item.email || "",
             leaveType: item.leaveType,
             startDate: item.startDate,
@@ -171,21 +170,19 @@ export default function AdminLeaveManagementPage() {
           <div className="flex bg-slate-200/60 p-1 rounded-2xl border border-slate-200 self-start md:self-auto">
             <button
               onClick={() => handleTabChange("TEACHER")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                applicantType === "TEACHER"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${applicantType === "TEACHER"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               <UserCheck className="w-4 h-4" /> Teachers
             </button>
             <button
               onClick={() => handleTabChange("STUDENT")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                applicantType === "STUDENT"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${applicantType === "STUDENT"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:text-slate-900"
-              }`}
+                }`}
             >
               <GraduationCap className="w-4 h-4" /> Students
             </button>
@@ -243,11 +240,10 @@ export default function AdminLeaveManagementPage() {
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${
-                    statusFilter === st
+                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${statusFilter === st
                       ? "bg-white text-emerald-700 shadow-xs font-bold"
                       : "text-slate-500 hover:text-slate-800"
-                  }`}
+                    }`}
                 >
                   {st}
                 </button>
@@ -296,7 +292,7 @@ export default function AdminLeaveManagementPage() {
                       <td className="py-3.5 px-4 font-semibold text-slate-600">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-3.5 h-3.5 text-emerald-600" />
-                          <span>{new Date(req.startDate).toLocaleDateString()}</span> - 
+                          <span>{new Date(req.startDate).toLocaleDateString()}</span> -
                           <span>{new Date(req.endDate).toLocaleDateString()}</span>
                         </div>
                       </td>
