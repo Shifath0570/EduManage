@@ -101,8 +101,17 @@ const Hero = () => {
 
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
+                  href="/routine"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-600 bg-emerald-50/60 px-7 py-3.5 text-base font-bold text-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition shadow-2xs"
+                >
+                  <span>Class Routine</span>
+                </Link>
+              </motion.div>
+
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
                   href="#FeaturedSection"
-                  className="inline-flex items-center justify-center rounded-full border border-slate-900 px-8 py-3.5 text-base font-bold text-slate-900 bg-white/20 hover:bg-white hover:shadow-sm transition"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-900 px-7 py-3.5 text-base font-bold text-slate-900 bg-white/20 hover:bg-white hover:shadow-sm transition"
                 >
                   Explore Features
                 </Link>
