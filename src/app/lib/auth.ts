@@ -8,6 +8,7 @@ const db = client.db(process.env.MONGO_DB_NAME);
 
 export const auth = betterAuth({
   secret: process.env.BETTER_AUTH_SECRET,
+  baseURL: process.env.BETTER_AUTH_URL,
   advanced: {
     cookiePrefix: "my_app_v2"
   },
@@ -27,4 +28,6 @@ export const auth = betterAuth({
     },
   },
 });
+
+
 

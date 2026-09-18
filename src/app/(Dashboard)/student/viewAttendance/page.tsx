@@ -167,21 +167,23 @@ export default function StudentViewAttendance() {
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <div className="flex items-center gap-2.5">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md shadow-[#03204c]/20">
-                                <User className="h-5 w-5" />
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20">
+                                <User className="h-5 w-5 stroke-[2.3]" />
                             </span>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                                My Attendance Record
-                            </h1>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                                    My Attendance Record
+                                </h1>
+                                <p className="text-xs sm:text-sm font-medium text-slate-500">
+                                    Track your personal class attendance record and subject participation metrics in real time.
+                                </p>
+                            </div>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
-                            Track your personal class attendance record and subject participation metrics in real time.
-                        </p>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs">
-                        <span>Student: <strong className="text-slate-900">{user?.name || "Student"}</strong></span>
+                    <div className="flex items-center gap-2 rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-2 text-xs font-bold text-emerald-800 shadow-xs">
+                        <span>Student: <strong className="text-emerald-950">{user?.name || "Student"}</strong></span>
                     </div>
                 </div>
 
@@ -189,73 +191,73 @@ export default function StudentViewAttendance() {
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
                     {/* Total Classes */}
                     <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-slate-500">Total Classes</span>
+                        <span className="text-xs font-bold uppercase tracking-wider text-slate-500">Total Classes</span>
                         <div className="mt-1">
                             <span className="text-3xl font-extrabold text-slate-900">{summary.totalClasses}</span>
                         </div>
-                        <span className="text-[11px] text-slate-400">All recorded sessions</span>
+                        <span className="text-[11px] font-medium text-slate-400">All recorded sessions</span>
                     </div>
 
                     {/* Present */}
-                    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5" /> Present
                         </span>
                         <div className="mt-1">
                             <span className="text-3xl font-extrabold text-emerald-700">{summary.present}</span>
                         </div>
-                        <span className="text-[11px] text-emerald-600/80">Attended classes</span>
+                        <span className="text-[11px] font-medium text-emerald-600/80">Attended classes</span>
                     </div>
 
                     {/* Absent */}
-                    <div className="rounded-2xl border border-rose-200 bg-rose-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-rose-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-rose-200/80 bg-rose-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-rose-700 flex items-center gap-1">
                             <XCircle className="h-3.5 w-3.5" /> Absent
                         </span>
                         <div className="mt-1">
                             <span className="text-3xl font-extrabold text-rose-700">{summary.absent}</span>
                         </div>
-                        <span className="text-[11px] text-rose-600/80">Missed days</span>
+                        <span className="text-[11px] font-medium text-rose-600/80">Missed days</span>
                     </div>
 
                     {/* Late */}
-                    <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-amber-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-amber-200/80 bg-amber-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-amber-700 flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" /> Late
                         </span>
                         <div className="mt-1">
                             <span className="text-3xl font-extrabold text-amber-700">{summary.late}</span>
                         </div>
-                        <span className="text-[11px] text-amber-600/80">Late arrivals</span>
+                        <span className="text-[11px] font-medium text-amber-600/80">Late arrivals</span>
                     </div>
 
                     {/* Overall Attendance Percentage */}
-                    <div className="rounded-2xl border border-[#03204c]/20 bg-[#03204c]/5 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-[#03204c] flex items-center gap-1">
-                            <Sparkles className="h-3.5 w-3.5" /> Attendance
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 shadow-xs">
+                        <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 flex items-center gap-1">
+                            <Sparkles className="h-3.5 w-3.5 text-emerald-600" /> Attendance
                         </span>
                         <div className="mt-1">
-                            <span className="text-3xl font-extrabold text-[#03204c]">{summary.attendancePercentage}%</span>
+                            <span className="text-3xl font-extrabold text-emerald-800">{summary.attendancePercentage}%</span>
                         </div>
-                        <span className={`text-[11px] font-bold ${summary.totalClasses === 0 ? "text-slate-400" : isGoodStanding ? "text-emerald-600" : "text-rose-600"}`}>
+                        <span className={`text-[11px] font-bold ${summary.totalClasses === 0 ? "text-slate-400" : isGoodStanding ? "text-emerald-700" : "text-rose-600"}`}>
                             {summary.totalClasses === 0 ? "No classes marked" : isGoodStanding ? "✓ Satisfactory (≥75%)" : "⚠ Below Requirement (<75%)"}
                         </span>
                     </div>
                 </div>
 
                 {/* Progress Bar Card */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
-                    <div className="flex items-center justify-between mb-2">
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5">
+                    <div className="flex items-center justify-between mb-2.5">
                         <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">Attendance Percentage</span>
-                        <span className="text-sm font-bold text-slate-800">{summary.attendancePercentage}% (Minimum Target: 75%)</span>
+                        <span className="text-sm font-extrabold text-slate-800">{summary.attendancePercentage}% (Target: ≥ 75%)</span>
                     </div>
                     <div className="h-3.5 w-full bg-slate-100 rounded-full overflow-hidden p-0.5 border border-slate-200/60">
                         <div
                             className={`h-full rounded-full transition-all duration-500 ${
                                 summary.attendancePercentage >= 85
-                                    ? "bg-emerald-500"
+                                    ? "bg-gradient-to-r from-teal-500 to-emerald-500"
                                     : summary.attendancePercentage >= 75
-                                    ? "bg-blue-500"
+                                    ? "bg-gradient-to-r from-teal-600 to-emerald-600"
                                     : "bg-rose-500"
                             }`}
                             style={{ width: `${Math.min(summary.attendancePercentage, 100)}%` }}
@@ -264,10 +266,10 @@ export default function StudentViewAttendance() {
                 </div>
 
                 {/* AI Attendance Advisories & Notices Section */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5 space-y-4">
                     <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                        <div className="flex items-center gap-2">
-                            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-amber-800">
+                        <div className="flex items-center gap-2.5">
+                            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-800 border border-amber-200">
                                 <Bell className="h-4 w-4" />
                             </span>
                             <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
@@ -280,7 +282,7 @@ export default function StudentViewAttendance() {
                     </div>
 
                     {notices.length === 0 ? (
-                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-xs text-slate-500">
+                        <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 p-6 text-center text-xs text-slate-500">
                             <CheckCircle2 className="mx-auto h-6 w-6 text-emerald-500 mb-1.5" />
                             <p className="font-semibold text-slate-700">No Attendance Warnings</p>
                             <p className="mt-0.5 text-slate-400">You do not have any active attendance warnings or exam ineligibility notices. Keep attending classes regularly!</p>
@@ -293,7 +295,7 @@ export default function StudentViewAttendance() {
                                     className={`rounded-2xl border p-5 shadow-xs transition ${
                                         !n.isEligibleForExam
                                             ? "border-rose-300 bg-gradient-to-br from-rose-50/90 via-white to-amber-50/50 text-rose-950"
-                                            : "border-blue-200 bg-gradient-to-br from-blue-50/90 via-white to-indigo-50/50 text-blue-950"
+                                            : "border-emerald-200 bg-gradient-to-br from-emerald-50/90 via-white to-teal-50/50 text-emerald-950"
                                     }`}
                                 >
                                     {/* Notice Header */}
@@ -304,7 +306,7 @@ export default function StudentViewAttendance() {
                                                     <ShieldAlert className="h-4 w-4" />
                                                 </span>
                                             ) : (
-                                                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-xs">
+                                                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-600 text-white shadow-xs">
                                                     <Sparkles className="h-4 w-4" />
                                                 </span>
                                             )}
@@ -337,13 +339,13 @@ export default function StudentViewAttendance() {
                                     </div>
 
                                     {/* Notice Message Body */}
-                                    <div className="mt-3.5 rounded-xl border border-slate-200/80 bg-white/90 p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-wrap font-sans shadow-2xs">
+                                    <div className="mt-3.5 rounded-2xl border border-slate-200/80 bg-white/90 p-4 text-xs leading-relaxed text-slate-800 whitespace-pre-wrap font-sans shadow-2xs">
                                         {n.message}
                                     </div>
 
                                     {/* Action Footnote */}
                                     {!n.isEligibleForExam && (
-                                        <div className="mt-3 flex items-center gap-2 rounded-xl bg-rose-100/70 px-3.5 py-2 text-[11px] font-bold text-rose-800 border border-rose-200/80">
+                                        <div className="mt-3 flex items-center gap-2 rounded-2xl bg-rose-100/70 px-3.5 py-2 text-[11px] font-bold text-rose-800 border border-rose-200/80">
                                             <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                                             <span>Important: You must attend all remaining classes regularly and contact your teacher immediately to improve your standing.</span>
                                         </div>
@@ -355,9 +357,9 @@ export default function StudentViewAttendance() {
                 </div>
 
                 {/* Subject-Wise Breakdown */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
-                        <BookOpen className="h-4 w-4 text-[#03204c]" />
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5 space-y-4">
+                    <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
+                        <BookOpen className="h-4 w-4 text-emerald-600" />
                         Subject-Wise Attendance Breakdown
                     </h2>
 
@@ -368,29 +370,29 @@ export default function StudentViewAttendance() {
                     ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                             {subjectBreakdown.map((sb, idx) => (
-                                <div key={idx} className="rounded-xl border border-slate-100 bg-slate-50/50 p-4 space-y-2">
+                                <div key={idx} className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4 space-y-2.5 shadow-xs">
                                     <div className="flex items-center justify-between">
                                         <span className="font-bold text-sm text-slate-800">{sb.subject}</span>
                                         <span
-                                            className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                                            className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
                                                 sb.percentage >= 85
                                                     ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                                     : sb.percentage >= 75
-                                                    ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                                    ? "bg-teal-50 text-teal-700 border border-teal-200"
                                                     : "bg-rose-50 text-rose-700 border border-rose-200"
                                             }`}
                                         >
                                             {sb.percentage}%
                                         </span>
                                     </div>
-                                    <div className="text-xs text-slate-500 flex justify-between">
-                                        <span>Present: <strong>{sb.present}</strong></span>
-                                        <span>Absent: <strong>{sb.absent}</strong></span>
-                                        <span>Total: <strong>{sb.total}</strong></span>
+                                    <div className="text-xs font-medium text-slate-500 flex justify-between">
+                                        <span>Present: <strong className="text-emerald-700">{sb.present}</strong></span>
+                                        <span>Absent: <strong className="text-rose-700">{sb.absent}</strong></span>
+                                        <span>Total: <strong className="text-slate-700">{sb.total}</strong></span>
                                     </div>
-                                    <div className="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden">
+                                    <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
                                         <div
-                                            className="h-full bg-[#03204c] rounded-full"
+                                            className="h-full bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full"
                                             style={{ width: `${Math.min(sb.percentage, 100)}%` }}
                                         />
                                     </div>
@@ -401,13 +403,13 @@ export default function StudentViewAttendance() {
                 </div>
 
                 {/* Attendance Log Table */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
-                    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 overflow-hidden">
+                    <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 className="text-base font-bold text-slate-900">
                                 Attendance Log History
                             </h3>
-                            <p className="text-xs text-slate-400">
+                            <p className="text-xs font-medium text-slate-400">
                                 Real-time history of your individual attendance status
                             </p>
                         </div>
@@ -416,7 +418,7 @@ export default function StudentViewAttendance() {
                             <select
                                 value={selectedSubjectFilter}
                                 onChange={(e) => setSelectedSubjectFilter(e.target.value)}
-                                className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-1.5 text-xs font-semibold text-slate-700 outline-none"
+                                className="rounded-2xl border border-slate-200 bg-slate-50/60 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                             >
                                 <option value="All">All Subjects</option>
                                 {subjectBreakdown.map((sb, idx) => (
@@ -428,7 +430,7 @@ export default function StudentViewAttendance() {
                                 type="month"
                                 value={selectedMonthFilter}
                                 onChange={(e) => setSelectedMonthFilter(e.target.value)}
-                                className="rounded-xl border border-slate-200 bg-slate-50/60 px-3 py-1 text-xs text-slate-700 outline-none"
+                                className="rounded-2xl border border-slate-200 bg-slate-50/60 px-3.5 py-2 text-xs font-semibold text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                             />
                         </div>
                     </div>
@@ -437,12 +439,12 @@ export default function StudentViewAttendance() {
                         <table className="w-full text-left text-sm">
                             <thead className="bg-slate-50/80 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-100">
                                 <tr>
-                                    <th className="py-3 px-4">Date</th>
-                                    <th className="py-3 px-4">Class</th>
-                                    <th className="py-3 px-4">Subject</th>
-                                    <th className="py-3 px-4">Teacher</th>
-                                    <th className="py-3 px-4 text-center">Status</th>
-                                    <th className="py-3 px-4">Remarks</th>
+                                    <th className="py-3.5 px-4">Date</th>
+                                    <th className="py-3.5 px-4">Class</th>
+                                    <th className="py-3.5 px-4">Subject</th>
+                                    <th className="py-3.5 px-4">Teacher</th>
+                                    <th className="py-3.5 px-4 text-center">Status</th>
+                                    <th className="py-3.5 px-4">Remarks</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -459,17 +461,17 @@ export default function StudentViewAttendance() {
                                 ) : (
                                     filteredHistory.map((item, idx) => (
                                         <tr key={idx} className="hover:bg-slate-50/60 transition">
-                                            <td className="py-3 px-4 font-semibold text-slate-800">{item.date}</td>
-                                            <td className="py-3 px-4">
-                                                <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                                            <td className="py-3.5 px-4 font-semibold text-slate-800">{item.date}</td>
+                                            <td className="py-3.5 px-4">
+                                                <span className="rounded-xl bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-700">
                                                     Class {item.className}-{item.section}
                                                 </span>
                                             </td>
-                                            <td className="py-3 px-4 font-medium text-slate-700">{item.subject}</td>
-                                            <td className="py-3 px-4 text-xs text-slate-500">{item.teacherName}</td>
-                                            <td className="py-3 px-4 text-center">
+                                            <td className="py-3.5 px-4 font-medium text-slate-700">{item.subject}</td>
+                                            <td className="py-3.5 px-4 text-xs font-medium text-slate-500">{item.teacherName}</td>
+                                            <td className="py-3.5 px-4 text-center">
                                                 <span
-                                                    className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                                                    className={`px-3 py-1 rounded-full text-xs font-bold ${
                                                         item.status === "PRESENT"
                                                             ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                                                             : item.status === "ABSENT"
@@ -482,7 +484,7 @@ export default function StudentViewAttendance() {
                                                     {item.status}
                                                 </span>
                                             </td>
-                                            <td className="py-3 px-4 text-xs text-slate-400">{item.remarks || "—"}</td>
+                                            <td className="py-3.5 px-4 text-xs text-slate-400">{item.remarks || "—"}</td>
                                         </tr>
                                     ))
                                 )}

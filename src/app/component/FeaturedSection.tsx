@@ -154,7 +154,7 @@ export function FeaturedSection() {
   ];
 
   return (
-    <section id="features" className="relative overflow-hidden bg-gradient-to-b from-white via-[#EBFBFA]/40 to-[#FFF9EE]/50 py-16 md:py-24">
+    <section id="FeaturedSection" className="relative overflow-hidden bg-gradient-to-b from-white via-[#EBFBFA]/40 to-[#FFF9EE]/50 py-16 md:py-24">
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 h-96 w-[36rem] rounded-full bg-emerald-200/20 blur-3xl pointer-events-none" />
 
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl relative z-10">
