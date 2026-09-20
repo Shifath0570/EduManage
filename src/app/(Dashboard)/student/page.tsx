@@ -23,6 +23,7 @@ import {
   BookMarked
 } from 'lucide-react';
 import { useSession } from '@/app/lib/auth-client';
+import { fetchWithAuth } from '@/app/lib/api';
 import AIPerformanceInsightCard from '@/app/component/AIPerformanceInsightCard';
 
 interface Student {
@@ -88,7 +89,7 @@ export default function StudentDetailsPage() {
 
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiURL}/api/students/by-user/${stuId}`);
+        const res = await fetchWithAuth(`${apiURL}/api/students/by-user/${stuId}`);
 
         if (!res.ok) {
           if (res.status === 404) {
