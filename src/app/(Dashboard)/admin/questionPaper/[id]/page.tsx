@@ -99,6 +99,25 @@ interface ExamInfo {
   description?: string;
 }
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to manage question papers.");
+  }
+
+  return result.token;
+};
+
 const defaultQuestionConfig: QuestionConfiguration = {
   mcq: { count: 20, marksPerQuestion: 1 },
   short: { count: 5, marksPerQuestion: 2 },
@@ -161,7 +180,15 @@ export default function QuestionPaperPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/question-papers/exam/${examId}`);
+      const token = await getJwt();
+
+      const res = await fetch(`${API_BASE}/api/question-papers/exam/${examId}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await res.json();
 
       if (!res.ok || !data.success) {
@@ -280,10 +307,13 @@ export default function QuestionPaperPage() {
         }
       };
 
+      const token = await getJwt();
+
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
