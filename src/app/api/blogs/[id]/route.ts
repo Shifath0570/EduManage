@@ -68,8 +68,7 @@ export async function PUT(
 ) {
     try {
         const authUser = await getSessionOrJwtUser(req);
-        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        if (userRole !== "admin") {
+        if (!authUser || authUser.role !== "admin") {
             return NextResponse.json(
                 { success: false, message: "Unauthorized: Only administrators can update blogs." },
                 { status: 403 }
@@ -153,8 +152,7 @@ export async function DELETE(
 ) {
     try {
         const authUser = await getSessionOrJwtUser(req);
-        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        if (userRole !== "admin") {
+        if (!authUser || authUser.role !== "admin") {
             return NextResponse.json(
                 { success: false, message: "Unauthorized: Only administrators can delete blogs." },
                 { status: 403 }

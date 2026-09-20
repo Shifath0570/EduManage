@@ -57,11 +57,15 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const authUser = await getSessionOrJwtUser(req);
-    const userRole = (authUser?.role || searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
-    const isAdmin = userRole === "admin";
 
-    // Strictly ensure only admin can view contact messages
-    if (!isAdmin) {
+    if (!authUser) {
+      return NextResponse.json(
+        { success: false, message: "Unauthorized: Authentication required." },
+        { status: 401 }
+      );
+    }
+
+    if (authUser.role !== "admin") {
       return NextResponse.json(
         { success: false, message: "Access denied: Only administrators can view contact messages." },
         { status: 403 }
