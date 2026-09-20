@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,7 +56,8 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const userRole = (searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
+    const authUser = await getSessionOrJwtUser(req);
+    const userRole = (authUser?.role || searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
     const isAdmin = userRole === "admin";
 
     // Strictly ensure only admin can view contact messages
@@ -65,6 +67,7 @@ export async function GET(req: NextRequest) {
         { status: 403 }
       );
     }
+
 
     const status = searchParams.get("status");
     const role = searchParams.get("role");
