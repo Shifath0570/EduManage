@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
-export async function PATCH(
+async function handleUpdate(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  paramsPromise: Promise<{ id: string }>
 ) {
   try {
-    const { id } = await params;
+    const { id } = await paramsPromise;
     const body = await req.json();
-    const userRole = (body.userRole || req.headers.get("x-user-role") || "").toLowerCase().trim();
+    const authUser = await getSessionOrJwtUser(req);
+    const userRole = (authUser?.role || body.userRole || req.headers.get("x-user-role") || "").toLowerCase().trim();
     const isAdmin = userRole === "admin";
 
     if (!isAdmin) {
@@ -45,12 +47,26 @@ export async function PATCH(
       data: result,
     });
   } catch (error: any) {
-    console.error("Error in PATCH /api/contact/[id]:", error);
+    console.error("Error updating contact message:", error);
     return NextResponse.json(
       { success: false, message: error.message || "Failed to update contact message." },
       { status: 500 }
     );
   }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return handleUpdate(req, params);
+}
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  return handleUpdate(req, params);
 }
 
 export async function DELETE(
@@ -59,7 +75,8 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const userRole = (req.headers.get("x-user-role") || "").toLowerCase().trim();
+    const authUser = await getSessionOrJwtUser(req);
+    const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
     const isAdmin = userRole === "admin";
 
     if (!isAdmin) {
@@ -92,3 +109,4 @@ export async function DELETE(
     );
   }
 }
+
