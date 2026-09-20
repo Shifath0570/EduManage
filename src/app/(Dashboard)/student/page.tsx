@@ -71,7 +71,7 @@
 //       headers: { Accept: "application/json" }, 
 //     }); 
 //     const result: JwtResponse = await response.json().catch(() => ({})); 
- 
+
 //     if (!response.ok || !result.token) { 
 //       throw new Error(result.message || "You must be signed in to create notices."); 
 //     } 
@@ -449,10 +449,10 @@ export default function StudentDetailsPage() {
     return isNaN(date.getTime())
       ? '-'
       : date.toLocaleDateString('en-US', {
-          year: 'numeric',
-          month: 'short',
-          day: 'numeric',
-        });
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
   };
 
   const formatClassName = (name?: string) => {
@@ -461,50 +461,50 @@ export default function StudentDetailsPage() {
   };
 
   useEffect(() => {
-    const fetchStudent = async () => {
-      if (!stuId) return;
+  const fetchStudent = async () => {
+    if (!stuId) return;
 
-      setLoading(true);
-      setError(null);
+    setLoading(true);
+    setError(null);
 
-      try {
-        const token = await getJwt();
-        const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
+    try {
+      const token = await getJwt();
+      const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
 
-        // Properly formatted fetch request with Authorization header
-        const res = await fetch(`${apiURL}/api/students/by-user/${stuId}`, {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        console.log(res)
+      const res = await fetch(`${apiURL}/api/students/by-user/${stuId}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-        if (!res.ok) {
-          if (res.status === 404) {
-            throw new Error('Student record not found for this user.');
-          }
-          throw new Error(`Failed to fetch details: ${res.statusText}`);
+      if (!res.ok) {
+        if (res.status === 404) {
+          throw new Error('Student record not found for this user.');
         }
-
-        const result = await res.json();
-        
-        setStudent(result?.data || result || null);
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : 'An unknown error occurred.';
-        setError(message);
-      } {
-        setLoading(false);
+        throw new Error(`Failed to fetch details: ${res.statusText}`);
       }
-    };
 
-    if (stuId) {
-      fetchStudent();
-    } else if (!isSessionPending) {
+      const result = await res.json();
+      setStudent(result?.data || result || null);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'An unknown error occurred.';
+      setError(message);
+    } finally {
       setLoading(false);
     }
-  }, [stuId, isSessionPending]);
+  };
+
+  if (!isSessionPending) {
+    if (stuId) {
+      fetchStudent();
+    } else {
+      setError('User ID is missing from session.');
+      setLoading(false);
+    }
+  }
+}, [stuId, isSessionPending]);
 
   // Loading State
   if (loading || isSessionPending) {
@@ -602,11 +602,10 @@ export default function StudentDetailsPage() {
 
           <div className="mt-3 flex items-center gap-2">
             <span
-              className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                student.status === 'Active'
+              className={`px-3 py-1 rounded-full text-xs font-semibold ${student.status === 'Active'
                   ? 'bg-emerald-50 text-emerald-600 border border-emerald-100'
                   : 'bg-rose-50 text-rose-600 border border-rose-100'
-              }`}
+                }`}
             >
               {student.status || 'Active'}
             </span>

@@ -391,7 +391,7 @@ export default function ManageTeachersPage() {
                                 <Eye size={16} />
                               </Button>
                             </Link>
-                            <Link href={`/admin/manageTeachers/assign/${teacher._id}`}>
+                            <Link href={`/admin/manageTeachers/assing/${teacher._id}`}>
                               <Button className="p-2 text-amber-600 bg-amber-50 hover:bg-amber-100/80 rounded-lg border border-amber-200/70 transition shadow-2xs">
                                 <UserCheck size={16} />
                               </Button>
