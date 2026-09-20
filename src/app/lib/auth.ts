@@ -1,5 +1,6 @@
 
 import { betterAuth } from "better-auth";
+import { jwt } from "better-auth/plugins";
 import { MongoClient } from "mongodb";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
 
@@ -12,6 +13,20 @@ export const auth = betterAuth({
   advanced: {
     cookiePrefix: "my_app_v2"
   },
+  plugins: [
+    jwt({
+      jwt: {
+        definePayload: (session) => {
+          return {
+            id: session.user.id,
+            email: session.user.email,
+            name: session.user.name,
+            role: (session.user as any).role || "student",
+          };
+        }
+      }
+    })
+  ],
   emailAndPassword: {
     enabled: true,
   },
@@ -28,6 +43,7 @@ export const auth = betterAuth({
     },
   },
 });
+
 
 
 
