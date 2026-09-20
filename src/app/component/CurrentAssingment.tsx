@@ -10,8 +10,6 @@ import {
   Calendar,
   Trash2,
   Info,
-  ArrowLeft,
-  Plus,
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 
@@ -36,6 +34,11 @@ interface Assignment {
   assignedDate: string;
 }
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
 export default function CurrentAssignment(): React.ReactElement {
   const params = useParams();
   const router = useRouter();
@@ -47,9 +50,21 @@ export default function CurrentAssignment(): React.ReactElement {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
+  const getJwt = async (): Promise<string> => {
+    const response = await fetch("/api/auth/token", {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    const result: JwtResponse = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.token) {
+      throw new Error(result.message || "You must be signed in to manage teachers.");
+    }
+    return result.token;
+  };
+
   useEffect(() => {
     const fetchAssignments = async (): Promise<void> => {
-      // Prevent fetching if teacherId is expected but not present
       if (!teacherIdParam) {
         setAssignments([]);
         setFetching(false);
@@ -58,18 +73,26 @@ export default function CurrentAssignment(): React.ReactElement {
 
       try {
         setFetching(true);
-        const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
+        const token = await getJwt();
+        const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
-        // Fetch query targeted specifically to the teacherId
         const endpoint = `${apiURL}/api/assignments?teacherId=${teacherIdParam}`;
+        console.log(teacherIdParam)
 
-        const res = await fetch(endpoint);
+        const res = await fetch(endpoint, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         const data = await res.json();
+        
 
         if (res.ok) {
           const rawData: RawAssignment[] = data.data || data;
 
-          // Strictly filter assignments matching ONLY teacherIdParam
           const teacherAssignments = rawData
             .filter((item) => String(item.teacherId) === String(teacherIdParam))
             .map((item) => ({
@@ -87,7 +110,6 @@ export default function CurrentAssignment(): React.ReactElement {
                   })
                 : "N/A",
             }));
-
 
           setAssignments(teacherAssignments);
         } else {
@@ -116,9 +138,15 @@ export default function CurrentAssignment(): React.ReactElement {
 
     setDeletingId(assignmentId);
     try {
-      const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
+      const token = await getJwt();
+      const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+
       const res = await fetch(`${apiURL}/api/assignments/${assignmentId}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (!res.ok) {
@@ -136,11 +164,9 @@ export default function CurrentAssignment(): React.ReactElement {
     }
   };
 
-
   return (
     <div className="mx-auto w-[90%] px-6 py-10">
-
-      <Card className="border border-slate-200/80 bg-white p-6 shadow-xs rounded-2xl">
+      <Card className="rounded-2xl border border-slate-200/80 bg-white p-6 shadow-xs">
         <h2 className="mb-6 text-lg font-bold text-[#081838]">
           Current Assignments
         </h2>
@@ -158,7 +184,16 @@ export default function CurrentAssignment(): React.ReactElement {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {assignments.length === 0 ? (
+              {fetching ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <Spinner size="sm" />
+                      <span>Loading assignments...</span>
+                    </div>
+                  </td>
+                </tr>
+              ) : assignments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-8 text-center text-slate-400">
                     No active assignments found for this teacher.
@@ -234,7 +269,6 @@ export default function CurrentAssignment(): React.ReactElement {
     </div>
   );
 }
-
 
 
 

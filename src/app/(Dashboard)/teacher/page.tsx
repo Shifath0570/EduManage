@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,7 +9,6 @@ import {
   Phone,
   User as UserIcon,
   ShieldAlert,
-  Edit,
   Loader2,
   AlertTriangle,
   RotateCcw,
@@ -24,6 +22,7 @@ import {
   Building
 } from 'lucide-react';
 import { useSession } from '@/app/lib/auth-client';
+import { fetchWithAuth } from '@/app/lib/api';
 
 interface Teacher {
   _id?: string;
@@ -85,7 +84,7 @@ export default function TeacherDetailsPage() {
 
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`);
+        const res = await fetchWithAuth(`${apiURL}/api/teachers/by-user/${teacherId}`);
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -107,7 +106,7 @@ export default function TeacherDetailsPage() {
     if (teacherId) {
       fetchTeacher();
     } else if (!isSessionPending) {
-    //   setLoading(false);
+      setLoading(false);
     }
   }, [teacherId, isSessionPending]);
 
@@ -333,8 +332,3 @@ export default function TeacherDetailsPage() {
     </div>
   );
 }
-
-
-
-
-

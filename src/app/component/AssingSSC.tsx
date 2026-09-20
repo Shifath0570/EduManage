@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import React, { useState, ChangeEvent, FormEvent } from "react";
@@ -13,6 +14,11 @@ interface AssignFormData {
   sectionId: string;
   subjectId: string;
   academicYear: string;
+}
+
+interface JwtResponse {
+  token?: string;
+  message?: string;
 }
 
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
@@ -172,6 +178,19 @@ const AssingSSC = () => {
 
   const isGroupRequired = formData.classId === "class_9" || formData.classId === "class_10";
 
+  const getJwt = async (): Promise<string> => {
+    const response = await fetch("/api/auth/token", {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    const result: JwtResponse = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.token) {
+      throw new Error(result.message || "You must be signed in to manage teachers.");
+    }
+    return result.token;
+  };
+
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
 
@@ -204,23 +223,28 @@ const AssingSSC = () => {
     setSubmitting(true);
 
     try {
-      const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
+      const token = await getJwt();
+      const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
       if (!teacherIdParam) {
         throw new Error("Missing teacher parameter in URL.");
       }
 
-      // 1. Retrieve teacher data safely
-      const teacherRes = await fetch(`${apiURL}/api/teachers/${teacherIdParam}`);
+      // 1. Fetch Teacher Info with Authorization header
+      const teacherRes = await fetch(`${apiURL}/api/teachers/${teacherIdParam}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Fixed Header
+        },
+      });
+
       const teacher = await teacherRes.json();
-      const teacherData = teacher.data
+      const teacherData = teacher.data || teacher;
 
       if (!teacherRes.ok || !teacherData) {
         throw new Error(teacherData?.message || teacherData?.error || "Teacher not found.");
       }
-
-      console.log(teacherData)
-
 
       // Safe extraction of IDs and Names
       const resolvedTeacherId = teacherData?._id || teacherData?.id || teacherIdParam;
@@ -228,7 +252,7 @@ const AssingSSC = () => {
       const teacherEmail = teacherData?.email || "";
       const assignedBy = user?.id ? String(user.id) : "admin";
 
-      // 2. Prepare assignment payload with sanitized fallbacks
+      // 2. Prepare assignment payload
       const payload = {
         teacherName,
         teacherEmail,
@@ -241,19 +265,23 @@ const AssingSSC = () => {
         groupId: isGroupRequired ? formData.groupId : "N/A",
       };
 
-      // 3. Submit assignment
+      // 3. Submit assignment with Authorization header
       const res = await fetch(`${apiURL}/api/assignments`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // ✅ Fixed Header
+        },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        const errorMsg = Array.isArray(data?.errors) && data.errors.length > 0
-          ? data.errors.join("\n• ")
-          : data?.message || "Failed to assign teacher.";
+        const errorMsg =
+          Array.isArray(data?.errors) && data.errors.length > 0
+            ? data.errors.join("\n• ")
+            : data?.message || "Failed to assign teacher.";
         throw new Error(errorMsg);
       }
 
@@ -442,3 +470,7 @@ const AssingSSC = () => {
 };
 
 export default AssingSSC;
+
+
+
+

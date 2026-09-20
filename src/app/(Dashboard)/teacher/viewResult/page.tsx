@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
   Eye,
   AlertCircle,
@@ -21,7 +23,6 @@ import {
   Check,
   ShieldAlert
 } from "lucide-react";
-import { useSession } from "@/app/lib/auth-client";
 
 interface ExamOption {
   _id?: string;
@@ -33,17 +34,10 @@ interface ExamOption {
   subject?: string;
   totalMarks?: number;
   passMarks?: number;
+  createdBy?: string;
   createdByEmail?: string;
-}
-
-interface TeacherAssignment {
-  _id?: string;
-  id?: string;
-  classId: string;
-  groupId?: string;
-  sectionId?: string;
-  subjectId: string;
-  teacherEmail?: string;
+  createdByName?: string;
+  createdByRole?: string;
 }
 
 interface StudentItem {
@@ -76,10 +70,9 @@ interface ResultRecord {
 export default function TeacherViewResult() {
   const router = useRouter();
   const { data: session } = useSession();
-  const user = session?.user;
+  const user = session?.user as { id?: string; name?: string; email?: string; image?: string; role?: string } | undefined;
 
   const [exams, setExams] = useState<ExamOption[]>([]);
-  const [assignments, setAssignments] = useState<TeacherAssignment[]>([]);
   const [selectedExamId, setSelectedExamId] = useState<string>("");
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [selectedStream, setSelectedStream] = useState<string>("");
@@ -89,38 +82,17 @@ export default function TeacherViewResult() {
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [results, setResults] = useState<ResultRecord[]>([]);
   const [loadingExams, setLoadingExams] = useState<boolean>(true);
-  const [loadingAssignments, setLoadingAssignments] = useState<boolean>(true);
   const [loadingResults, setLoadingResults] = useState<boolean>(false);
   const [feedback, setFeedback] = useState<{ type: "info" | "error" | "success"; text: string } | null>(null);
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-
-  // Fetch Teacher Assignments
-  useEffect(() => {
-    async function fetchAssignments() {
-      if (!user?.email) return;
-      setLoadingAssignments(true);
-      try {
-        const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
-        const data = await res.json();
-        if (data.success && Array.isArray(data.data)) {
-          setAssignments(data.data);
-        }
-      } catch (err) {
-        console.error("Error fetching assignments:", err);
-      } finally {
-        setLoadingAssignments(false);
-      }
-    }
-    fetchAssignments();
-  }, [user?.email, API_BASE]);
 
   // Load Exams from API
   useEffect(() => {
     async function fetchExams() {
       setLoadingExams(true);
       try {
-        const res = await fetch(`${API_BASE}/api/exams`);
+        const res = await fetchWithAuth(`${API_BASE}/api/exams`);
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
@@ -148,33 +120,18 @@ export default function TeacherViewResult() {
     return exams.find((ex) => ex._id === selectedExamId || ex.examName === selectedExamId) || null;
   }, [exams, selectedExamId]);
 
-  // Check if teacher is authorized to EDIT marks for current selection
+  // Check if teacher is creator / authorized to EDIT marks for current selection (Exam Creator Rule)
   const canEditCurrentResult = useMemo(() => {
     if (!currentExam) return false;
+    if (user?.role === "admin") return true;
     if (currentExam.createdByEmail && user?.email && currentExam.createdByEmail.toLowerCase() === user.email.toLowerCase()) {
       return true;
     }
-
-    const norm = (str?: string) => (str || "").toLowerCase().replace(/[\s_-]/g, "");
-    const examClassNorm = norm(currentExam.className);
-    const examSubNorm = norm(currentExam.subject);
-    const examStreamNorm = norm(currentExam.stream || currentExam.group);
-    const examSecNorm = (currentExam.section || "A").toUpperCase().replace("SECTION", "").trim();
-
-    return assignments.some((a) => {
-      const matchClass = norm(a.classId) === examClassNorm;
-      const matchSub = !examSubNorm || examSubNorm === "allsubjects" || norm(a.subjectId) === examSubNorm;
-      const matchGroup =
-        !examStreamNorm ||
-        norm(a.groupId) === examStreamNorm ||
-        norm(a.groupId) === "general" ||
-        !a.groupId ||
-        a.groupId === "N/A";
-      const matchSection = !a.sectionId || a.sectionId === "All" || norm(a.sectionId).toUpperCase().replace("SECTION", "").trim() === examSecNorm;
-
-      return matchClass && matchSub && matchGroup && matchSection;
-    });
-  }, [currentExam, assignments, user]);
+    if (currentExam.createdBy && user?.id && String(currentExam.createdBy) === String(user.id)) {
+      return true;
+    }
+    return false;
+  }, [currentExam, user]);
 
   // Constrain Class, Section, Stream, and Subject when selected Exam changes
   useEffect(() => {
@@ -208,7 +165,7 @@ export default function TeacherViewResult() {
           stuUrl += `&stream=${encodeURIComponent(selectedStream)}`;
         }
 
-        const stuRes = await fetch(stuUrl);
+        const stuRes = await fetchWithAuth(stuUrl);
         const stuData = await stuRes.json();
         const studentList: StudentItem[] = stuData.success && Array.isArray(stuData.data) ? stuData.data : [];
 
@@ -224,7 +181,7 @@ export default function TeacherViewResult() {
           markUrl += `&stream=${encodeURIComponent(selectedStream)}`;
         }
 
-        const markRes = await fetch(markUrl);
+        const markRes = await fetchWithAuth(markUrl);
         const markData = await markRes.json();
         const marksList = markData.success && Array.isArray(markData.data) ? markData.data : [];
 

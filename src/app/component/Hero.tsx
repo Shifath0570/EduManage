@@ -72,9 +72,9 @@ const Hero = () => {
 
       <div className="container mx-auto px-6 max-w-7xl relative z-10">
         <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-          
+
           {/* Left Column Text Reveal */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
@@ -92,7 +92,7 @@ const Hero = () => {
             <div className="flex flex-wrap items-center gap-4 pt-1">
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
-                  href="/auth/Login"
+                  href="/blog"
                   className="inline-flex items-center justify-center rounded-full bg-emerald-500 px-8 py-3.5 text-base font-bold text-white shadow-md shadow-emerald-500/20 hover:bg-emerald-600"
                 >
                   Get Started
@@ -101,8 +101,17 @@ const Hero = () => {
 
               <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                 <Link
-                  href="/about"
-                  className="inline-flex items-center justify-center rounded-full border border-slate-900 px-8 py-3.5 text-base font-bold text-slate-900 bg-white/20 hover:bg-white hover:shadow-sm"
+                  href="/routine"
+                  className="inline-flex items-center justify-center gap-2 rounded-full border border-emerald-600 bg-emerald-50/60 px-7 py-3.5 text-base font-bold text-emerald-800 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 transition shadow-2xs"
+                >
+                  <span>Class Routine</span>
+                </Link>
+              </motion.div>
+
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Link
+                  href="#FeaturedSection"
+                  className="inline-flex items-center justify-center rounded-full border border-slate-900 px-7 py-3.5 text-base font-bold text-slate-900 bg-white/20 hover:bg-white hover:shadow-sm transition"
                 >
                   Explore Features
                 </Link>
@@ -111,7 +120,7 @@ const Hero = () => {
 
             <div className="pt-4 flex flex-wrap items-center gap-6 text-sm font-semibold text-slate-900">
               {["Instant Setup", "Role-Based Access", "24/7 Support"].map((item, idx) => (
-                <motion.div 
+                <motion.div
                   key={item}
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -126,7 +135,7 @@ const Hero = () => {
           </motion.div>
 
           {/* Right Column Graphic Frame Animation */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
@@ -144,7 +153,7 @@ const Hero = () => {
                 />
 
                 {/* Animated Floating Reviews Card */}
-                <motion.div 
+                <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.6, duration: 0.6 }}

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 const INITIAL_SEED_BLOGS = [
     {
@@ -27,26 +28,26 @@ By combining quality teaching, modern technology, extracurricular activities, an
         updatedAt: new Date()
     },
     {
-        title: "How Technology Is Changing Education",
-        slug: "how-technology-is-changing-education",
-        description: "Learn how modern technology is transforming classrooms and creating better learning experiences for students.",
+        title: "How Technology & AI Are Changing Education",
+        slug: "how-technology-and-ai-are-changing-education",
+        description: "Learn how modern technology, AI study tools, and smart digital classrooms are transforming learning experiences for students.",
         category: "Technology",
         author: "Technology Department",
         authorEmail: "admin@edumanage.com",
         image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=1200&auto=format&fit=crop",
-        tags: ["Technology", "Innovation", "Digital Learning", "Smart Classroom"],
+        tags: ["Technology", "AI", "Artificial Intelligence", "EdTech", "Innovation", "Digital Learning", "Smart Classroom"],
         status: "published",
         featured: false,
         views: 98,
-        content: `Technology has become an important part of modern education. Digital tools are helping teachers provide more interactive and engaging learning experiences.
+        content: `Technology and Artificial Intelligence (AI) have become an essential part of modern education. Digital tools and smart learning assistants are helping teachers provide more interactive, engaging, and personalized learning experiences.
 
-Online resources, digital classrooms, smart boards, educational applications, and learning management systems allow students to access educational materials more easily.
+Online resources, digital classrooms, smart boards, educational applications, and learning management systems allow students to access high-quality educational materials more easily.
 
-Technology also makes it easier for teachers to monitor student performance and identify areas where students may need additional support.
+Technology also makes it easier for teachers to monitor student performance, detect learning difficulties early, and identify areas where students may need additional support.
 
-However, technology should be used as a tool to support teachers and students rather than completely replacing traditional learning methods.
+However, AI and technology should always be used as empowering tools to support teachers and students rather than completely replacing traditional human guidance and interaction.
 
-Our goal is to use technology responsibly to make education more accessible, engaging, and effective for every student.`,
+Our goal is to use AI and technology responsibly to make education more accessible, engaging, and effective for every student.`,
         createdAt: new Date(),
         updatedAt: new Date()
     },
@@ -170,8 +171,9 @@ export async function GET(req: NextRequest) {
         const featured = searchParams.get("featured");
         const page = parseInt(searchParams.get("page") || "1", 10);
         const limit = parseInt(searchParams.get("limit") || "50", 10);
-        const userRole = (searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        const isAdmin = userRole === "admin";
+
+        const authUser = await getSessionOrJwtUser(req);
+        const isAdmin = authUser?.role === "admin";
 
         const db = await getDatabase();
         const collection = db.collection("Blogs");
@@ -196,11 +198,13 @@ export async function GET(req: NextRequest) {
         }
 
         if (category && category !== "All") {
-            filter.category = { $regex: new RegExp(`^${category.trim()}$`, "i") };
+            const escapedCategory = category.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+            filter.category = { $regex: new RegExp(`^${escapedCategory}$`, "i") };
         }
 
         if (tag && tag !== "All") {
-            filter.tags = { $regex: new RegExp(`^${tag.trim()}$`, "i") };
+            const escapedTag = tag.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+            filter.tags = { $regex: new RegExp(`^${escapedTag}$`, "i") };
         }
 
         if (featured !== null && featured !== undefined) {
@@ -209,12 +213,14 @@ export async function GET(req: NextRequest) {
 
         if (search && search.trim()) {
             const term = search.trim();
+            const safeTerm = term.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+            const words = term.split(/\s+/).filter(Boolean).map(w => w.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&"));
+            const searchTerms = Array.from(new Set([safeTerm, ...words]));
+            const regexList = searchTerms.map(t => new RegExp(t, "i"));
+
             filter.$or = [
-                { title: { $regex: term, $options: "i" } },
-                { description: { $regex: term, $options: "i" } },
-                { content: { $regex: term, $options: "i" } },
-                { author: { $regex: term, $options: "i" } },
-                { category: { $regex: term, $options: "i" } }
+                { title: { $in: regexList } },
+                { tags: { $in: regexList } }
             ];
         }
 
@@ -245,6 +251,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const authUser = await getSessionOrJwtUser(req);
+        if (!authUser || authUser.role !== "admin") {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized: Only administrators can publish blogs." },
+                { status: 403 }
+            );
+        }
+
         const body = await req.json();
         const {
             title,
@@ -258,6 +272,7 @@ export async function POST(req: NextRequest) {
             status = "published",
             featured = false
         } = body;
+
 
         if (!title || !title.trim()) {
             return NextResponse.json({ success: false, message: "Blog title is required." }, { status: 400 });
@@ -304,3 +319,6 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+
+

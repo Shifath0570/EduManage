@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     Calendar,
     CheckCircle2,
@@ -55,7 +56,7 @@ export default function TeacherTakeAttendance() {
     const [assignments, setAssignments] = useState<AssignmentItem[]>([]);
     const [loadingAssignments, setLoadingAssignments] = useState(true);
 
-    const [selectedClass, setSelectedClass] = useState<string>("");
+    const [selectedClass, setSelectedClass] = useState<string>("1");
     const [selectedSection, setSelectedSection] = useState<string>("A");
     const [selectedSubject, setSelectedSubject] = useState<string>("");
     const [selectedDate, setSelectedDate] = useState<string>(
@@ -83,7 +84,7 @@ export default function TeacherTakeAttendance() {
 
             setLoadingAssignments(true);
             try {
-                const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
+                const res = await fetchWithAuth(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
 
                 if (data.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -188,7 +189,7 @@ export default function TeacherTakeAttendance() {
         setMessage(null);
         try {
             // First check if an attendance session already exists for this date, class, section, subject
-            const attRes = await fetch(
+            const attRes = await fetchWithAuth(
                 `${API_BASE}/api/attendance?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&subject=${encodeURIComponent(selectedSubject)}&date=${encodeURIComponent(selectedDate)}&userRole=teacher&teacherEmail=${encodeURIComponent(user?.email || "")}`
             );
             const attData = await attRes.json();
@@ -207,7 +208,7 @@ export default function TeacherTakeAttendance() {
             }
 
             // Otherwise, fetch enrolled students dynamically from DB for this class and section
-            const stuRes = await fetch(
+            const stuRes = await fetchWithAuth(
                 `${API_BASE}/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&status=Active`
             );
             const stuData = await stuRes.json();
@@ -297,7 +298,7 @@ export default function TeacherTakeAttendance() {
                 records: students
             };
 
-            const res = await fetch(`${API_BASE}/api/attendance`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -323,7 +324,7 @@ export default function TeacherTakeAttendance() {
             console.error("Save attendance error:", err);
             setMessage({
                 type: "error",
-                text: "Failed to connect to the backend server."
+                text: "Network error occurred while saving attendance session."
             });
         } finally {
             setSaving(false);
@@ -347,21 +348,23 @@ export default function TeacherTakeAttendance() {
                 {/* Header */}
                 <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <div className="flex items-center gap-2.5">
-                            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#03204c] text-white shadow-md shadow-[#03204c]/20">
-                                <BookOpen className="h-5 w-5" />
+                        <div className="flex items-center gap-3">
+                            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20">
+                                <BookOpen className="h-5 w-5 stroke-[2.3]" />
                             </span>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                                Take Attendance
-                            </h1>
+                            <div>
+                                <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900">
+                                    Take Attendance
+                                </h1>
+                                <p className="text-xs sm:text-sm font-medium text-slate-500">
+                                    Mark daily student attendance for your assigned classes and subjects.
+                                </p>
+                            </div>
                         </div>
-                        <p className="mt-1 text-sm text-slate-500">
-                            Mark daily student attendance for your assigned classes and subjects.
-                        </p>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50/80 px-3.5 py-2 text-xs font-semibold text-blue-800">
-                        <Users className="h-4 w-4 text-blue-600 shrink-0" />
+                    <div className="flex items-center gap-2 rounded-2xl border border-emerald-200/80 bg-emerald-50/80 px-4 py-2 text-xs font-bold text-emerald-800 shadow-xs">
+                        <Users className="h-4 w-4 text-emerald-600 shrink-0" />
                         <span>Teacher Portal • Assigned Classes Only</span>
                     </div>
                 </div>
@@ -378,17 +381,17 @@ export default function TeacherTakeAttendance() {
                 )}
 
                 {/* Selection Configuration Bar */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs">
+                <div className="rounded-3xl border border-slate-200/80 bg-white p-6 shadow-sm shadow-slate-900/5">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xs font-bold uppercase tracking-wider text-slate-500 flex items-center gap-2">
-                            <Layers className="h-4 w-4 text-[#03204c]" />
-                            Assigned Class & Session Selection
+                            <Layers className="h-4 w-4 text-emerald-600" />
+                            Assigned Class &amp; Session Selection
                         </h2>
                         <button
                             type="button"
                             onClick={loadRoster}
                             disabled={!selectedClass || assignedClassOptions.length === 0}
-                            className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-[#03204c] transition disabled:opacity-40"
+                            className="flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-emerald-600 transition disabled:opacity-40"
                         >
                             <RotateCcw className="h-3.5 w-3.5" /> Reload Roster
                         </button>
@@ -397,14 +400,14 @@ export default function TeacherTakeAttendance() {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                         {/* Assigned Classes */}
                         <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Assigned Class
                             </label>
                             <select
                                 value={selectedClass}
                                 onChange={(e) => handleClassChange(e.target.value)}
                                 disabled={loadingAssignments || assignedClassOptions.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {loadingAssignments ? (
                                     <option value="">Loading assignments...</option>
@@ -422,14 +425,14 @@ export default function TeacherTakeAttendance() {
 
                         {/* Assigned Section */}
                         <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Assigned Section
                             </label>
                             <select
                                 value={selectedSection}
                                 onChange={(e) => handleSectionChange(e.target.value)}
                                 disabled={loadingAssignments || assignedSectionOptions.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {assignedSectionOptions.map((sec) => (
                                     <option key={sec} value={sec}>
@@ -441,14 +444,14 @@ export default function TeacherTakeAttendance() {
 
                         {/* Assigned Subject */}
                         <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Assigned Subject
                             </label>
                             <select
                                 value={selectedSubject}
                                 onChange={(e) => setSelectedSubject(e.target.value)}
                                 disabled={loadingAssignments || assignedSubjectOptions.length === 0}
-                                className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20 disabled:opacity-50"
+                                className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 disabled:opacity-50"
                             >
                                 {assignedSubjectOptions.length === 0 ? (
                                     <option value="">No Assigned Subjects</option>
@@ -464,7 +467,7 @@ export default function TeacherTakeAttendance() {
 
                         {/* Date */}
                         <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                            <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                                 Attendance Date
                             </label>
                             <div className="relative">
@@ -472,9 +475,9 @@ export default function TeacherTakeAttendance() {
                                     type="date"
                                     value={selectedDate}
                                     onChange={(e) => setSelectedDate(e.target.value)}
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50/60 px-3.5 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-[#03204c] focus:bg-white focus:ring-2 focus:ring-[#03204c]/20"
+                                    className="w-full rounded-2xl border border-slate-200 bg-slate-50/60 px-4 py-2.5 text-sm font-semibold text-slate-800 outline-none transition focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                                 />
-                                <Calendar className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                                <Calendar className="pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                             </div>
                         </div>
                     </div>
@@ -483,18 +486,18 @@ export default function TeacherTakeAttendance() {
                 {/* Notifications & Feedback */}
                 {message && (
                     <div
-                        className={`flex items-center gap-3 rounded-xl p-4 text-sm font-medium border ${
+                        className={`flex items-center gap-3 rounded-2xl p-4 text-sm font-semibold border ${
                             message.type === "success"
-                                ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                                ? "bg-emerald-50 text-emerald-900 border-emerald-200"
                                 : message.type === "info"
-                                ? "bg-blue-50 text-blue-800 border-blue-200"
-                                : "bg-rose-50 text-rose-800 border-rose-200"
+                                ? "bg-teal-50 text-teal-900 border-teal-200"
+                                : "bg-rose-50 text-rose-900 border-rose-200"
                         }`}
                     >
                         {message.type === "success" ? (
                             <CheckCircle2 className="h-5 w-5 text-emerald-600 shrink-0" />
                         ) : message.type === "info" ? (
-                            <HelpCircle className="h-5 w-5 text-blue-600 shrink-0" />
+                            <HelpCircle className="h-5 w-5 text-teal-600 shrink-0" />
                         ) : (
                             <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
                         )}
@@ -504,77 +507,77 @@ export default function TeacherTakeAttendance() {
 
                 {/* Live Metrics */}
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-                    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-slate-500">Total Enrolled</span>
+                    <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-xs">
+                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Enrolled</span>
                         <div className="mt-1 flex items-baseline gap-2">
-                            <span className="text-2xl font-bold text-slate-900">{students.length}</span>
-                            <span className="text-xs text-slate-400">Students</span>
+                            <span className="text-2xl font-extrabold text-slate-900">{students.length}</span>
+                            <span className="text-xs font-medium text-slate-400">Students</span>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-emerald-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1">
                             <CheckCircle2 className="h-3.5 w-3.5" /> Present
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-emerald-700">{presentCount}</span>
+                            <span className="text-2xl font-extrabold text-emerald-700">{presentCount}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-rose-200 bg-rose-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-rose-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-rose-200/80 bg-rose-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold text-rose-700 uppercase tracking-wider flex items-center gap-1">
                             <XCircle className="h-3.5 w-3.5" /> Absent
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-rose-700">{absentCount}</span>
+                            <span className="text-2xl font-extrabold text-rose-700">{absentCount}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-amber-700 flex items-center gap-1">
+                    <div className="rounded-2xl border border-amber-200/80 bg-amber-50/60 p-4 shadow-xs">
+                        <span className="text-xs font-bold text-amber-700 uppercase tracking-wider flex items-center gap-1">
                             <Clock className="h-3.5 w-3.5" /> Late
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-amber-700">{lateCount}</span>
+                            <span className="text-2xl font-extrabold text-amber-700">{lateCount}</span>
                         </div>
                     </div>
 
-                    <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-4 shadow-xs">
-                        <span className="text-xs font-semibold text-indigo-700 flex items-center gap-1">
-                            <Sparkles className="h-3.5 w-3.5" /> Attendance Rate
+                    <div className="rounded-2xl border border-emerald-200/80 bg-emerald-50/70 p-4 shadow-xs">
+                        <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                            <Sparkles className="h-3.5 w-3.5 text-emerald-600" /> Attendance Rate
                         </span>
                         <div className="mt-1">
-                            <span className="text-2xl font-bold text-indigo-700">{attendancePercentage}%</span>
+                            <span className="text-2xl font-extrabold text-emerald-800">{attendancePercentage}%</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Student Roster Table Card */}
-                <div className="rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden">
+                <div className="rounded-3xl border border-slate-200/80 bg-white shadow-sm shadow-slate-900/5 overflow-hidden">
                     {/* Header Controls */}
-                    <div className="flex flex-col gap-3 border-b border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex flex-col gap-3 border-b border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between">
                         <div>
                             <h3 className="text-base font-bold text-slate-900">
                                 Student Roster • Class {selectedClass}-{selectedSection}
                             </h3>
-                            <p className="text-xs text-slate-500">
-                                Subject: <span className="font-semibold text-slate-700">{selectedSubject}</span> | Date: <span className="font-semibold text-slate-700">{selectedDate}</span>
+                            <p className="text-xs font-medium text-slate-500">
+                                Subject: <span className="font-bold text-slate-700">{selectedSubject}</span> | Date: <span className="font-bold text-slate-700">{selectedDate}</span>
                             </p>
                         </div>
 
                         {students.length > 0 && (
-                            <div className="flex flex-wrap items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2.5">
                                 <button
                                     type="button"
                                     onClick={() => handleMarkAll("PRESENT")}
-                                    className="flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 transition"
+                                    className="flex items-center gap-1.5 rounded-xl border border-emerald-200 bg-emerald-50 px-3.5 py-2 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition active:scale-95"
                                 >
                                     <CheckCheck className="h-3.5 w-3.5" /> Mark All Present
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => handleMarkAll("ABSENT")}
-                                    className="flex items-center gap-1.5 rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-100 transition"
+                                    className="flex items-center gap-1.5 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2 text-xs font-bold text-rose-700 hover:bg-rose-100 transition active:scale-95"
                                 >
                                     <XCircle className="h-3.5 w-3.5" /> Mark All Absent
                                 </button>
@@ -628,7 +631,7 @@ export default function TeacherTakeAttendance() {
                                                         const isSelected = student.status === st;
                                                         const colorMap = {
                                                             PRESENT: isSelected
-                                                                ? "bg-emerald-600 text-white shadow-xs"
+                                                                ? "bg-emerald-500 text-white shadow-xs"
                                                                 : "bg-slate-100 text-slate-600 hover:bg-emerald-50 hover:text-emerald-700",
                                                             ABSENT: isSelected
                                                                 ? "bg-rose-600 text-white shadow-xs"
@@ -646,7 +649,7 @@ export default function TeacherTakeAttendance() {
                                                                 key={st}
                                                                 type="button"
                                                                 onClick={() => handleStatusChange(student.studentId, st)}
-                                                                className={`rounded-lg px-2.5 py-1 text-xs font-bold transition ${colorMap[st]}`}
+                                                                className={`rounded-xl px-3 py-1.5 text-xs font-bold transition ${colorMap[st]}`}
                                                             >
                                                                 {st}
                                                             </button>
@@ -667,7 +670,7 @@ export default function TeacherTakeAttendance() {
                                                             )
                                                         );
                                                     }}
-                                                    className="w-full max-w-[200px] rounded-lg border border-slate-200 bg-slate-50/50 px-2.5 py-1 text-xs text-slate-700 outline-none focus:border-[#03204c] focus:bg-white"
+                                                    className="w-full max-w-[200px] rounded-xl border border-slate-200 bg-slate-50/50 px-3 py-1.5 text-xs font-medium text-slate-700 outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-500/15"
                                                 />
                                             </td>
                                         </tr>
@@ -678,19 +681,19 @@ export default function TeacherTakeAttendance() {
                     </div>
 
                     {/* Footer / Submit */}
-                    <div className="flex flex-col gap-3 border-t border-slate-100 p-4 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
-                        <div className="text-xs text-slate-500">
-                            Recording as: <span className="font-semibold text-slate-800">{user?.name || "Teacher"}</span> ({user?.email || "teacher@edumanage.com"})
+                    <div className="flex flex-col gap-3 border-t border-slate-100 p-5 sm:flex-row sm:items-center sm:justify-between bg-slate-50/40">
+                        <div className="text-xs font-medium text-slate-500">
+                            Recording as: <span className="font-bold text-slate-800">{user?.name || "Teacher"}</span> ({user?.email || "teacher@edumanage.com"})
                         </div>
 
                         <button
                             type="button"
                             onClick={handleSaveAttendance}
                             disabled={saving || students.length === 0}
-                            className="flex items-center justify-center gap-2 rounded-xl bg-[#03204c] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-[#03204c]/20 hover:bg-[#02183a] transition disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 px-7 py-3 text-sm font-bold text-white shadow-lg shadow-emerald-500/25 transition-all duration-200 hover:from-emerald-600 hover:to-teal-700 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <Save className="h-4 w-4" />
-                            {saving ? "Saving to Database..." : "Save Attendance"}
+                            <span>{saving ? "Saving to Database..." : "Save Attendance"}</span>
                         </button>
                     </div>
                 </div>

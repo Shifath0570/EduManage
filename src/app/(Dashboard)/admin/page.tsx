@@ -14,6 +14,7 @@ import {
   Calendar,
   FileText,
   Menu,
+  Mail,
 } from "lucide-react";
 import {
   PieChart,
@@ -95,6 +96,11 @@ interface EventItem {
   colorClass: string;
 }
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+}
+
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -164,7 +170,19 @@ export default function AdminDashboardPage() {
     { id: "4", dateDay: "20", dateMonth: "Sep", title: "Science Fair", fullDate: "Saturday, 20 September 2024", colorClass: "bg-purple-600" },
   ]);
 
-  // Calculation Helpers defined before useEffect or using function declarations for hoisting
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "Authentication required. Please sign in again."); 
+    } 
+    return result.token; 
+  }; 
+
   function calculateFallbackStudentStats(list: Student[]) {
     const totalCount = list.length;
     const maleCount = list.filter((s) => s.gender?.toLowerCase() === "male").length;
@@ -183,15 +201,36 @@ export default function AdminDashboardPage() {
     setTeacherGender({ male: maleCount, female: femaleCount });
   }
 
+  const [unreadInquiries, setUnreadInquiries] = useState<number>(0);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        const token = await getJwt(); 
         const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
 
-        const [studentsRes, teachersRes] = await Promise.allSettled([
-          fetch(`${apiURL}/api/students`),
-          fetch(`${apiURL}/api/teachers`),
+        const authHeaders = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        const [studentsRes, teachersRes, contactRes] = await Promise.allSettled([
+          fetch(`${apiURL}/api/students`, { headers: authHeaders }),
+          fetch(`${apiURL}/api/teachers`, { headers: authHeaders }),
+          fetch(`/api/contact?userRole=admin&limit=1`, { 
+            headers: { 
+              ...authHeaders,
+              "x-user-role": "admin" 
+            } 
+          }),
         ]);
+
+        if (contactRes.status === "fulfilled" && contactRes.value.ok) {
+          const contactData = await contactRes.value.json();
+          if (contactData.success && typeof contactData.unreadCount === "number") {
+            setUnreadInquiries(contactData.unreadCount);
+          }
+        }
 
         if (studentsRes.status === "fulfilled" && studentsRes.value.ok) {
           const data = await studentsRes.value.json();
@@ -226,7 +265,7 @@ export default function AdminDashboardPage() {
           calculateFallbackTeacherStats(teachersList);
         }
       } catch (err) {
-        console.log("Using fallback overview state:", err);
+        console.log("Using fallback overview state due to authentication or network error:", err);
         calculateFallbackStudentStats(recentStudents);
         calculateFallbackTeacherStats(teachersList);
       } finally {
@@ -266,6 +305,31 @@ export default function AdminDashboardPage() {
           </p>
         </div>
       </div>
+
+      {/* Unread Contact Inquiries Alert Banner */}
+      {unreadInquiries > 0 && (
+        <div className="mb-6 flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50/90 p-4 text-amber-900 shadow-2xs animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-500 text-white shadow-xs">
+              <Mail className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold">
+                You have {unreadInquiries} unread website contact {unreadInquiries === 1 ? "inquiry" : "inquiries"}!
+              </p>
+              <p className="text-[11px] text-amber-700">
+                Review messages submitted by school administrators, teachers, and parents.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/admin/contactMessages"
+            className="shrink-0 rounded-full bg-amber-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-amber-700 transition shadow-xs"
+          >
+            View Inbox →
+          </Link>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <Card className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md transition">
@@ -576,4 +640,10 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+
+
+
+
+
 

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -9,7 +8,6 @@ import {
   Phone,
   User as UserIcon,
   ShieldAlert,
-  Edit,
   Loader2,
   AlertTriangle,
   RotateCcw,
@@ -23,6 +21,8 @@ import {
   BookMarked
 } from 'lucide-react';
 import { useSession } from '@/app/lib/auth-client';
+import { fetchWithAuth } from '@/app/lib/api';
+import AIPerformanceInsightCard from '@/app/component/AIPerformanceInsightCard';
 
 interface Student {
   _id?: string;
@@ -87,7 +87,7 @@ export default function StudentDetailsPage() {
 
       try {
         const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiURL}/api/students/by-user/${stuId}`);
+        const res = await fetchWithAuth(`${apiURL}/api/students/by-user/${stuId}`);
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -109,7 +109,7 @@ export default function StudentDetailsPage() {
     if (stuId) {
       fetchStudent();
     } else if (!isSessionPending) {
-    //   setLoading(false);
+      setLoading(false);
     }
   }, [stuId, isSessionPending]);
 
@@ -155,9 +155,15 @@ export default function StudentDetailsPage() {
   }
 
   return (
-    <div className="mx-auto w-[90%] px-6 py-10 space-y-6 font-sans text-slate-800">
+    <div className="mx-auto w-[90%] px-6 py-8 space-y-8 font-sans text-slate-800">
+      {/* AI-Powered Student Performance Insight Card */}
+      <AIPerformanceInsightCard
+        userEmail={student.email || session?.user?.email}
+        userId={student.studentId || student._id || stuId}
+      />
+
       {/* Top Navigation */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-2">
         <div className="flex items-center gap-3">
           <div>
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
@@ -334,8 +340,3 @@ export default function StudentDetailsPage() {
     </div>
   );
 }
-
-
-
-
-
