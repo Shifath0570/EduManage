@@ -96,6 +96,11 @@ interface EventItem {
   colorClass: string;
 }
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+}
+
 export default function AdminDashboardPage() {
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -165,7 +170,19 @@ export default function AdminDashboardPage() {
     { id: "4", dateDay: "20", dateMonth: "Sep", title: "Science Fair", fullDate: "Saturday, 20 September 2024", colorClass: "bg-purple-600" },
   ]);
 
-  // Calculation Helpers defined before useEffect or using function declarations for hoisting
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "Authentication required. Please sign in again."); 
+    } 
+    return result.token; 
+  }; 
+
   function calculateFallbackStudentStats(list: Student[]) {
     const totalCount = list.length;
     const maleCount = list.filter((s) => s.gender?.toLowerCase() === "male").length;
@@ -189,12 +206,23 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
+        const token = await getJwt(); 
         const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
 
+        const authHeaders = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
         const [studentsRes, teachersRes, contactRes] = await Promise.allSettled([
-          fetch(`${apiURL}/api/students`),
-          fetch(`${apiURL}/api/teachers`),
-          fetch(`/api/contact?userRole=admin&limit=1`, { headers: { "x-user-role": "admin" } }),
+          fetch(`${apiURL}/api/students`, { headers: authHeaders }),
+          fetch(`${apiURL}/api/teachers`, { headers: authHeaders }),
+          fetch(`/api/contact?userRole=admin&limit=1`, { 
+            headers: { 
+              ...authHeaders,
+              "x-user-role": "admin" 
+            } 
+          }),
         ]);
 
         if (contactRes.status === "fulfilled" && contactRes.value.ok) {
@@ -237,7 +265,7 @@ export default function AdminDashboardPage() {
           calculateFallbackTeacherStats(teachersList);
         }
       } catch (err) {
-        console.log("Using fallback overview state:", err);
+        console.log("Using fallback overview state due to authentication or network error:", err);
         calculateFallbackStudentStats(recentStudents);
         calculateFallbackTeacherStats(teachersList);
       } finally {
@@ -612,4 +640,10 @@ export default function AdminDashboardPage() {
     </div>
   );
 }
+
+
+
+
+
+
 

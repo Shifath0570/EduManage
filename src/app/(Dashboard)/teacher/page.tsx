@@ -53,6 +53,11 @@ interface CustomUser {
   _id?: string;
 }
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
 export default function TeacherDetailsPage() {
   const { data: session, isPending: isSessionPending, error: sessionError } = useSession();
   const user = session?.user as CustomUser | undefined;
@@ -61,6 +66,20 @@ export default function TeacherDetailsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [imgError, setImgError] = useState<boolean>(false);
+
+  // Function to retrieve JWT from internal endpoint
+  const getJwt = async (): Promise<string> => {
+    const response = await fetch('/api/auth/token', {
+      credentials: 'include',
+      headers: { Accept: 'application/json' },
+    });
+    const result: JwtResponse = await response.json().catch(() => ({}));
+
+    if (!response.ok || !result.token) {
+      throw new Error(result.message || 'You must be signed in to view teacher details.');
+    }
+    return result.token;
+  };
 
   const teacherId = user?.id || user?._id;
 
@@ -84,8 +103,19 @@ export default function TeacherDetailsPage() {
       setError(null);
 
       try {
+        // 1. Fetch JWT Token
+        const token = await getJwt();
+
         const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
-        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`);
+
+        // 2. Fetch API resource using the Bearer token in headers
+        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!res.ok) {
           if (res.status === 404) {
@@ -107,7 +137,7 @@ export default function TeacherDetailsPage() {
     if (teacherId) {
       fetchTeacher();
     } else if (!isSessionPending) {
-    //   setLoading(false);
+      setLoading(false);
     }
   }, [teacherId, isSessionPending]);
 
@@ -333,8 +363,5 @@ export default function TeacherDetailsPage() {
     </div>
   );
 }
-
-
-
 
 

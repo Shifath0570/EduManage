@@ -35,8 +35,12 @@ interface LeaveRequestItem {
   createdAt: string;
 }
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
 export default function TeacherLeaveRequestPage() {
-  // FIXED: Destructured `isPending` directly from `useSession()`
   const { data: session, isPending } = useSession();
 
   const user = session?.user as
@@ -71,7 +75,20 @@ export default function TeacherLeaveRequestPage() {
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
 
-  const BACKEND_API_URL = "http://localhost:5000/api/teacher-leave-requests";
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to perform this action."); 
+    } 
+    return result.token; 
+  };
+
+  const BACKEND_API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/teacher-leave-requests`;
 
   // Fetch extra teacher profile details if user ID is available
   useEffect(() => {
@@ -80,8 +97,15 @@ export default function TeacherLeaveRequestPage() {
       if (!teacherId) return;
 
       try {
-        const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`);
+        const token = await getJwt(); 
+        const apiURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
         if (res.ok) {
           const data = await res.json();
           setTeacherData({
@@ -103,8 +127,15 @@ export default function TeacherLeaveRequestPage() {
     if (!user?.id) return;
     setIsLoadingRequests(true);
     try {
-      const res = await fetch(`${BACKEND_API_URL}?userId=${user.id}`);
+      const token = await getJwt(); 
+      const res = await fetch(`${BACKEND_API_URL}?userId=${user.id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
       const data = await res.json();
+
       if (data.success) {
         const userOnlyData = data.data.filter(
           (item: LeaveRequestItem) => item.userId === user.id
@@ -113,7 +144,7 @@ export default function TeacherLeaveRequestPage() {
       }
     } catch (err) {
       console.error("Failed to load requests:", err);
-    } finally {
+    } {
       setIsLoadingRequests(false);
     }
   };
@@ -140,9 +171,13 @@ export default function TeacherLeaveRequestPage() {
     setIsAiGenerating(true);
 
     try {
+      const token = await getJwt();
       const res = await fetch("/api/leave/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           teacherName: teacherData.name,
           department: teacherData.department,
@@ -196,9 +231,13 @@ export default function TeacherLeaveRequestPage() {
     };
 
     try {
+      const token = await getJwt();
       const res = await fetch(BACKEND_API_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify(payload),
       });
 
@@ -234,8 +273,13 @@ export default function TeacherLeaveRequestPage() {
     setDeletingId(id);
 
     try {
+      const token = await getJwt();
       const res = await fetch(`${BACKEND_API_URL}/${id}`, {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       const data = await res.json();
@@ -576,6 +620,9 @@ export default function TeacherLeaveRequestPage() {
     </div>
   );
 }
+
+
+
 
 
 
