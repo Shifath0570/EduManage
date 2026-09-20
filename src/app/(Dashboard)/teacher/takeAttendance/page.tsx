@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     Calendar,
     CheckCircle2,
@@ -83,7 +84,7 @@ export default function TeacherTakeAttendance() {
 
             setLoadingAssignments(true);
             try {
-                const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
+                const res = await fetchWithAuth(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
 
                 if (data.success && Array.isArray(data.data) && data.data.length > 0) {
@@ -188,7 +189,7 @@ export default function TeacherTakeAttendance() {
         setMessage(null);
         try {
             // First check if an attendance session already exists for this date, class, section, subject
-            const attRes = await fetch(
+            const attRes = await fetchWithAuth(
                 `${API_BASE}/api/attendance?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&subject=${encodeURIComponent(selectedSubject)}&date=${encodeURIComponent(selectedDate)}&userRole=teacher&teacherEmail=${encodeURIComponent(user?.email || "")}`
             );
             const attData = await attRes.json();
@@ -207,7 +208,7 @@ export default function TeacherTakeAttendance() {
             }
 
             // Otherwise, fetch enrolled students dynamically from DB for this class and section
-            const stuRes = await fetch(
+            const stuRes = await fetchWithAuth(
                 `${API_BASE}/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&status=Active`
             );
             const stuData = await stuRes.json();
@@ -297,7 +298,7 @@ export default function TeacherTakeAttendance() {
                 records: students
             };
 
-            const res = await fetch(`${API_BASE}/api/attendance`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -323,7 +324,7 @@ export default function TeacherTakeAttendance() {
             console.error("Save attendance error:", err);
             setMessage({
                 type: "error",
-                text: "Failed to connect to the backend server."
+                text: "Network error occurred while saving attendance session."
             });
         } finally {
             setSaving(false);
