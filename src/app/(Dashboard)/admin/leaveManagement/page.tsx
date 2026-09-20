@@ -30,6 +30,11 @@ interface LeaveRequest {
   createdAt: string;
 }
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+}
+
 export default function AdminLeaveManagementPage() {
   const [applicantType, setApplicantType] = useState<"TEACHER" | "STUDENT">("TEACHER");
   const [statusFilter, setStatusFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
@@ -40,6 +45,19 @@ export default function AdminLeaveManagementPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || " You must be signed in to access this page."); 
+    } 
+    return result.token; 
+  }; 
+
   // Backend Endpoints
   const TEACHER_API = `${process.env.NEXT_PUBLIC_API_URL}/api/teacher-leave-requests`;
   const STUDENT_API = `${process.env.NEXT_PUBLIC_API_URL}/api/student-leave-requests`;
@@ -48,21 +66,27 @@ export default function AdminLeaveManagementPage() {
   const handleTabChange = (type: "TEACHER" | "STUDENT") => {
     if (applicantType === type) return;
     setApplicantType(type);
-    setSelectedRequest(null); // Clear selected request modal on tab switch
-    setRequests([]); // Clear previous state instantly so stale data isn't rendered
+    setSelectedRequest(null);
+    setRequests([]);
   };
 
   useEffect(() => {
-    let isSubscribed = true; // Prevent race conditions
+    let isSubscribed = true;
     setIsLoading(true);
 
     const fetchRequests = async () => {
       const targetUrl = applicantType === "TEACHER" ? TEACHER_API : STUDENT_API;
       try {
-        const res = await fetch(targetUrl);
+        const token = await getJwt(); 
+        const res = await fetch(targetUrl, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await res.json();
 
-        if (isSubscribed && data.success) {
+        if (isSubscribed && res.ok && data.success) {
           const formatted: LeaveRequest[] = data.data.map((item: any) => ({
             _id: item._id,
             applicantType,
@@ -73,8 +97,9 @@ export default function AdminLeaveManagementPage() {
             identifier:
               applicantType === "TEACHER"
                 ? item.teacher?.subject || item.subject || "N/A"
-                : `${item.student?.grade || item.grade || "N/A"} (Roll: ${item.student?.rollNumber || item.rollNumber || "N/A"
-                })`,
+                : `${item.student?.grade || item.grade || "N/A"} (Roll: ${
+                    item.student?.rollNumber || item.rollNumber || "N/A"
+                  })`,
             email: item.teacher?.email || item.student?.email || item.email || "",
             leaveType: item.leaveType,
             startDate: item.startDate,
@@ -86,7 +111,7 @@ export default function AdminLeaveManagementPage() {
           }));
           setRequests(formatted);
         }
-      } catch (err) {
+      } catch (err: any) {
         if (isSubscribed) {
           console.error("Failed to fetch leave requests:", err);
           setRequests([]);
@@ -101,7 +126,7 @@ export default function AdminLeaveManagementPage() {
     fetchRequests();
 
     return () => {
-      isSubscribed = false; // Clean up stale promises on fast toggles
+      isSubscribed = false;
     };
   }, [applicantType]);
 
@@ -111,9 +136,13 @@ export default function AdminLeaveManagementPage() {
     const targetUrl = applicantType === "TEACHER" ? `${TEACHER_API}/${id}` : `${STUDENT_API}/${id}`;
 
     try {
+      const token = await getJwt(); 
       const res = await fetch(targetUrl, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
+        },
         body: JSON.stringify({ status: newStatus }),
       });
 
@@ -170,19 +199,21 @@ export default function AdminLeaveManagementPage() {
           <div className="flex bg-slate-200/60 p-1 rounded-2xl border border-slate-200 self-start md:self-auto">
             <button
               onClick={() => handleTabChange("TEACHER")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${applicantType === "TEACHER"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                applicantType === "TEACHER"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:text-slate-900"
-                }`}
+              }`}
             >
               <UserCheck className="w-4 h-4" /> Teachers
             </button>
             <button
               onClick={() => handleTabChange("STUDENT")}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${applicantType === "STUDENT"
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                applicantType === "STUDENT"
                   ? "bg-emerald-600 text-white shadow-md shadow-emerald-600/20"
                   : "text-slate-600 hover:text-slate-900"
-                }`}
+              }`}
             >
               <GraduationCap className="w-4 h-4" /> Students
             </button>
@@ -240,10 +271,11 @@ export default function AdminLeaveManagementPage() {
                 <button
                   key={st}
                   onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${statusFilter === st
+                  className={`px-3 py-1.5 rounded-lg capitalize transition-all ${
+                    statusFilter === st
                       ? "bg-white text-emerald-700 shadow-xs font-bold"
                       : "text-slate-500 hover:text-slate-800"
-                    }`}
+                  }`}
                 >
                   {st}
                 </button>
@@ -326,15 +358,17 @@ export default function AdminLeaveManagementPage() {
                               <button
                                 onClick={() => handleUpdateStatus(req._id, "approved")}
                                 disabled={actionLoadingId === req._id}
-                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-xs transition-colors disabled:opacity-50"
+                                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1"
                               >
+                                {actionLoadingId === req._id && <Loader2 className="w-3 h-3 animate-spin" />}
                                 Approve
                               </button>
                               <button
                                 onClick={() => handleUpdateStatus(req._id, "rejected")}
                                 disabled={actionLoadingId === req._id}
-                                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-xs transition-colors disabled:opacity-50"
+                                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg shadow-xs transition-colors disabled:opacity-50 flex items-center gap-1"
                               >
+                                {actionLoadingId === req._id && <Loader2 className="w-3 h-3 animate-spin" />}
                                 Reject
                               </button>
                             </>
@@ -394,14 +428,18 @@ export default function AdminLeaveManagementPage() {
               <div className="flex gap-2 pt-2">
                 <button
                   onClick={() => handleUpdateStatus(selectedRequest._id, "approved")}
-                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors"
+                  disabled={actionLoadingId === selectedRequest._id}
+                  className="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition-colors disabled:opacity-50 flex justify-center items-center gap-1"
                 >
+                  {actionLoadingId === selectedRequest._id && <Loader2 className="w-3 h-3 animate-spin" />}
                   Approve Application
                 </button>
                 <button
                   onClick={() => handleUpdateStatus(selectedRequest._id, "rejected")}
-                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors"
+                  disabled={actionLoadingId === selectedRequest._id}
+                  className="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition-colors disabled:opacity-50 flex justify-center items-center gap-1"
                 >
+                  {actionLoadingId === selectedRequest._id && <Loader2 className="w-3 h-3 animate-spin" />}
                   Reject Application
                 </button>
               </div>
@@ -412,5 +450,10 @@ export default function AdminLeaveManagementPage() {
     </div>
   );
 }
+
+
+
+
+
 
 

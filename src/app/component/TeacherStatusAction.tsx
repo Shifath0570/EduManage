@@ -11,6 +11,11 @@ interface TeacherStatusActionProps {
   onSuccess?: () => void;
 }
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+}
+
 export function TeacherStatusAction({
   teacherId,
   teacherName,
@@ -24,16 +29,31 @@ export function TeacherStatusAction({
   const isActive = currentStatus === "Active";
   const newStatus = isActive ? "Inactive" : "Active";
 
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  }; 
+
   const handleToggleStatus = async () => {
     setLoading(true);
     setError(null);
 
     try {
+      const token = await getJwt(); 
       const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
       const res = await fetch(`${apiURL}/api/teachers/${teacherId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}` 
         },
         body: JSON.stringify({
           status: newStatus,

@@ -16,10 +16,7 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/createStudent/student',
-    '/admin/createStudent',
-    '/admin/createTeacher/teacher',
-    '/admin/createTeacher',
+    '/admin',
     '/admin/manageTeachers',
     '/admin/manageStudents',
     '/admin/viewAttendance',

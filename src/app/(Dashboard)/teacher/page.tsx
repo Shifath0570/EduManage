@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -10,7 +9,6 @@ import {
   Phone,
   User as UserIcon,
   ShieldAlert,
-  Edit,
   Loader2,
   AlertTriangle,
   RotateCcw,
@@ -108,7 +106,7 @@ export default function TeacherDetailsPage() {
     if (teacherId) {
       fetchTeacher();
     } else if (!isSessionPending) {
-    //   setLoading(false);
+      setLoading(false);
     }
   }, [teacherId, isSessionPending]);
 
@@ -334,8 +332,3 @@ export default function TeacherDetailsPage() {
     </div>
   );
 }
-
-
-
-
-

@@ -12,6 +12,7 @@ import { signOut, useSession } from "../lib/auth-client";
 const baseNavItems = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
+  { label: "Routine", href: "/routine" },
   { label: "Notice", href: "/notice" },
   { label: "Blog", href: "/blog" },
   { label: "Chat", href: "/chat" },
