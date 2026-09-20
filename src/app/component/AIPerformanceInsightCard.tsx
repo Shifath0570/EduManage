@@ -2,7 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { Sparkles, Award } from "lucide-react";
+<<<<<<< HEAD
 import { fetchWithAuth } from "@/app/lib/api";
+=======
+>>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 
 export interface StudentInsightData {
   studentId: string;
@@ -43,7 +46,11 @@ export default function AIPerformanceInsightCard({ userEmail, userId }: AIPerfor
       if (userEmail) queryParams.set("email", userEmail);
       if (userId) queryParams.set("userId", userId);
 
+<<<<<<< HEAD
       const res = await fetchWithAuth(`${API_BASE}/api/marks/performance-insight?${queryParams.toString()}`);
+=======
+      const res = await fetch(`${API_BASE}/api/marks/performance-insight?${queryParams.toString()}`);
+>>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
       const json = await res.json();
 
       if (!res.ok || !json.success) {
