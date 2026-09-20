@@ -52,8 +52,7 @@ async function callGemini(promptText: string): Promise<string> {
 export async function POST(req: NextRequest) {
     try {
         const authUser = await getSessionOrJwtUser(req);
-        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        if (userRole !== "admin") {
+        if (!authUser || authUser.role !== "admin") {
             return NextResponse.json(
                 { success: false, message: "Unauthorized: Only administrators can use AI blog generation." },
                 { status: 403 }

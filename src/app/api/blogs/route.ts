@@ -173,8 +173,7 @@ export async function GET(req: NextRequest) {
         const limit = parseInt(searchParams.get("limit") || "50", 10);
 
         const authUser = await getSessionOrJwtUser(req);
-        const userRole = (authUser?.role || searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        const isAdmin = userRole === "admin";
+        const isAdmin = authUser?.role === "admin";
 
         const db = await getDatabase();
         const collection = db.collection("Blogs");
@@ -253,8 +252,7 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
     try {
         const authUser = await getSessionOrJwtUser(req);
-        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        if (userRole !== "admin") {
+        if (!authUser || authUser.role !== "admin") {
             return NextResponse.json(
                 { success: false, message: "Unauthorized: Only administrators can publish blogs." },
                 { status: 403 }
