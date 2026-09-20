@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     ArrowLeft,
     CalendarDays,
@@ -50,15 +51,16 @@ export default function BlogDetailsPage() {
             if (!id) return;
             setLoading(true);
             try {
-                let res = await fetch(`/api/blogs/${id}`);
+                let res = await fetchWithAuth(`/api/blogs/${id}`);
                 if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
                     try {
-                        res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`);
+                        res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs/${id}`);
                     } catch {
                         // ignore
                     }
                 }
                 const data = await res.json();
+
                 if (data.success && data.data) {
                     setBlog(data.data);
                 } else {

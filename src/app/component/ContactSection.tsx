@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
   MapPin,
   Phone,
@@ -87,7 +88,7 @@ export default function ContactSection() {
 
     setIsSubmitting(true);
     try {
-      let res = await fetch("/api/contact", {
+      let res = await fetchWithAuth("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -95,7 +96,7 @@ export default function ContactSection() {
 
       if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
         try {
-          res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
+          res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/contact`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),

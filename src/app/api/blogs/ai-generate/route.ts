@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 async function callGemini(promptText: string): Promise<string> {
     const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
@@ -50,6 +51,15 @@ async function callGemini(promptText: string): Promise<string> {
 
 export async function POST(req: NextRequest) {
     try {
+        const authUser = await getSessionOrJwtUser(req);
+        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
+        if (userRole !== "admin") {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized: Only administrators can use AI blog generation." },
+                { status: 403 }
+            );
+        }
+
         const body = await req.json();
         const {
             topic,

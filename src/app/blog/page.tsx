@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     ArrowRight,
     BookOpen,
@@ -144,10 +145,10 @@ export default function BlogPage() {
             if (cat !== "All") params.append("category", cat);
             if (query.trim()) params.append("search", query.trim());
 
-            let res = await fetch(`/api/blogs?${params.toString()}`);
+            let res = await fetchWithAuth(`/api/blogs?${params.toString()}`);
             if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
                 try {
-                    res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`);
+                    res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`);
                 } catch {
                     // ignore
                 }

@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     BookOpen,
     Sparkles,
@@ -131,14 +132,14 @@ export default function AdminManageBlogsPage() {
             if (filterStatus !== "all") params.append("status", filterStatus);
             if (searchQuery.trim()) params.append("search", searchQuery.trim());
 
-            let res = await fetch(`/api/blogs?${params.toString()}`, {
+            let res = await fetchWithAuth(`/api/blogs?${params.toString()}`, {
                 headers: { "x-user-role": "admin" }
             });
 
             // If local route returns 404 or fails, fallback to configured NEXT_PUBLIC_API_URL if present
             if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
                 try {
-                    res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`, {
+                    res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/blogs?${params.toString()}`, {
                         headers: { "x-user-role": "admin" }
                     });
                 } catch {
@@ -271,7 +272,7 @@ export default function AdminManageBlogsPage() {
 
         setGeneratingAi(true);
         try {
-            const res = await fetch(`${API_BASE}/api/blogs/ai-generate`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/blogs/ai-generate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -311,7 +312,7 @@ export default function AdminManageBlogsPage() {
 
         setGeneratingTitles(true);
         try {
-            const res = await fetch(`${API_BASE}/api/blogs/ai-generate`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/blogs/ai-generate`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -371,7 +372,7 @@ export default function AdminManageBlogsPage() {
             const url = editingId ? `${API_BASE}/api/blogs/${editingId}` : `${API_BASE}/api/blogs`;
             const method = editingId ? "PUT" : "POST";
 
-            const res = await fetch(url, {
+            const res = await fetchWithAuth(url, {
                 method,
                 headers: {
                     "Content-Type": "application/json",
@@ -426,7 +427,7 @@ export default function AdminManageBlogsPage() {
         }
 
         try {
-            const res = await fetch(`${API_BASE}/api/blogs/${id}`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/blogs/${id}`, {
                 method: "DELETE",
                 headers: { "x-user-role": "admin" }
             });
@@ -442,6 +443,7 @@ export default function AdminManageBlogsPage() {
             toast.error(err.message || "Failed to delete blog article.");
         }
     };
+
 
     const handleResetForm = () => {
         setEditingId(null);

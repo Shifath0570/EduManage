@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
   Eye,
   AlertCircle,
@@ -21,7 +23,6 @@ import {
   Check,
   ShieldAlert
 } from "lucide-react";
-import { useSession } from "@/app/lib/auth-client";
 
 interface ExamOption {
   _id?: string;
@@ -91,7 +92,7 @@ export default function TeacherViewResult() {
     async function fetchExams() {
       setLoadingExams(true);
       try {
-        const res = await fetch(`${API_BASE}/api/exams`);
+        const res = await fetchWithAuth(`${API_BASE}/api/exams`);
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
@@ -164,7 +165,7 @@ export default function TeacherViewResult() {
           stuUrl += `&stream=${encodeURIComponent(selectedStream)}`;
         }
 
-        const stuRes = await fetch(stuUrl);
+        const stuRes = await fetchWithAuth(stuUrl);
         const stuData = await stuRes.json();
         const studentList: StudentItem[] = stuData.success && Array.isArray(stuData.data) ? stuData.data : [];
 
@@ -180,7 +181,7 @@ export default function TeacherViewResult() {
           markUrl += `&stream=${encodeURIComponent(selectedStream)}`;
         }
 
-        const markRes = await fetch(markUrl);
+        const markRes = await fetchWithAuth(markUrl);
         const markData = await markRes.json();
         const marksList = markData.success && Array.isArray(markData.data) ? markData.data : [];
 

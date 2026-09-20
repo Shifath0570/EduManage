@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     Calendar,
     Search,
@@ -120,7 +121,7 @@ export default function TeacherViewAttendance() {
 
             setLoadingAssignments(true);
             try {
-                const res = await fetch(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
+                const res = await fetchWithAuth(`${API_BASE}/api/assignments?teacherEmail=${encodeURIComponent(user.email)}`);
                 const data = await res.json();
 
                 if (data.success && Array.isArray(data.data)) {
@@ -206,7 +207,7 @@ export default function TeacherViewAttendance() {
             if (filterDate) params.append("date", filterDate);
             if (filterMonth) params.append("month", filterMonth);
 
-            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance?${params.toString()}`, {
                 headers: {
                     "x-user-role": "teacher",
                     "x-user-email": user?.email || ""
@@ -256,7 +257,7 @@ export default function TeacherViewAttendance() {
                 teacherEmail: user?.email || selectedSession.teacherEmail || ""
             };
 
-            const res = await fetch(`${API_BASE}/api/attendance/ai-warning`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance/ai-warning`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
