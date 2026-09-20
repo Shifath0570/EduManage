@@ -1,7 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { authClient } from "../../../lib/auth-client";
+import { authClient } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
+import {
+  FileText,
+  Download,
+  Calendar,
+  CreditCard,
+  Building,
+  User,
+  GraduationCap,
+  Clock,
+  DollarSign,
+  AlertCircle,
+  CheckCircle2,
+  RefreshCw,
+} from "lucide-react";
 
 interface SalaryItem {
   _id: string;
@@ -50,7 +65,7 @@ const Page = () => {
         setError(null);
 
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetch(`${baseUrl}/api/salaries/${teacherId}`);
+        const res = await fetchWithAuth(`${baseUrl}/api/salaries/${teacherId}`);
         const result = await res.json();
 
         if (res.ok && result.success) {

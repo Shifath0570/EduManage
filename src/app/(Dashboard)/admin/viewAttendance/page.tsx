@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     Calendar,
     Search,
@@ -107,7 +108,7 @@ export default function AdminViewAttendance() {
     useEffect(() => {
         async function fetchTeachers() {
             try {
-                const res = await fetch(`${API_BASE}/api/teachers?limit=100`);
+                const res = await fetchWithAuth(`${API_BASE}/api/teachers?limit=100`);
                 const data = await res.json();
                 if (data.success && Array.isArray(data.data)) {
                     setTeachers(data.data);
@@ -132,7 +133,7 @@ export default function AdminViewAttendance() {
             if (filterDate) params.append("date", filterDate);
             if (filterMonth) params.append("month", filterMonth);
 
-            const res = await fetch(`${API_BASE}/api/attendance?${params.toString()}`, {
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance?${params.toString()}`, {
                 headers: {
                     "x-user-role": "admin"
                 }

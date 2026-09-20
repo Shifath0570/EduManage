@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 // 'use client';
 
@@ -362,6 +363,8 @@
 //   );
 // }
 
+=======
+>>>>>>> c54683d4656f4aacf566c85cd11a44768a541c12
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -382,9 +385,10 @@ import {
   BookOpen,
   Layers,
   UserCheck,
-  BookMarked,
+  BookMarked
 } from 'lucide-react';
 import { useSession } from '@/app/lib/auth-client';
+import { fetchWithAuth } from '@/app/lib/api';
 import AIPerformanceInsightCard from '@/app/component/AIPerformanceInsightCard';
 
 interface Student {
@@ -413,11 +417,6 @@ interface CustomUser {
   _id?: string;
 }
 
-interface JwtResponse {
-  token?: string;
-  message?: string;
-}
-
 export default function StudentDetailsPage() {
   const { data: session, isPending: isSessionPending, error: sessionError } = useSession();
   const user = session?.user as CustomUser | undefined;
@@ -426,20 +425,6 @@ export default function StudentDetailsPage() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [imgError, setImgError] = useState<boolean>(false);
-
-  // Function to retrieve JWT from authentication endpoint
-  const getJwt = async (): Promise<string> => {
-    const response = await fetch('/api/auth/token', {
-      credentials: 'include',
-      headers: { Accept: 'application/json' },
-    });
-    const result: JwtResponse = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.token) {
-      throw new Error(result.message || 'You must be signed in to view student details.');
-    }
-    return result.token;
-  };
 
   const stuId = user?.id || user?._id;
 
@@ -467,6 +452,7 @@ export default function StudentDetailsPage() {
     setLoading(true);
     setError(null);
 
+<<<<<<< HEAD
     try {
       const token = await getJwt();
       const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -478,12 +464,28 @@ export default function StudentDetailsPage() {
           Authorization: `Bearer ${token}`,
         },
       });
+=======
+      try {
+        const apiURL = process.env.NEXT_PUBLIC_API_URL || '';
+        const res = await fetchWithAuth(`${apiURL}/api/students/by-user/${stuId}`);
+>>>>>>> c54683d4656f4aacf566c85cd11a44768a541c12
 
       if (!res.ok) {
         if (res.status === 404) {
           throw new Error('Student record not found for this user.');
         }
+<<<<<<< HEAD
         throw new Error(`Failed to fetch details: ${res.statusText}`);
+=======
+
+        const result = await res.json();
+        setStudent(result?.data || result || null);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(message);
+      } finally {
+        setLoading(false);
+>>>>>>> c54683d4656f4aacf566c85cd11a44768a541c12
       }
 
       const result = await res.json();
@@ -732,6 +734,3 @@ export default function StudentDetailsPage() {
     </div>
   );
 }
-
-
-

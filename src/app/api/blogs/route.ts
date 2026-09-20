@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 const INITIAL_SEED_BLOGS = [
     {
@@ -170,8 +171,9 @@ export async function GET(req: NextRequest) {
         const featured = searchParams.get("featured");
         const page = parseInt(searchParams.get("page") || "1", 10);
         const limit = parseInt(searchParams.get("limit") || "50", 10);
-        const userRole = (searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
-        const isAdmin = userRole === "admin";
+
+        const authUser = await getSessionOrJwtUser(req);
+        const isAdmin = authUser?.role === "admin";
 
         const db = await getDatabase();
         const collection = db.collection("Blogs");
@@ -249,6 +251,14 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
     try {
+        const authUser = await getSessionOrJwtUser(req);
+        if (!authUser || authUser.role !== "admin") {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized: Only administrators can publish blogs." },
+                { status: 403 }
+            );
+        }
+
         const body = await req.json();
         const {
             title,
@@ -262,6 +272,7 @@ export async function POST(req: NextRequest) {
             status = "published",
             featured = false
         } = body;
+
 
         if (!title || !title.trim()) {
             return NextResponse.json({ success: false, message: "Blog title is required." }, { status: 400 });

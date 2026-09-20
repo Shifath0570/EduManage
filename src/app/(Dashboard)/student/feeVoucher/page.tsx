@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { authClient } from "../../../lib/auth-client";
+import { authClient } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -53,7 +54,7 @@ const Page = () => {
         setLoading(true);
         setError(null);
 
-        const res = await fetch(
+        const res = await fetchWithAuth(
           `${process.env.NEXT_PUBLIC_API_URL}/api/fees/${studentIdentifier}`
         );
         const result = await res.json();

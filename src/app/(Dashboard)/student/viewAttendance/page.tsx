@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "@/app/lib/auth-client";
+import { fetchWithAuth } from "@/app/lib/api";
 import {
     Calendar,
     CheckCircle2,
@@ -94,7 +95,7 @@ export default function StudentViewAttendance() {
             const identifier = user.email || user.name || "";
             
             // 1. Fetch attendance summary & history
-            const res = await fetch(`${API_BASE}/api/attendance/student/${encodeURIComponent(identifier)}`);
+            const res = await fetchWithAuth(`${API_BASE}/api/attendance/student/${encodeURIComponent(identifier)}`);
             const data = await res.json();
 
             if (data.success && data.data) {
@@ -122,7 +123,7 @@ export default function StudentViewAttendance() {
             }
 
             // 2. Fetch AI attendance advisory notices
-            const noticesRes = await fetch(`${API_BASE}/api/attendance/notices/student/${encodeURIComponent(identifier)}`);
+            const noticesRes = await fetchWithAuth(`${API_BASE}/api/attendance/notices/student/${encodeURIComponent(identifier)}`);
             const noticesData = await noticesRes.json();
             if (noticesData.success && Array.isArray(noticesData.data)) {
                 setNotices(noticesData.data);
