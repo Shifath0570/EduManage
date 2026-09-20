@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
 import { ObjectId } from "mongodb";
+import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 export async function GET(
     req: NextRequest,
@@ -66,6 +67,15 @@ export async function PUT(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authUser = await getSessionOrJwtUser(req);
+        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
+        if (userRole !== "admin") {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized: Only administrators can update blogs." },
+                { status: 403 }
+            );
+        }
+
         const { id } = await context.params;
         const body = await req.json();
         const {
@@ -142,6 +152,15 @@ export async function DELETE(
     context: { params: Promise<{ id: string }> }
 ) {
     try {
+        const authUser = await getSessionOrJwtUser(req);
+        const userRole = (authUser?.role || req.headers.get("x-user-role") || "").toLowerCase().trim();
+        if (userRole !== "admin") {
+            return NextResponse.json(
+                { success: false, message: "Unauthorized: Only administrators can delete blogs." },
+                { status: 403 }
+            );
+        }
+
         const { id } = await context.params;
         const db = await getDatabase();
         const collection = db.collection("Blogs");
@@ -174,3 +193,4 @@ export async function DELETE(
         );
     }
 }
+
