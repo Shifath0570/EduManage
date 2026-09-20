@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button, Card, Spinner } from "@heroui/react";
 import {
   BookOpen,
@@ -16,12 +16,12 @@ import { useParams, useRouter } from "next/navigation";
 interface RawAssignment {
   _id?: string;
   id?: string;
-  teacherId: string;
-  subjectId: string;
-  classId: string;
-  sectionId: string;
-  academicYear: string;
-  assignedDate: string;
+  teacherId?: string | { _id?: string; id?: string };
+  subjectId?: string;
+  classId?: string;
+  sectionId?: string;
+  academicYear?: string;
+  assignedDate?: string;
 }
 
 interface Assignment {
@@ -43,8 +43,9 @@ export default function CurrentAssignment(): React.ReactElement {
   const params = useParams();
   const router = useRouter();
 
-  // Extract teacherId from route dynamic params
-  const teacherIdParam = params?.id as string;
+  // Extract teacherId from route dynamic params safely
+  const rawId = params?.id;
+  const teacherIdParam = Array.isArray(rawId) ? rawId[0] : (rawId as string) || "";
 
   const [fetching, setFetching] = useState<boolean>(true);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -63,69 +64,96 @@ export default function CurrentAssignment(): React.ReactElement {
     return result.token;
   };
 
-  useEffect(() => {
-    const fetchAssignments = async (): Promise<void> => {
-      if (!teacherIdParam) {
-        setAssignments([]);
-        setFetching(false);
-        return;
+  const fetchAssignments = useCallback(async (): Promise<void> => {
+    if (!teacherIdParam) {
+      setAssignments([]);
+      setFetching(false);
+      return;
+    }
+
+    try {
+      setFetching(true);
+      const token = await getJwt();
+      const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
+
+      const endpoint = `${apiURL}/api/assignments?teacherId=${teacherIdParam}`;
+
+      const res = await fetch(endpoint, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        // Extract array safely from data, data.data, or data.assignments
+        const rawData: RawAssignment[] = Array.isArray(data)
+          ? data
+          : Array.isArray(data.data)
+          ? data.data
+          : Array.isArray(data.assignments)
+          ? data.assignments
+          : [];
+
+        // Normalize and safely map assignments
+        const teacherAssignments = rawData
+          .filter((item) => {
+            // Support both string IDs and populated object IDs
+            const tId =
+              typeof item.teacherId === "object"
+                ? item.teacherId?._id || item.teacherId?.id
+                : item.teacherId;
+
+            // If the API endpoint already filtered by teacherId, accept all returned items
+            return tId ? String(tId) === String(teacherIdParam) : true;
+          })
+          .map((item) => {
+            let formattedDate = "N/A";
+            if (item.assignedDate) {
+              const d = new Date(item.assignedDate);
+              if (!isNaN(d.getTime())) {
+                formattedDate = d.toLocaleDateString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                });
+              }
+            }
+
+            return {
+              id: String(item._id || item.id || Math.random()),
+              teacherId: String(
+                typeof item.teacherId === "object"
+                  ? item.teacherId?._id || item.teacherId?.id
+                  : item.teacherId || ""
+              ),
+              subjectId: item.subjectId || "N/A",
+              classId: item.classId || "N/A",
+              sectionId: item.sectionId || "N/A",
+              academicYear: item.academicYear || "N/A",
+              assignedDate: formattedDate,
+            };
+          });
+
+        setAssignments(teacherAssignments);
+      } else {
+        throw new Error(data.message || "Failed to fetch assignments.");
       }
-
-      try {
-        setFetching(true);
-        const token = await getJwt();
-        const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
-
-        const endpoint = `${apiURL}/api/assignments?teacherId=${teacherIdParam}`;
-        console.log(teacherIdParam)
-
-        const res = await fetch(endpoint, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        const data = await res.json();
-        
-
-        if (res.ok) {
-          const rawData: RawAssignment[] = data.data || data;
-
-          const teacherAssignments = rawData
-            .filter((item) => String(item.teacherId) === String(teacherIdParam))
-            .map((item) => ({
-              id: item._id || item.id || "",
-              teacherId: item.teacherId,
-              subjectId: item.subjectId,
-              classId: item.classId,
-              sectionId: item.sectionId,
-              academicYear: item.academicYear,
-              assignedDate: item.assignedDate
-                ? new Date(item.assignedDate).toLocaleDateString("en-GB", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })
-                : "N/A",
-            }));
-
-          setAssignments(teacherAssignments);
-        } else {
-          throw new Error(data.message || "Failed to fetch assignments.");
-        }
-      } catch (err: unknown) {
-        const errorMessage =
-          err instanceof Error ? err.message : "Error fetching assignments.";
-        alert(errorMessage);
-      } finally {
-        setFetching(false);
-      }
-    };
-
-    fetchAssignments();
+    } catch (err: unknown) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Error fetching assignments.";
+      alert(errorMessage);
+    } finally {
+      setFetching(false);
+    }
   }, [teacherIdParam]);
+
+  useEffect(() => {
+    fetchAssignments();
+  }, [fetchAssignments]);
 
   const handleDeleteAssignment = async (assignmentId: string): Promise<void> => {
     if (!assignmentId) {
@@ -269,8 +297,6 @@ export default function CurrentAssignment(): React.ReactElement {
     </div>
   );
 }
-
-
 
 
 
