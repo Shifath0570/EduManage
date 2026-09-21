@@ -18,6 +18,32 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+// Fallback helper to fetch JWT token if authClient plugin is not directly exposed
+const getJwt = async (): Promise<string> => {
+  // If Better Auth JWT plugin client is attached, try calling it directly
+  if ((authClient as any)?.jwt?.getJwt) {
+    const res = await (authClient as any).jwt.getJwt();
+    if (res?.data?.token) return res.data.token;
+  }
+
+  // API endpoint fallback
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || " You must be signed in to access salary details.");
+  }
+  return result.token;
+};
+
 interface SalaryItem {
   _id: string;
   teacherId: string;
@@ -64,8 +90,15 @@ const Page = () => {
         setLoading(true);
         setError(null);
 
+        // Fetch JWT token
+        const token = await getJwt();
+
         const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
-        const res = await fetchWithAuth(`${baseUrl}/api/salaries/${teacherId}`);
+        const res = await fetchWithAuth(`${baseUrl}/api/salaries/${teacherId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const result = await res.json();
 
         if (res.ok && result.success) {
@@ -76,8 +109,8 @@ const Page = () => {
         } else {
           setError(result.message || "Failed to fetch salary details.");
         }
-      } catch (err) {
-        setError("An error occurred while fetching salary data.");
+      } catch (err: any) {
+        setError(err.message || "An error occurred while fetching salary data.");
       } finally {
         setLoading(false);
       }
