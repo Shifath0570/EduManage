@@ -32,6 +32,25 @@ interface ExamFormData {
   description: string;
 }
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to create exams.");
+  }
+
+  return result.token;
+};
+
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
   class_1: ["Bangla", "English", "Mathematics"],
   class_2: ["Bangla", "English", "Mathematics"],
@@ -440,10 +459,13 @@ export default function AdminCreateExam() {
     };
 
     try {
+      const token = await getJwt();
+
       const res = await fetch(`${API_BASE}/api/exams`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(payload)
       });
