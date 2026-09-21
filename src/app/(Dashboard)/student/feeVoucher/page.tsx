@@ -6,6 +6,11 @@ import { fetchWithAuth } from "@/app/lib/api";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
 interface PaymentHistory {
   _id: string;
   studentId: string;
@@ -46,6 +51,21 @@ const Page = () => {
     session?.user?.id ||
     null;
 
+    // Fetch JWT token for authenticated requests
+   const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  };
+
+
   useEffect(() => {
     if (!studentIdentifier) return;
 
@@ -55,7 +75,14 @@ const Page = () => {
         setError(null);
 
         const res = await fetchWithAuth(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/fees/${studentIdentifier}`
+          `${process.env.NEXT_PUBLIC_API_URL}/api/fees/${studentIdentifier}`,
+          {
+            method: "GET",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${await getJwt()}`,
+            },
+          }
         );
         const result = await res.json();
 
