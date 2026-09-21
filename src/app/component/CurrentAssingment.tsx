@@ -34,10 +34,6 @@ interface Assignment {
   assignedDate: string;
 }
 
-interface JwtResponse {
-  token?: string;
-  message?: string;
-}
 
 export default function CurrentAssignment(): React.ReactElement {
   const params = useParams();
@@ -51,19 +47,6 @@ export default function CurrentAssignment(): React.ReactElement {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
 
-  const getJwt = async (): Promise<string> => {
-    const response = await fetch("/api/auth/token", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    const result: JwtResponse = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.token) {
-      throw new Error(result.message || "You must be signed in to manage teachers.");
-    }
-    return result.token;
-  };
-
   const fetchAssignments = useCallback(async (): Promise<void> => {
     if (!teacherIdParam) {
       setAssignments([]);
@@ -73,7 +56,6 @@ export default function CurrentAssignment(): React.ReactElement {
 
     try {
       setFetching(true);
-      const token = await getJwt();
       const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
       const endpoint = `${apiURL}/api/assignments?teacherId=${teacherIdParam}`;
@@ -82,7 +64,6 @@ export default function CurrentAssignment(): React.ReactElement {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 
@@ -166,14 +147,12 @@ export default function CurrentAssignment(): React.ReactElement {
 
     setDeletingId(assignmentId);
     try {
-      const token = await getJwt();
       const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
       const res = await fetch(`${apiURL}/api/assignments/${assignmentId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
         },
       });
 

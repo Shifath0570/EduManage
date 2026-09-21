@@ -20,10 +20,6 @@ interface TeacherData {
   subjectSpecialization?: string;
 }
 
-interface JwtResponse {
-  token?: string;
-  message?: string;
-}
 
 export default function AssignTeacherPage(): React.ReactElement {
   const [fetching, setFetching] = useState<boolean>(true);
@@ -35,19 +31,6 @@ export default function AssignTeacherPage(): React.ReactElement {
 
   const { data: session } = useSession();
 
-  // Helper to retrieve JWT Token
-  const getJwt = async (): Promise<string> => {
-    const response = await fetch("/api/auth/token", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    const result: JwtResponse = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.token) {
-      throw new Error(result.message || "You must be signed in to manage teachers.");
-    }
-    return result.token;
-  };
 
   useEffect(() => {
     if (!teacherIdParam) return;
@@ -55,8 +38,6 @@ export default function AssignTeacherPage(): React.ReactElement {
     const fetchTeacherDetails = async () => {
       try {
         setFetching(true);
-        // 1. Get JWT Token
-        const token = await getJwt();
 
         // 2. Normalize Base API URL
         const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
@@ -66,7 +47,6 @@ export default function AssignTeacherPage(): React.ReactElement {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
           },
         });
 

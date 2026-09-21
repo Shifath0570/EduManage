@@ -16,11 +16,6 @@ interface AssignFormData {
   academicYear: string;
 }
 
-interface JwtResponse {
-  token?: string;
-  message?: string;
-}
-
 const CLASS_SUBJECTS_MAP: Record<string, string[]> = {
   class_1: ["Bangla", "English", "Mathematics"],
   class_2: ["Bangla", "English", "Mathematics"],
@@ -178,18 +173,6 @@ const AssingSSC = () => {
 
   const isGroupRequired = formData.classId === "class_9" || formData.classId === "class_10";
 
-  const getJwt = async (): Promise<string> => {
-    const response = await fetch("/api/auth/token", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    const result: JwtResponse = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.token) {
-      throw new Error(result.message || "You must be signed in to manage teachers.");
-    }
-    return result.token;
-  };
 
   const handleInputChange = (e: ChangeEvent<HTMLSelectElement | HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -223,7 +206,6 @@ const AssingSSC = () => {
     setSubmitting(true);
 
     try {
-      const token = await getJwt();
       const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
 
       if (!teacherIdParam) {
@@ -235,7 +217,6 @@ const AssingSSC = () => {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Fixed Header
         },
       });
 
@@ -270,7 +251,6 @@ const AssingSSC = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`, // ✅ Fixed Header
         },
         body: JSON.stringify(payload),
       });
