@@ -24,6 +24,25 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "@/app/lib/auth-client";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
+
 interface ExamOption {
   _id?: string;
   examName: string;
@@ -127,7 +146,13 @@ export default function TeacherEnterMarks() {
     async function fetchExams() {
       setLoadingExams(true);
       try {
-        const res = await fetch(`${API_BASE}/api/exams`);
+        const token = await getJwt();
+        const res = await fetch(`${API_BASE}/api/exams`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          }
+        });
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
@@ -381,10 +406,12 @@ export default function TeacherEnterMarks() {
         }))
       };
 
+      const token = await getJwt();
       const res = await fetch(`${API_BASE}/api/marks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },

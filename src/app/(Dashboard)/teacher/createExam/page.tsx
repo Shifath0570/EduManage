@@ -21,6 +21,25 @@ import {
 } from "lucide-react";
 import { useSession } from "@/app/lib/auth-client";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
+
 interface ExamFormData {
   examName: string;
   examType: string;
@@ -349,10 +368,12 @@ export default function TeacherCreateExam() {
         createdByRole: "teacher"
       };
 
+      const token = await getJwt();
       const res = await fetch(`${API_BASE}/api/exams`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },

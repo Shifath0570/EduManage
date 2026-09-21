@@ -28,6 +28,25 @@ import {
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "@/app/lib/auth-client";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
+
 interface SubQuestion {
   label: string;
   text?: string;
@@ -231,8 +250,18 @@ export default function TeacherQuestionPaperPage() {
     setError(null);
 
     try {
+      const token = await getJwt().catch(() => "");
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+      if (user?.email) {
+        headers["x-user-email"] = user.email;
+        headers["x-user-role"] = "teacher";
+      }
+
       // 1. Fetch Exam Details
-      const examRes = await fetch(`${API_BASE}/api/exams/${examId}`);
+      const examRes = await fetch(`${API_BASE}/api/exams/${examId}`, { headers });
       const examData = await examRes.json();
 
       if (!examRes.ok || !examData.success) {
@@ -268,7 +297,7 @@ export default function TeacherQuestionPaperPage() {
       }
 
       // 2. Fetch Existing Question Paper for this Exam
-      const paperRes = await fetch(`${API_BASE}/api/question-papers/exam/${examId}`);
+      const paperRes = await fetch(`${API_BASE}/api/question-papers/exam/${examId}`, { headers });
       const paperData = await paperRes.json();
 
       if (paperRes.ok && paperData.success && paperData.data) {
@@ -321,10 +350,12 @@ export default function TeacherQuestionPaperPage() {
       : `${API_BASE}/api/question-papers/generate/${examId}`;
 
     try {
+      const token = await getJwt();
       const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },
