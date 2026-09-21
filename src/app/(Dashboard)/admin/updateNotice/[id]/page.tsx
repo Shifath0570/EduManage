@@ -4,6 +4,12 @@ import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Home, FileText, AlertCircle } from 'lucide-react';
 import toast from "react-hot-toast";
 
+// JWT token interface 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
 interface IssuedBy {
   name: string;
   designation: string;
@@ -246,6 +252,20 @@ const UpdateNotice = () => {
 
     return true;
   };
+// Get JWT token from localStorage
+ const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  };
+  
 
   // Handle form submission (UPDATE - PUT)
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -291,6 +311,7 @@ const UpdateNotice = () => {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${await getJwt()}`,
         },
         body: JSON.stringify(payload),
         signal: controller.signal,
