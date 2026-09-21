@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
-<<<<<<< HEAD
 import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 
 export async function POST(req: NextRequest) {
   try {
@@ -59,7 +56,6 @@ export async function POST(req: NextRequest) {
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-<<<<<<< HEAD
     const authUser = await getSessionOrJwtUser(req);
 
     if (!authUser) {
@@ -70,23 +66,12 @@ export async function GET(req: NextRequest) {
     }
 
     if (authUser.role !== "admin") {
-=======
-    const userRole = (searchParams.get("userRole") || req.headers.get("x-user-role") || "").toLowerCase().trim();
-    const isAdmin = userRole === "admin";
-
-    // Strictly ensure only admin can view contact messages
-    if (!isAdmin) {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
       return NextResponse.json(
         { success: false, message: "Access denied: Only administrators can view contact messages." },
         { status: 403 }
       );
     }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
     const status = searchParams.get("status");
     const role = searchParams.get("role");
     const search = searchParams.get("search");

@@ -45,11 +45,7 @@ const teacherNavItems: NavItem[] = [
   { id: "enterMarks", href: "/teacher/enterMarks", label: "Enter Marks", icon: <FileSpreadsheet className="w-4 h-4" /> },
   { id: "viewResuls", href: "/teacher/viewResuls", label: "View Results", icon: <Award className="w-4 h-4" /> },
   { id: "leaveRequest", href: "/teacher/leaveRequest", label: "Leave Request", icon: <Award className="w-4 h-4" /> },
-<<<<<<< HEAD
   { id: "teacherSalary", href: "/teacher/salaryVoucher", label: "Teacher Salary", icon: <CreditCard className="w-4 h-4" /> },
-=======
-  { id: "teacherSalary", href: "/teacher/teacherSalary", label: "Teacher Salary", icon: <CreditCard className="w-4 h-4" /> },
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 ];
 
 const adminNavItems: NavItem[] = [
@@ -74,11 +70,7 @@ const studentNavItems: NavItem[] = [
   { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-4 h-4" /> },
   { id: "viewResuls", href: "/student/viewResuls", label: "View Results", icon: <Award className="w-4 h-4" /> },
   { id: "leaveRequest", href: "/student/leaveRequest", label: "Leave Request", icon: <Award className="w-4 h-4" /> },
-<<<<<<< HEAD
   { id: "feeCollection", href: "/student/feeVoucher", label: "Fee Collection", icon: <CreditCard className="w-4 h-4" /> },
-=======
-  { id: "feeCollection", href: "/student/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-4 h-4" /> },
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 ];
 
 const navLinkMap: Record<UserRole, NavItem[]> = {

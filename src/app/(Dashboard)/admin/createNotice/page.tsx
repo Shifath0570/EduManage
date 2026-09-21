@@ -19,6 +19,12 @@ import {
   Info,
 } from "lucide-react";
 
+//Type for JWT
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
 // Type definitions
 interface IssuedBy {
   name: string;
@@ -273,6 +279,21 @@ const Page = () => {
     return true;
   };
 
+// Call JWT 
+ const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  };
+
+
   // Handle Express.js submission
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -287,7 +308,10 @@ const Page = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/api/notices`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${await getJwt()}`
+           },
           body: JSON.stringify(formData),
         }
       );

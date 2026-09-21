@@ -209,7 +209,6 @@ export default function AdminDashboardPage() {
         const token = await getJwt(); 
         const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
 
-<<<<<<< HEAD
         const authHeaders = {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -224,12 +223,6 @@ export default function AdminDashboardPage() {
               "x-user-role": "admin" 
             } 
           }),
-=======
-        const [studentsRes, teachersRes, contactRes] = await Promise.allSettled([
-          fetch(`${apiURL}/api/students`),
-          fetch(`${apiURL}/api/teachers`),
-          fetch(`/api/contact?userRole=admin&limit=1`, { headers: { "x-user-role": "admin" } }),
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
         ]);
 
         if (contactRes.status === "fulfilled" && contactRes.value.ok) {
