@@ -64,6 +64,25 @@ interface ExamItem {
   createdAt?: string;
 }
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
+
 const classFilterOptions = [
   "All Classes", "Class 1", "Class 2", "Class 3", "Class 4", "Class 5",
   "Class 6", "Class 7", "Class 8", "Class 9", "Class 10"
@@ -125,7 +144,13 @@ export default function TeacherAllExams() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/exams`);
+      const token = await getJwt();
+      const res = await fetch(`${API_BASE}/api/exams`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await res.json();
 
       if (data.success && Array.isArray(data.data)) {
@@ -157,10 +182,12 @@ export default function TeacherAllExams() {
     const examName = deleteExamTarget.examName;
 
     try {
+      const token = await getJwt();
       const res = await fetch(`${API_BASE}/api/exams/${id}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },
@@ -213,10 +240,12 @@ export default function TeacherAllExams() {
     setEditError(null);
 
     try {
+      const token = await getJwt();
       const res = await fetch(`${API_BASE}/api/exams/${editExam._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },
