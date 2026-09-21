@@ -3,6 +3,24 @@
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import ReactPaginate from "react-paginate";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to create notices.");
+  }
+  return result.token;
+};
+
 interface PaymentRecord {
   _id: string;
   studentId: string;
@@ -76,11 +94,13 @@ export default function FeeManagementPage() {
   const [remarks, setRemarks] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
-  // Fetch API Data with Server Pagination
+  // Fetch API Data with Server Pagination and JWT Authentication
   const fetchFees = useCallback(async (page: number) => {
     setLoading(true);
     setError(null);
     try {
+      const token = await getJwt();
+
       const params = new URLSearchParams();
       params.append("page", (page + 1).toString());
       params.append("limit", itemsPerPage.toString());
@@ -92,7 +112,13 @@ export default function FeeManagementPage() {
       if (startDate) params.append("startDate", startDate);
       if (endDate) params.append("endDate", endDate);
 
-      const response = await fetch(`${API_BASE_URL}?${params.toString()}`);
+      const response = await fetch(`${API_BASE_URL}?${params.toString()}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
       const result = await response.json();
 
       if (result.success) {
@@ -103,8 +129,12 @@ export default function FeeManagementPage() {
       } else {
         setError(result.message || "Failed to fetch fee data");
       }
-    } catch (err) {
-      setError("Unable to connect to backend server.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Unable to connect to backend server.");
+      }
     } finally {
       setLoading(false);
     }
@@ -132,9 +162,14 @@ export default function FeeManagementPage() {
 
     setSubmitting(true);
     try {
+      const token = await getJwt();
+
       const response = await fetch(`${API_BASE_URL}/collect`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           studentId: selectedStudent.studentId,
           paidAmount: Number(collectAmount),
@@ -152,8 +187,12 @@ export default function FeeManagementPage() {
       } else {
         alert(`Error: ${result.message}`);
       }
-    } catch (err) {
-      alert("Failed to submit payment request.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert(`Error: ${err.message}`);
+      } else {
+        alert("Failed to submit payment request.");
+      }
     } finally {
       setSubmitting(false);
     }
