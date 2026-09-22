@@ -91,7 +91,7 @@ export default function TeacherDetailsPage({ params }: PageProps) {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${await getJwt()}` 
+            Authorization: `Bearer ${token}` 
           },
         });
 
@@ -358,6 +358,5 @@ export default function TeacherDetailsPage({ params }: PageProps) {
     </div>
   );
 }
-
 
 

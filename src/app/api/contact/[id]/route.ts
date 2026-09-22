@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/app/lib/mongodb";
 import { ObjectId } from "mongodb";
-<<<<<<< HEAD
 import { getSessionOrJwtUser } from "@/app/lib/serverAuth";
 
 async function handleUpdate(
@@ -21,20 +20,6 @@ async function handleUpdate(
     }
 
     if (authUser.role !== "admin") {
-=======
-
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id } = await params;
-    const body = await req.json();
-    const userRole = (body.userRole || req.headers.get("x-user-role") || "").toLowerCase().trim();
-    const isAdmin = userRole === "admin";
-
-    if (!isAdmin) {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
       return NextResponse.json(
         { success: false, message: "Access denied: Only administrators can update contact messages." },
         { status: 403 }
@@ -67,11 +52,7 @@ export async function PATCH(
       data: result,
     });
   } catch (error: any) {
-<<<<<<< HEAD
     console.error("Error updating contact message:", error);
-=======
-    console.error("Error in PATCH /api/contact/[id]:", error);
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
     return NextResponse.json(
       { success: false, message: error.message || "Failed to update contact message." },
       { status: 500 }
@@ -79,7 +60,6 @@ export async function PATCH(
   }
 }
 
-<<<<<<< HEAD
 export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -94,15 +74,12 @@ export async function PUT(
   return handleUpdate(req, params);
 }
 
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await params;
-<<<<<<< HEAD
     const authUser = await getSessionOrJwtUser(req);
 
     if (!authUser) {
@@ -113,12 +90,6 @@ export async function DELETE(
     }
 
     if (authUser.role !== "admin") {
-=======
-    const userRole = (req.headers.get("x-user-role") || "").toLowerCase().trim();
-    const isAdmin = userRole === "admin";
-
-    if (!isAdmin) {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
       return NextResponse.json(
         { success: false, message: "Access denied: Only administrators can delete contact messages." },
         { status: 403 }
@@ -148,7 +119,3 @@ export async function DELETE(
     );
   }
 }
-<<<<<<< HEAD
-
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e

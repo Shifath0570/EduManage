@@ -17,7 +17,7 @@ export const auth = betterAuth({
       jwt: {
         issuer: process.env.BETTER_AUTH_JWT_ISSUER || "edumanage",
         audience: process.env.BETTER_AUTH_JWT_AUDIENCE || "edumanage-client",
-        expirationTime: "15m",
+        expirationTime: "7d",
         definePayload: (session) => {
           return {
             id: session.user.id,

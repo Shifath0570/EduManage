@@ -2,10 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useSession } from "@/app/lib/auth-client";
-<<<<<<< HEAD
 import { fetchWithAuth } from "@/app/lib/api";
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Mail,
@@ -68,21 +65,13 @@ export default function AdminContactMessagesPage() {
       if (roleFilter !== "all") params.append("role", roleFilter);
       if (searchQuery.trim()) params.append("search", searchQuery.trim());
 
-<<<<<<< HEAD
       let res = await fetchWithAuth(`/api/contact?${params.toString()}`, {
-=======
-      let res = await fetch(`/api/contact?${params.toString()}`, {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
         headers: { "x-user-role": "admin" },
       });
 
       if (!res.ok && process.env.NEXT_PUBLIC_API_URL) {
         try {
-<<<<<<< HEAD
           res = await fetchWithAuth(`${process.env.NEXT_PUBLIC_API_URL}/api/contact?${params.toString()}`, {
-=======
-          res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/contact?${params.toString()}`, {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
             headers: { "x-user-role": "admin" },
           });
         } catch {
@@ -123,11 +112,7 @@ export default function AdminContactMessagesPage() {
   const handleUpdateStatus = async (id: string, newStatus: "unread" | "read" | "replied") => {
     setActionLoading(true);
     try {
-<<<<<<< HEAD
       let res = await fetchWithAuth(`/api/contact/${id}`, {
-=======
-      let res = await fetch(`/api/contact/${id}`, {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -162,11 +147,7 @@ export default function AdminContactMessagesPage() {
 
     setActionLoading(true);
     try {
-<<<<<<< HEAD
       let res = await fetchWithAuth(`/api/contact/${id}`, {
-=======
-      let res = await fetch(`/api/contact/${id}`, {
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
         method: "DELETE",
         headers: { "x-user-role": "admin" },
       });
@@ -189,10 +170,7 @@ export default function AdminContactMessagesPage() {
     }
   };
 
-<<<<<<< HEAD
 
-=======
->>>>>>> b88572d96ea733a1804a78636619141f053b7d0e
   // Open detail modal and mark as read if unread
   const handleOpenMessage = (msg: ContactMessageItem) => {
     setSelectedMessage(msg);

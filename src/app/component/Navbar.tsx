@@ -15,7 +15,7 @@ const baseNavItems = [
   { label: "Routine", href: "/routine" },
   { label: "Notice", href: "/notice" },
   { label: "Blog", href: "/blog" },
-  { label: "Chat", href: "/chat" },
+  { label: "EduChat", href: "/chat" },
   { label: "Contact", href: "/contact" },
 ];
 

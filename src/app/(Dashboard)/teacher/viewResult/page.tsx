@@ -24,6 +24,25 @@ import {
   ShieldAlert
 } from "lucide-react";
 
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
+
 interface ExamOption {
   _id?: string;
   examName: string;

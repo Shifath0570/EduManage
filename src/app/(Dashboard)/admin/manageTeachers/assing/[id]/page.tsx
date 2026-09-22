@@ -20,9 +20,9 @@ interface TeacherData {
   subjectSpecialization?: string;
 }
 
-interface JwtResponse {
-  token?: string;
-  message?: string;
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
 }
 
 export default function AssignTeacherPage(): React.ReactElement {
@@ -35,28 +35,27 @@ export default function AssignTeacherPage(): React.ReactElement {
 
   const { data: session } = useSession();
 
-  // Helper to retrieve JWT Token
-  const getJwt = async (): Promise<string> => {
-    const response = await fetch("/api/auth/token", {
-      credentials: "include",
-      headers: { Accept: "application/json" },
-    });
-    const result: JwtResponse = await response.json().catch(() => ({}));
-
-    if (!response.ok || !result.token) {
-      throw new Error(result.message || "You must be signed in to manage teachers.");
-    }
-    return result.token;
+  const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
   };
+
 
   useEffect(() => {
     if (!teacherIdParam) return;
 
     const fetchTeacherDetails = async () => {
       try {
+        const token = await getJwt(); 
         setFetching(true);
-        // 1. Get JWT Token
-        const token = await getJwt();
 
         // 2. Normalize Base API URL
         const apiURL = (process.env.NEXT_PUBLIC_API_URL || "").replace(/\/$/, "");
@@ -66,7 +65,7 @@ export default function AssignTeacherPage(): React.ReactElement {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}` 
           },
         });
 
@@ -148,4 +147,3 @@ export default function AssignTeacherPage(): React.ReactElement {
     </div>
   );
 }
-
