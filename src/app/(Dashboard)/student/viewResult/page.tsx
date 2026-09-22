@@ -2,6 +2,25 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useSession } from "@/app/lib/auth-client";
+
+interface JwtResponse {
+  token?: string;
+  message?: string;
+}
+
+const getJwt = async (): Promise<string> => {
+  const response = await fetch("/api/auth/token", {
+    credentials: "include",
+    headers: { Accept: "application/json" },
+  });
+  const result: JwtResponse = await response.json().catch(() => ({}));
+
+  if (!response.ok || !result.token) {
+    throw new Error(result.message || "You must be signed in to perform this action.");
+  }
+
+  return result.token;
+};
 import {
   Award,
   BookOpen,
@@ -139,7 +158,17 @@ export default function StudentViewResultPage() {
           queryParams.set("examType", examTypeFilter);
         }
 
-        const res = await fetch(`${API_BASE}/api/marks/my-results?${queryParams.toString()}`);
+        const token = await getJwt();
+        const headers: Record<string, string> = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        };
+        if (user.email) {
+          headers["x-user-email"] = user.email;
+          headers["x-user-role"] = "student";
+        }
+
+        const res = await fetch(`${API_BASE}/api/marks/my-results?${queryParams.toString()}`, { headers });
         const data = await res.json();
 
         if (!res.ok || !data.success) {
