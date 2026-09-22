@@ -38,7 +38,7 @@ interface LeaveRequestItem {
 interface JwtResponse { 
   token?: string; 
   message?: string; 
-} 
+}
 
 export default function TeacherLeaveRequestPage() {
   const { data: session, isPending } = useSession();
@@ -88,7 +88,7 @@ export default function TeacherLeaveRequestPage() {
     return result.token; 
   };
 
-  const BACKEND_API_URL = `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"}/api/teacher-leave-requests`;
+  const BACKEND_API_URL = "http://localhost:5000/api/teacher-leave-requests";
 
   // Fetch extra teacher profile details if user ID is available
   useEffect(() => {
@@ -98,14 +98,12 @@ export default function TeacherLeaveRequestPage() {
 
       try {
         const token = await getJwt(); 
-        const apiURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+        const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
         const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`, {
           headers: {
-            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (res.ok) {
           const data = await res.json();
           setTeacherData({
@@ -127,15 +125,13 @@ export default function TeacherLeaveRequestPage() {
     if (!user?.id) return;
     setIsLoadingRequests(true);
     try {
-      const token = await getJwt(); 
+      const token = await getJwt();
       const res = await fetch(`${BACKEND_API_URL}?userId=${user.id}`, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
       const data = await res.json();
-
       if (data.success) {
         const userOnlyData = data.data.filter(
           (item: LeaveRequestItem) => item.userId === user.id
@@ -277,7 +273,6 @@ export default function TeacherLeaveRequestPage() {
       const res = await fetch(`${BACKEND_API_URL}/${id}`, {
         method: "DELETE",
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -620,6 +615,12 @@ export default function TeacherLeaveRequestPage() {
     </div>
   );
 }
+
+
+
+
+
+
 
 
 
