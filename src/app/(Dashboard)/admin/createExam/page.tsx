@@ -509,11 +509,11 @@ export default function AdminCreateExam() {
       {/* Page Header */}
       <div className="mb-8 flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-100 text-purple-700">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
               <Award className="h-5 w-5" />
             </span>
-            <h1 className="text-2xl md:text-3xl font-extrabold text-[#081838]">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">
               Create Exam
             </h1>
           </div>
@@ -526,15 +526,15 @@ export default function AdminCreateExam() {
           <button
             type="button"
             onClick={() => router.push("/admin/allExams")}
-            className="inline-flex items-center gap-2 rounded-xl bg-purple-50 px-4 py-2.5 text-xs font-semibold text-purple-700 hover:bg-purple-100 transition border border-purple-200/60"
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-50/80 px-4 py-2.5 text-xs font-bold text-emerald-700 hover:bg-emerald-100/80 transition border border-emerald-200/80 shadow-xs cursor-pointer active:scale-[0.98]"
           >
-            <BookOpen className="h-4 w-4 text-purple-600" />
+            <BookOpen className="h-4 w-4 text-emerald-600" />
             View All Exams
           </button>
           <button
             type="button"
             onClick={() => router.push("/admin/enterMarks")}
-            className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-200 transition"
+            className="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition border border-slate-200/80 shadow-xs cursor-pointer active:scale-[0.98]"
           >
             <BookOpen className="h-4 w-4 text-slate-500" />
             Go to Enter Marks
@@ -565,9 +565,9 @@ export default function AdminCreateExam() {
                   <button
                     type="button"
                     onClick={() => router.push(`/admin/questionPaper/${lastCreatedExam._id}`)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-purple-700 hover:bg-purple-800 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-600/30 transition transform hover:-translate-y-0.5"
+                    className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition transform hover:-translate-y-0.5 cursor-pointer"
                   >
-                    <Sparkles className="h-4 w-4 text-amber-300" />
+                    <Sparkles className="h-4 w-4 fill-amber-300 text-amber-300" />
                     Generate Question Paper (AI)
                     <ArrowRight className="h-3.5 w-3.5 ml-0.5" />
                   </button>
@@ -575,7 +575,7 @@ export default function AdminCreateExam() {
                   <button
                     type="button"
                     onClick={() => router.push("/admin/allExams")}
-                    className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 transition border border-slate-200"
+                    className="inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition border border-slate-200/80 shadow-xs cursor-pointer"
                   >
                     <BookOpen className="h-3.5 w-3.5 text-slate-500" />
                     View in All Exams
@@ -591,8 +591,8 @@ export default function AdminCreateExam() {
       <Card className="border border-slate-200/80 bg-white p-6 md:p-8 shadow-xs rounded-2xl">
         <CardHeader className="mb-6 p-0 border-b border-slate-100 pb-4">
           <div className="flex items-center gap-2 text-slate-800">
-            <Layers className="h-5 w-5 text-[#6348eb]" />
-            <h2 className="text-lg font-bold text-[#081838]">
+            <Layers className="h-5 w-5 text-emerald-600" />
+            <h2 className="text-lg font-bold text-slate-800">
               Examination Details & Subject Configuration
             </h2>
           </div>
@@ -612,7 +612,7 @@ export default function AdminCreateExam() {
                 placeholder="e.g. Mid Term Examination 2026, Final Assessment"
                 value={formData.examName}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
               />
             </div>
 
@@ -627,7 +627,7 @@ export default function AdminCreateExam() {
                   name="className"
                   value={formData.className}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 >
                   <option value="" disabled>Select target class</option>
                   {classOptions.map((cls) => (
@@ -647,7 +647,7 @@ export default function AdminCreateExam() {
                   <span>
                     Group / Stream <span className="text-red-500">*</span>
                   </span>
-                  <span className="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full border border-purple-100">
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80">
                     Required for {formData.className}
                   </span>
                 </label>
@@ -657,7 +657,7 @@ export default function AdminCreateExam() {
                     name="stream"
                     value={formData.stream}
                     onChange={handleInputChange}
-                    className="w-full appearance-none rounded-xl bg-purple-50/30 border border-purple-200 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                    className="w-full appearance-none rounded-xl bg-emerald-50/30 border border-emerald-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   >
                     <option value="" disabled>Select Group (Science / Business / Humanities)</option>
                     {groupOptions.map((grp) => (
@@ -681,7 +681,7 @@ export default function AdminCreateExam() {
                     name="section"
                     value={formData.section}
                     onChange={handleInputChange}
-                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   >
                     {sectionOptions.map((sec) => (
                       <option key={sec} value={sec}>
@@ -706,7 +706,7 @@ export default function AdminCreateExam() {
                     name="section"
                     value={formData.section}
                     onChange={handleInputChange}
-                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                    className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   >
                     {sectionOptions.map((sec) => (
                       <option key={sec} value={sec}>
@@ -738,7 +738,7 @@ export default function AdminCreateExam() {
                   value={formData.subject}
                   onChange={handleInputChange}
                   disabled={!formData.className || (requiresGroup && !formData.stream)}
-                  className={`w-full appearance-none rounded-xl border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 ${
+                  className={`w-full appearance-none rounded-xl border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 ${
                     !formData.className || (requiresGroup && !formData.stream)
                       ? "bg-slate-100 cursor-not-allowed opacity-70 text-slate-400"
                       : "bg-slate-50/70"
@@ -772,7 +772,7 @@ export default function AdminCreateExam() {
                   name="examType"
                   value={formData.examType}
                   onChange={handleInputChange}
-                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  className="w-full appearance-none rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 >
                   <option value="Mid Term">Mid Term Examination</option>
                   <option value="Final">Final Examination</option>
@@ -796,7 +796,7 @@ export default function AdminCreateExam() {
                   name="examDate"
                   value={formData.examDate}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 [color-scheme:light]"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 [color-scheme:light]"
                 />
                 <Calendar className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -815,7 +815,7 @@ export default function AdminCreateExam() {
                   placeholder="e.g. 2 Hours 30 Minutes, 3 Hours, 1 Hour"
                   value={formData.duration}
                   onChange={handleInputChange}
-                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                  className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 />
                 <Clock className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>
@@ -834,7 +834,7 @@ export default function AdminCreateExam() {
                 name="totalMarks"
                 value={formData.totalMarks}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
               />
             </div>
 
@@ -851,7 +851,7 @@ export default function AdminCreateExam() {
                 name="passMarks"
                 value={formData.passMarks}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20"
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
               />
             </div>
 
@@ -869,7 +869,7 @@ export default function AdminCreateExam() {
                       value={st}
                       checked={formData.status === st}
                       onChange={handleInputChange}
-                      className="accent-[#6348eb]"
+                      className="accent-emerald-600"
                     />
                     <span>{st}</span>
                   </label>
@@ -888,20 +888,20 @@ export default function AdminCreateExam() {
                 placeholder="Add optional notes, exam rules, or room arrangements..."
                 value={formData.description}
                 onChange={handleInputChange}
-                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-[#6348eb] focus:bg-white focus:ring-2 focus:ring-[#6348eb]/20 resize-none"
+                className="w-full rounded-xl bg-slate-50/70 border border-slate-200/80 px-4 py-3 text-sm text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 resize-none"
               />
             </div>
           </div>
 
           {/* Question Paper Configuration Section (AI Blueprint) */}
-          <div className="mt-8 rounded-2xl border border-purple-200 bg-purple-50/30 p-5 md:p-6 space-y-5">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-purple-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-                  <Sparkles className="h-4 w-4 text-purple-600" />
+          <div className="mt-8 rounded-2xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white p-5 md:p-6 space-y-5 shadow-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-emerald-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-xs">
+                  <Sparkles className="h-4 w-4 fill-white text-white" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="text-sm font-bold text-slate-800">
                     Question Paper Structure Configuration
                   </h3>
                   <p className="text-xs text-slate-500">
@@ -912,7 +912,7 @@ export default function AdminCreateExam() {
 
               <div className="text-right">
                 <span className="text-xs font-semibold text-slate-500">Configured Total:</span>{" "}
-                <span className={`text-sm font-extrabold ${isConfigMatched ? "text-emerald-700" : "text-purple-700"}`}>
+                <span className={`text-sm font-extrabold ${isConfigMatched ? "text-emerald-700" : "text-amber-700"}`}>
                   {configuredGrandTotal} Marks
                 </span>
               </div>
@@ -921,10 +921,10 @@ export default function AdminCreateExam() {
             {/* 3 Section Config Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* MCQ / Objective */}
-              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+              <div className="rounded-xl bg-white p-4 border border-emerald-100/80 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">MCQ / Objective</span>
-                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     {mcqTotal} Marks
                   </span>
                 </div>
@@ -936,7 +936,7 @@ export default function AdminCreateExam() {
                       min={0}
                       value={questionConfig.mcq.count}
                       onChange={(e) => handleQuestionConfigChange("mcq", "count", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -946,7 +946,7 @@ export default function AdminCreateExam() {
                       min={1}
                       value={questionConfig.mcq.marksPerQuestion}
                       onChange={(e) => handleQuestionConfigChange("mcq", "marksPerQuestion", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
@@ -956,10 +956,10 @@ export default function AdminCreateExam() {
               </div>
 
               {/* Short Questions */}
-              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+              <div className="rounded-xl bg-white p-4 border border-emerald-100/80 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">Short Questions</span>
-                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     {shortTotal} Marks
                   </span>
                 </div>
@@ -971,7 +971,7 @@ export default function AdminCreateExam() {
                       min={0}
                       value={questionConfig.short.count}
                       onChange={(e) => handleQuestionConfigChange("short", "count", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -981,7 +981,7 @@ export default function AdminCreateExam() {
                       min={1}
                       value={questionConfig.short.marksPerQuestion}
                       onChange={(e) => handleQuestionConfigChange("short", "marksPerQuestion", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
@@ -991,10 +991,10 @@ export default function AdminCreateExam() {
               </div>
 
               {/* Creative / Broad Questions */}
-              <div className="rounded-xl bg-white p-4 border border-purple-100 shadow-xs space-y-3">
+              <div className="rounded-xl bg-white p-4 border border-emerald-100/80 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-slate-800">Creative / Broad</span>
-                  <span className="rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-700 border border-purple-100">
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     {creativeTotal} Marks
                   </span>
                 </div>
@@ -1006,7 +1006,7 @@ export default function AdminCreateExam() {
                       min={0}
                       value={questionConfig.creative.count}
                       onChange={(e) => handleQuestionConfigChange("creative", "count", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -1016,7 +1016,7 @@ export default function AdminCreateExam() {
                       min={1}
                       value={questionConfig.creative.marksPerQuestion}
                       onChange={(e) => handleQuestionConfigChange("creative", "marksPerQuestion", Number(e.target.value))}
-                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500"
+                      className="w-full mt-1 rounded-lg border border-slate-200 px-3 py-1.5 text-xs text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
@@ -1065,7 +1065,7 @@ export default function AdminCreateExam() {
                 <button
                   type="button"
                   onClick={handleSyncTotalMarks}
-                  className="rounded-lg bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 text-xs font-semibold shadow-xs transition"
+                  className="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-1.5 text-xs font-bold shadow-xs transition cursor-pointer"
                 >
                   Set Exam Total to {configuredGrandTotal} Marks
                 </button>
@@ -1078,14 +1078,14 @@ export default function AdminCreateExam() {
             <button
               type="button"
               onClick={() => setFormData(initialFormData)}
-              className="rounded-xl border border-slate-200 bg-slate-50 px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 transition"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 shadow-xs transition cursor-pointer active:scale-[0.98]"
             >
               Reset Form
             </button>
             <Button
               type="submit"
               isDisabled={loading || !formData.className || (requiresGroup && !formData.stream) || !formData.subject}
-              className="font-semibold text-white shadow-md shadow-purple-500/20 bg-[#03204C]/80 hover:bg-[#1556a7]"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm px-6 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <Spinner size="sm" color="current" />

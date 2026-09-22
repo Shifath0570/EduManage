@@ -423,11 +423,11 @@ export default function TeacherCreateExam() {
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-                <Plus className="h-4 w-4" />
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
+                <Award className="h-5 w-5" />
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">
                 Create Examination Schedule
               </h1>
             </div>
@@ -438,23 +438,23 @@ export default function TeacherCreateExam() {
         </div>
 
         {/* Informational Teacher Scope Alert */}
-        <div className="rounded-2xl border border-blue-200 bg-blue-50/80 p-4 text-xs text-blue-900 flex items-start gap-3 shadow-xs">
-          <Info className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+        <div className="rounded-2xl border border-teal-200/80 bg-teal-50/70 p-4 text-xs text-teal-950 flex items-start gap-3 shadow-xs">
+          <Info className="h-5 w-5 text-teal-600 shrink-0 mt-0.5" />
           <div className="space-y-1">
-            <span className="font-bold text-sm text-blue-950">Teacher Assignment Scoped Creation</span>
-            <p className="text-blue-800 leading-relaxed">
+            <span className="font-bold text-sm text-teal-950">Teacher Assignment Scoped Creation</span>
+            <p className="text-teal-900 leading-relaxed">
               As a faculty member, you can create examinations <strong>only for the Class, Group/Department, and Subject assigned to you</strong>.
               All other classes and subjects are restricted on both frontend and backend.
             </p>
             {assignments.length > 0 && (
               <div className="pt-1 flex flex-wrap gap-2 items-center">
-                <span className="font-semibold text-blue-900">Your Active Assignments:</span>
+                <span className="font-semibold text-teal-900">Your Active Assignments:</span>
                 {assignments.map((a, i) => (
                   <span
                     key={a._id || i}
-                    className="inline-flex items-center gap-1 bg-white border border-blue-200 px-2.5 py-0.5 rounded-full font-bold text-blue-950 text-[11px]"
+                    className="inline-flex items-center gap-1 bg-white border border-teal-200/80 px-2.5 py-0.5 rounded-full font-bold text-teal-950 text-[11px] shadow-2xs"
                   >
-                    <UserCheck size={12} className="text-blue-600" />
+                    <UserCheck size={12} className="text-teal-600" />
                     {formatClassName(a.classId)}
                     {formatGroupName(a.groupId || "") ? ` (${formatGroupName(a.groupId || "")})` : ""}
                     {" • "}{a.subjectId}
@@ -485,10 +485,10 @@ export default function TeacherCreateExam() {
 
         {/* AI Question Paper CTA Banner after Exam Creation */}
         {lastCreatedExam && (
-          <div className="rounded-2xl border border-purple-200 bg-linear-to-r from-purple-50 via-indigo-50 to-blue-50 p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-white p-5 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-start gap-3">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-600 text-white shadow-md">
-                <Sparkles className="h-5 w-5 text-amber-300" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/20">
+                <Sparkles className="h-5 w-5 fill-amber-300 text-amber-300" />
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900">
@@ -503,7 +503,7 @@ export default function TeacherCreateExam() {
             <button
               type="button"
               onClick={() => router.push(`/teacher/questionPaper/${lastCreatedExam._id}`)}
-              className="inline-flex items-center gap-2 rounded-xl bg-purple-700 px-4 py-2.5 text-xs font-bold text-white shadow-md shadow-purple-600/20 transition hover:bg-purple-800 cursor-pointer shrink-0"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition active:scale-[0.98] cursor-pointer shrink-0"
             >
               <span>Generate AI Question Paper</span>
               <ArrowRight size={14} />
@@ -527,7 +527,7 @@ export default function TeacherCreateExam() {
           {/* Card 1: Exam General Information */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Award className="h-4 w-4 text-blue-600" />
+              <Award className="h-4 w-4 text-emerald-600" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Examination Details
               </h2>
@@ -546,7 +546,7 @@ export default function TeacherCreateExam() {
                   placeholder="e.g. 1st Mid Term Examination 2026"
                   value={formData.examName}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 />
               </div>
 
@@ -560,7 +560,7 @@ export default function TeacherCreateExam() {
                     name="examType"
                     value={formData.examType}
                     onChange={handleChange}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                   >
                     <option value="Mid Term">Mid Term</option>
                     <option value="Final">Final Examination</option>
@@ -582,7 +582,7 @@ export default function TeacherCreateExam() {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                   >
                     <option value="Active">Active</option>
                     <option value="Upcoming">Upcoming</option>
@@ -597,7 +597,7 @@ export default function TeacherCreateExam() {
           {/* Card 2: Academic Scope (Restricted to Teacher Assignment) */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Layers className="h-4 w-4 text-blue-600" />
+              <Layers className="h-4 w-4 text-emerald-600" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Target Academic Scope (Assigned Courses)
               </h2>
@@ -619,7 +619,7 @@ export default function TeacherCreateExam() {
                       type="text"
                       readOnly
                       value={formData.className || "No assigned class"}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
+                      className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
                     />
                   ) : (
                     <>
@@ -628,7 +628,7 @@ export default function TeacherCreateExam() {
                         required
                         value={formData.className}
                         onChange={handleChange}
-                        className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                        className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                       >
                         <option value="">Select Assigned Class</option>
                         {authorizedClasses.map((cls) => (
@@ -655,7 +655,7 @@ export default function TeacherCreateExam() {
                         type="text"
                         readOnly
                         value={formData.stream || "Assigned Group"}
-                        className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
+                        className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
                       />
                     ) : (
                       <>
@@ -664,7 +664,7 @@ export default function TeacherCreateExam() {
                           required
                           value={formData.stream}
                           onChange={handleChange}
-                          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                          className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                         >
                           <option value="">Select Assigned Group</option>
                           {authorizedGroups.map((grp) => (
@@ -690,7 +690,7 @@ export default function TeacherCreateExam() {
                     name="section"
                     value={formData.section}
                     onChange={handleChange}
-                    className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                   >
                     {sectionOptions.map((sec) => (
                       <option key={sec} value={sec}>
@@ -713,7 +713,7 @@ export default function TeacherCreateExam() {
                       type="text"
                       readOnly
                       value={formData.subject || "No assigned subject"}
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
+                      className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
                     />
                   ) : (
                     <>
@@ -722,7 +722,7 @@ export default function TeacherCreateExam() {
                         required
                         value={formData.subject}
                         onChange={handleChange}
-                        className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                        className="w-full appearance-none rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                       >
                         <option value="">Select Assigned Subject</option>
                         {authorizedSubjects.map((sub) => (
@@ -742,7 +742,7 @@ export default function TeacherCreateExam() {
           {/* Card 3: Schedule & Marks Configuration */}
           <div className="rounded-2xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
             <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
-              <Clock className="h-4 w-4 text-blue-600" />
+              <Clock className="h-4 w-4 text-emerald-600" />
               <h2 className="text-sm font-bold uppercase tracking-wider text-slate-600">
                 Schedule & Marks
               </h2>
@@ -761,7 +761,7 @@ export default function TeacherCreateExam() {
                     required
                     value={formData.examDate}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
+                    className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer [color-scheme:light]"
                   />
                 </div>
               </div>
@@ -777,7 +777,7 @@ export default function TeacherCreateExam() {
                   placeholder="e.g. 2 Hours 30 Minutes"
                   value={formData.duration}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 />
               </div>
 
@@ -794,7 +794,7 @@ export default function TeacherCreateExam() {
                   required
                   value={formData.totalMarks}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 />
               </div>
 
@@ -811,18 +811,20 @@ export default function TeacherCreateExam() {
                   required
                   value={formData.passMarks}
                   onChange={handleChange}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                  className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                 />
               </div>
             </div>
           </div>
 
           {/* Card 4: Question Paper Blueprint Configuration */}
-          <div className="rounded-2xl border border-purple-200 bg-linear-to-b from-purple-50/40 via-white to-white p-5 sm:p-6 shadow-xs space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-purple-100 pb-3">
-              <div className="flex items-center gap-2">
-                <Sparkles className="h-4 w-4 text-purple-600" />
-                <h2 className="text-sm font-bold uppercase tracking-wider text-purple-900">
+          <div className="rounded-2xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white p-5 sm:p-6 shadow-xs space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-emerald-100 pb-3">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-xs">
+                  <Sparkles className="h-4 w-4 fill-white text-white" />
+                </span>
+                <h2 className="text-sm font-bold uppercase tracking-wider text-slate-800">
                   Question Paper Blueprint Structure
                 </h2>
               </div>
@@ -833,10 +835,10 @@ export default function TeacherCreateExam() {
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               {/* MCQ Config */}
-              <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-2xs space-y-3">
+              <div className="rounded-xl border border-emerald-100/80 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900">1. MCQ / Objective</span>
-                  <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-slate-800">1. MCQ / Objective</span>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     Total: {mcqTotal}M
                   </span>
                 </div>
@@ -856,7 +858,7 @@ export default function TeacherCreateExam() {
                           mcq: { ...questionConfig.mcq, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -874,17 +876,17 @@ export default function TeacherCreateExam() {
                           mcq: { ...questionConfig.mcq, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Short Questions Config */}
-              <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-2xs space-y-3">
+              <div className="rounded-xl border border-emerald-100/80 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900">2. Short Questions</span>
-                  <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-slate-800">2. Short Questions</span>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     Total: {shortTotal}M
                   </span>
                 </div>
@@ -904,7 +906,7 @@ export default function TeacherCreateExam() {
                           short: { ...questionConfig.short, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -922,17 +924,17 @@ export default function TeacherCreateExam() {
                           short: { ...questionConfig.short, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
               </div>
 
               {/* Creative / Broad Questions Config */}
-              <div className="rounded-xl border border-purple-100 bg-white p-4 shadow-2xs space-y-3">
+              <div className="rounded-xl border border-emerald-100/80 bg-white p-4 shadow-xs space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-900">3. Creative / Broad</span>
-                  <span className="text-xs font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-slate-800">3. Creative / Broad</span>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
                     Total: {creativeTotal}M
                   </span>
                 </div>
@@ -952,7 +954,7 @@ export default function TeacherCreateExam() {
                           creative: { ...questionConfig.creative, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                   <div>
@@ -970,7 +972,7 @@ export default function TeacherCreateExam() {
                           creative: { ...questionConfig.creative, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-800 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                     />
                   </div>
                 </div>
@@ -1008,7 +1010,7 @@ export default function TeacherCreateExam() {
                     <button
                       type="button"
                       onClick={handleSyncMarks}
-                      className="bg-amber-600 hover:bg-amber-700 text-white px-3 py-1 rounded-lg text-xs font-bold transition cursor-pointer shadow-xs"
+                      className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold transition cursor-pointer shadow-xs"
                     >
                       Set Exam Total to {configuredGrandTotal}M
                     </button>
@@ -1029,7 +1031,7 @@ export default function TeacherCreateExam() {
               placeholder="e.g. Covers Chapters 1 to 5. Scientific calculators are permitted for mathematics and science sections."
               value={formData.description}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-200 bg-white p-3.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+              className="w-full rounded-xl border border-slate-200/80 bg-slate-50/70 p-3.5 text-sm font-medium text-slate-800 outline-none transition-all focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 resize-none"
             />
           </div>
 
@@ -1038,14 +1040,14 @@ export default function TeacherCreateExam() {
             <button
               type="button"
               onClick={() => router.push("/teacher")}
-              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 cursor-pointer shadow-xs"
+              className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer shadow-xs active:scale-[0.98]"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={loading || assignments.length === 0}
-              className="flex items-center gap-2 rounded-xl bg-[#03204C] hover:bg-[#1556a7] px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-blue-900/10 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm px-6 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (
                 <>
