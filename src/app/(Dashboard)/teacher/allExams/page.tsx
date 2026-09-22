@@ -369,11 +369,11 @@ export default function TeacherAllExams() {
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
-              <Award className="h-4 w-4" />
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
+              <Award className="h-5 w-5" />
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">
               Exam Schedule & Management
             </h1>
           </div>
@@ -385,7 +385,7 @@ export default function TeacherAllExams() {
         <button
           type="button"
           onClick={() => router.push("/teacher/createExam")}
-          className="bg-[#03204C] hover:bg-[#1556a7] text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-blue-900/10 transition cursor-pointer"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm px-5 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer"
         >
           <Plus size={16} /> Create Exam
         </button>
@@ -416,10 +416,10 @@ export default function TeacherAllExams() {
             setActiveTab("all");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "all"
-              ? "bg-[#03204c] text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-200/70"
+              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/20"
+              : "text-slate-600 hover:bg-emerald-50/60 hover:text-slate-900"
           }`}
         >
           <Layers size={16} />
@@ -438,17 +438,17 @@ export default function TeacherAllExams() {
             setActiveTab("mine");
             setCurrentPage(1);
           }}
-          className={`px-4 py-2 rounded-xl text-sm font-bold transition flex items-center gap-2 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === "mine"
-              ? "bg-[#03204c] text-white shadow-sm"
-              : "text-slate-600 hover:bg-slate-200/70"
+              ? "bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/20"
+              : "text-slate-600 hover:bg-emerald-50/60 hover:text-slate-900"
           }`}
         >
           <UserCheck size={16} />
           <span>My Created Exams</span>
           <span
             className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-              activeTab === "mine" ? "bg-blue-300 text-blue-950" : "bg-blue-100 text-blue-800"
+              activeTab === "mine" ? "bg-white/20 text-white" : "bg-teal-100 text-teal-800"
             }`}
           >
             {myExamsCount}
@@ -470,7 +470,7 @@ export default function TeacherAllExams() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 transition-all"
             />
           </div>
 
@@ -482,7 +482,7 @@ export default function TeacherAllExams() {
                 setSelectedClass(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
             >
               {classFilterOptions.map((cls) => (
                 <option key={cls} value={cls}>
@@ -498,7 +498,7 @@ export default function TeacherAllExams() {
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-blue-500 cursor-pointer"
+              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
             >
               {statusFilterOptions.map((st) => (
                 <option key={st} value={st}>
@@ -510,7 +510,7 @@ export default function TeacherAllExams() {
             {/* Reset Button */}
             <button
               onClick={handleResetFilters}
-              className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-xl flex items-center gap-1 hover:bg-slate-100 transition cursor-pointer"
+              className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-xl flex items-center gap-1 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer shadow-xs active:scale-[0.98]"
             >
               <RotateCcw size={14} /> Reset
             </button>
@@ -586,7 +586,7 @@ export default function TeacherAllExams() {
                           {exam.section ? ` (Sec ${exam.section})` : ""}
                         </div>
                         {exam.stream && (
-                          <span className="inline-block px-1.5 py-0.5 rounded bg-blue-50 text-blue-700 text-[10px] font-bold border border-blue-200 mt-0.5">
+                          <span className="inline-block px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 text-[10px] font-bold border border-teal-200/80 mt-0.5">
                             {exam.stream}
                           </span>
                         )}
@@ -615,11 +615,11 @@ export default function TeacherAllExams() {
                       </td>
                       <td className="py-3.5 px-4 text-center">
                         {teacherIsOwner ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                            <UserCheck size={12} /> You
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200/80">
+                            <UserCheck size={12} className="text-teal-600" /> You
                           </span>
                         ) : exam.createdByRole === "admin" ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium bg-purple-50 text-purple-700 border border-purple-200/80">
                             Admin
                           </span>
                         ) : (
@@ -634,7 +634,7 @@ export default function TeacherAllExams() {
                           <button
                             title="AI Question Paper"
                             onClick={() => router.push(`/teacher/questionPaper/${exam._id}`)}
-                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg border border-purple-200 transition cursor-pointer"
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-200/80 transition cursor-pointer"
                           >
                             <Sparkles size={15} />
                           </button>
@@ -643,7 +643,7 @@ export default function TeacherAllExams() {
                           <button
                             title="View Details"
                             onClick={() => setViewExam(exam)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-100 transition cursor-pointer"
+                            className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg border border-teal-200/80 transition cursor-pointer"
                           >
                             <Eye size={15} />
                           </button>
@@ -656,7 +656,7 @@ export default function TeacherAllExams() {
                                 setEditExam({ ...exam });
                                 setEditError(null);
                               }}
-                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-200 transition cursor-pointer"
+                              className="p-1.5 text-amber-600 hover:bg-amber-50 rounded-lg border border-amber-200/80 transition cursor-pointer"
                             >
                               <PencilLine size={15} />
                             </button>
@@ -678,7 +678,7 @@ export default function TeacherAllExams() {
                                 setDeleteExamTarget(exam);
                                 setDeleteError(null);
                               }}
-                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-100 transition cursor-pointer"
+                              className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-200/80 transition cursor-pointer"
                             >
                               <Trash2 size={15} />
                             </button>
@@ -718,7 +718,7 @@ export default function TeacherAllExams() {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="bg-white border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                className="bg-white border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value={5}>5</option>
                 <option value={10}>10</option>
@@ -758,7 +758,7 @@ export default function TeacherAllExams() {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-xs">
                   <Award className="h-4 w-4" />
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">Exam Details</h3>
@@ -820,29 +820,29 @@ export default function TeacherAllExams() {
 
               {/* Question Configuration Blueprint Summary */}
               {viewExam.questionConfiguration && (
-                <div className="bg-purple-50/60 p-3 rounded-xl border border-purple-100 space-y-2">
-                  <span className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
-                    <Sparkles size={13} className="text-purple-600" /> Question Paper Blueprint
+                <div className="bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white p-3 rounded-xl border border-emerald-200/80 space-y-2">
+                  <span className="text-xs font-bold text-emerald-900 flex items-center gap-1.5">
+                    <Sparkles size={13} className="fill-emerald-500 text-emerald-500" /> Question Paper Blueprint
                   </span>
-                  <div className="grid grid-cols-3 gap-2 text-xs text-purple-950">
-                    <div className="bg-white/80 p-2 rounded-lg border border-purple-100">
-                      <div className="font-bold">MCQ</div>
-                      <div>{viewExam.questionConfiguration.mcq?.count || 0} Qs × {viewExam.questionConfiguration.mcq?.marksPerQuestion || 1}M</div>
-                      <div className="font-semibold text-purple-700">
+                  <div className="grid grid-cols-3 gap-2 text-xs text-emerald-950">
+                    <div className="bg-white/90 p-2 rounded-lg border border-emerald-100/80 shadow-2xs">
+                      <div className="font-bold text-slate-800">MCQ</div>
+                      <div className="text-slate-500">{viewExam.questionConfiguration.mcq?.count || 0} Qs × {viewExam.questionConfiguration.mcq?.marksPerQuestion || 1}M</div>
+                      <div className="font-semibold text-emerald-700">
                         = {(viewExam.questionConfiguration.mcq?.count || 0) * (viewExam.questionConfiguration.mcq?.marksPerQuestion || 1)} Marks
                       </div>
                     </div>
-                    <div className="bg-white/80 p-2 rounded-lg border border-purple-100">
-                      <div className="font-bold">Short</div>
-                      <div>{viewExam.questionConfiguration.short?.count || 0} Qs × {viewExam.questionConfiguration.short?.marksPerQuestion || 2}M</div>
-                      <div className="font-semibold text-purple-700">
+                    <div className="bg-white/90 p-2 rounded-lg border border-emerald-100/80 shadow-2xs">
+                      <div className="font-bold text-slate-800">Short</div>
+                      <div className="text-slate-500">{viewExam.questionConfiguration.short?.count || 0} Qs × {viewExam.questionConfiguration.short?.marksPerQuestion || 2}M</div>
+                      <div className="font-semibold text-emerald-700">
                         = {(viewExam.questionConfiguration.short?.count || 0) * (viewExam.questionConfiguration.short?.marksPerQuestion || 2)} Marks
                       </div>
                     </div>
-                    <div className="bg-white/80 p-2 rounded-lg border border-purple-100">
-                      <div className="font-bold">Creative</div>
-                      <div>{viewExam.questionConfiguration.creative?.count || 0} Qs × {viewExam.questionConfiguration.creative?.marksPerQuestion || 5}M</div>
-                      <div className="font-semibold text-purple-700">
+                    <div className="bg-white/90 p-2 rounded-lg border border-emerald-100/80 shadow-2xs">
+                      <div className="font-bold text-slate-800">Creative</div>
+                      <div className="text-slate-500">{viewExam.questionConfiguration.creative?.count || 0} Qs × {viewExam.questionConfiguration.creative?.marksPerQuestion || 5}M</div>
+                      <div className="font-semibold text-emerald-700">
                         = {(viewExam.questionConfiguration.creative?.count || 0) * (viewExam.questionConfiguration.creative?.marksPerQuestion || 5)} Marks
                       </div>
                     </div>
@@ -867,9 +867,9 @@ export default function TeacherAllExams() {
                   setViewExam(null);
                   router.push(`/teacher/questionPaper/${id}`);
                 }}
-                className="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition cursor-pointer"
               >
-                <Sparkles size={14} className="text-amber-300" /> AI Question Paper
+                <Sparkles size={14} className="fill-amber-300 text-amber-300" /> AI Question Paper
               </button>
               <button
                 onClick={() => {
@@ -877,7 +877,7 @@ export default function TeacherAllExams() {
                   setViewExam(null);
                   router.push(`/teacher/enterMarks?examId=${id}`);
                 }}
-                className="bg-[#03204C] hover:bg-[#1556a7] text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer"
+                className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               >
                 <FileSpreadsheet size={14} /> Enter Marks
               </button>
@@ -929,7 +929,7 @@ export default function TeacherAllExams() {
                     required
                     value={editExam.examName}
                     onChange={(e) => setEditExam({ ...editExam, examName: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 transition-all"
                   />
                 </div>
 
@@ -940,7 +940,7 @@ export default function TeacherAllExams() {
                   <select
                     value={editExam.examType}
                     onChange={(e) => setEditExam({ ...editExam, examType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                   >
                     <option value="Mid Term">Mid Term</option>
                     <option value="Final">Final Examination</option>
@@ -959,7 +959,7 @@ export default function TeacherAllExams() {
                     required
                     value={editExam.examDate}
                     onChange={(e) => setEditExam({ ...editExam, examDate: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer [color-scheme:light]"
                   />
                 </div>
 
@@ -974,7 +974,7 @@ export default function TeacherAllExams() {
                     required
                     value={editExam.totalMarks}
                     onChange={(e) => setEditExam({ ...editExam, totalMarks: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   />
                 </div>
 
@@ -989,7 +989,7 @@ export default function TeacherAllExams() {
                     required
                     value={editExam.passMarks}
                     onChange={(e) => setEditExam({ ...editExam, passMarks: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   />
                 </div>
 
@@ -1002,7 +1002,7 @@ export default function TeacherAllExams() {
                     value={editExam.duration || ""}
                     onChange={(e) => setEditExam({ ...editExam, duration: e.target.value })}
                     placeholder="e.g. 2 Hours 30 Minutes"
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15"
                   />
                 </div>
 
@@ -1013,7 +1013,7 @@ export default function TeacherAllExams() {
                   <select
                     value={editExam.status}
                     onChange={(e) => setEditExam({ ...editExam, status: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
                   >
                     <option value="Active">Active</option>
                     <option value="Upcoming">Upcoming</option>
@@ -1029,7 +1029,7 @@ export default function TeacherAllExams() {
                     rows={2}
                     value={editExam.description || ""}
                     onChange={(e) => setEditExam({ ...editExam, description: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-xl text-sm outline-none focus:border-blue-500"
+                    className="w-full px-3.5 py-2.5 border border-slate-200/80 bg-slate-50/70 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 resize-none"
                   />
                 </div>
               </div>
@@ -1039,14 +1039,14 @@ export default function TeacherAllExams() {
                   type="button"
                   onClick={() => setEditExam(null)}
                   disabled={isUpdating}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer shadow-xs active:scale-[0.98]"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isUpdating}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold bg-[#03204C] hover:bg-[#1556a7] text-white flex items-center gap-1.5 transition cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer"
                 >
                   {isUpdating ? (
                     <>

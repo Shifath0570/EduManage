@@ -251,11 +251,11 @@ export default function AllExamList() {
       {/* Header Section */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-              <Award className="h-4 w-4" />
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
+              <Award className="h-5 w-5" />
             </span>
-            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-800">
               All Exam List
             </h1>
           </div>
@@ -267,7 +267,7 @@ export default function AllExamList() {
         <button
           type="button"
           onClick={() => router.push("/admin/createExam")}
-          className="bg-[#03204C]/80 hover:bg-[#1556a7] text-white px-4 py-2.5 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 shadow-md shadow-purple-500/20 transition"
+          className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm px-5 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer"
         >
           <Plus size={16} /> Create Exam
         </button>
@@ -305,7 +305,7 @@ export default function AllExamList() {
                 setSearchQuery(e.target.value);
                 setCurrentPage(1);
               }}
-              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition"
+              className="w-full pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-4 focus:ring-emerald-500/15 transition-all"
             />
           </div>
 
@@ -317,7 +317,7 @@ export default function AllExamList() {
                 setSelectedClass(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-indigo-500"
+              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
             >
               {classFilterOptions.map((cls) => (
                 <option key={cls} value={cls}>
@@ -333,7 +333,7 @@ export default function AllExamList() {
                 setSelectedStatus(e.target.value);
                 setCurrentPage(1);
               }}
-              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-indigo-500"
+              className="bg-white border border-slate-200 text-sm rounded-xl px-3 py-2 text-slate-700 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 cursor-pointer"
             >
               {statusFilterOptions.map((st) => (
                 <option key={st} value={st}>
@@ -345,7 +345,7 @@ export default function AllExamList() {
             {/* Reset Button */}
             <button
               onClick={handleResetFilters}
-              className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-xl flex items-center gap-1 hover:bg-slate-100 transition"
+              className="border border-slate-200 text-slate-600 text-sm px-3 py-2 rounded-xl flex items-center gap-1 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer shadow-xs active:scale-[0.98]"
             >
               <RotateCcw size={14} /> Reset
             </button>
@@ -434,28 +434,28 @@ export default function AllExamList() {
                           <button
                             title="AI Question Paper"
                             onClick={() => router.push(`/admin/questionPaper/${exam._id}`)}
-                            className="p-1.5 text-purple-600 hover:bg-purple-50 rounded-lg border border-purple-200 transition"
+                            className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg border border-emerald-200/80 transition cursor-pointer"
                           >
                             <Sparkles size={15} />
                           </button>
                           <button
                             title="View Details"
                             onClick={() => setViewExam(exam)}
-                            className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg border border-blue-100 transition"
+                            className="p-1.5 text-teal-600 hover:bg-teal-50 rounded-lg border border-teal-200/80 transition cursor-pointer"
                           >
                             <Eye size={15} />
                           </button>
                           <button
                             title="Enter Marks"
                             onClick={() => router.push("/admin/enterMarks")}
-                            className="p-1.5 text-slate-600 hover:bg-slate-100 rounded-lg border border-slate-200 transition"
+                            className="p-1.5 text-slate-600 hover:bg-slate-50 hover:text-slate-900 rounded-lg border border-slate-200 transition cursor-pointer"
                           >
                             <PencilLine size={15} />
                           </button>
                           <button
                             title="Delete Exam"
                             onClick={() => handleOpenDeleteDialog(exam)}
-                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-100 transition"
+                            className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg border border-rose-200/80 transition cursor-pointer"
                           >
                             <Trash2 size={15} />
                           </button>
@@ -486,7 +486,7 @@ export default function AllExamList() {
                   setItemsPerPage(Number(e.target.value));
                   setCurrentPage(1);
                 }}
-                className="bg-white border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-indigo-500"
+                className="bg-white border border-slate-200 text-xs rounded-md px-2 py-1 text-slate-700 outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
               >
                 <option value={5}>5</option>
                 <option value={10}>10</option>
@@ -500,7 +500,7 @@ export default function AllExamList() {
             <button
               onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
               disabled={currentPage === 1 || loading}
-              className="px-2.5 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition"
+              className="px-2.5 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition cursor-pointer"
             >
               <ChevronLeft size={14} /> Previous
             </button>
@@ -512,7 +512,7 @@ export default function AllExamList() {
             <button
               onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
               disabled={currentPage === totalPages || loading}
-              className="px-2.5 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition"
+              className="px-2.5 py-1.5 border border-slate-200 rounded-lg hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1 transition cursor-pointer"
             >
               Next <ChevronRight size={14} />
             </button>
@@ -526,14 +526,14 @@ export default function AllExamList() {
           <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-xs">
                   <Award className="h-4 w-4" />
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">Exam Details</h3>
               </div>
               <button
                 onClick={() => setViewExam(null)}
-                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg hover:bg-slate-100"
+                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
               >
                 ✕
               </button>
@@ -589,22 +589,22 @@ export default function AllExamList() {
                   setViewExam(null);
                   router.push(`/admin/questionPaper/${id}`);
                 }}
-                className="bg-purple-700 hover:bg-purple-800 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition"
+                className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-500/20 transition cursor-pointer"
               >
-                <Sparkles size={14} className="text-amber-300" /> AI Question Paper
+                <Sparkles size={14} className="fill-amber-300 text-amber-300" /> AI Question Paper
               </button>
               <button
                 onClick={() => {
                   setViewExam(null);
                   router.push("/admin/enterMarks");
                 }}
-                className="bg-[#0B386C]/80 hover:bg-indigo-950 text-white px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
+                className="bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 px-3.5 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer shadow-xs"
               >
                 <PencilLine size={14} /> Enter Marks
               </button>
               <button
                 onClick={() => setViewExam(null)}
-                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition"
+                className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
               >
                 Close
               </button>
