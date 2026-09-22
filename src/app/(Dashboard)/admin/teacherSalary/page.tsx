@@ -3,6 +3,12 @@
 import { useState, useEffect, useCallback, FormEvent } from "react";
 import ReactPaginate from "react-paginate";
 
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
+
 interface SalaryRecord {
   _id: string;
   teacherId: string;
@@ -63,6 +69,21 @@ export default function TeacherSalaryPage() {
   const [remarks, setRemarks] = useState<string>("");
   const [submitting, setSubmitting] = useState<boolean>(false);
 
+  // Get JWT token from localStorage
+   const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  }; 
+
+
   // Fetch Data
   const fetchSalaries = useCallback(async (page: number) => {
     setLoading(true);
@@ -76,7 +97,10 @@ export default function TeacherSalaryPage() {
       if (month) params.append("month", month);
       if (paymentStatus) params.append("paymentStatus", paymentStatus);
 
-      const response = await fetch(`${API_BASE_URL}?${params.toString()}`);
+      const token = await getJwt();
+      const response = await fetch(`${API_BASE_URL}?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const result = await response.json();
 
       if (result.success) {
@@ -116,9 +140,13 @@ export default function TeacherSalaryPage() {
 
     setSubmitting(true);
     try {
+      const token = await getJwt();
       const response = await fetch(`${API_BASE_URL}/pay`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({
           teacherId: selectedTeacher._id,
           amount: Number(payAmount),

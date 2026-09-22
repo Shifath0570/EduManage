@@ -7,10 +7,34 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { Pencil, Eye, Trash2, Loader2 } from "lucide-react";
 
+// JWT interface
+interface JwtResponse { 
+  token?: string; 
+  message?: string; 
+} 
+
+
 const NoticeAction = ({ notice }: { notice: any }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+
+// Get the JWT token from localStorage
+
+ const getJwt = async (): Promise<string> => { 
+    const response = await fetch("/api/auth/token", { 
+      credentials: "include", 
+      headers: { Accept: "application/json" }, 
+    }); 
+    const result: JwtResponse = await response.json().catch(() => ({})); 
+ 
+    if (!response.ok || !result.token) { 
+      throw new Error(result.message || "You must be signed in to create notices."); 
+    } 
+    return result.token; 
+  };
+
+
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -21,6 +45,7 @@ const NoticeAction = ({ notice }: { notice: any }) => {
           method: "DELETE",
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${await getJwt()}`, // Include the JWT token in the Authorization header
           },
         }
       );
