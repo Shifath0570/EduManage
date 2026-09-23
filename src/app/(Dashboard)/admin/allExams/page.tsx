@@ -67,6 +67,11 @@ const classFilterOptions = [
 
 const statusFilterOptions = ["All Statuses", "Active", "Upcoming", "Completed"];
 
+const formatSection = (sec?: string) => {
+  if (!sec) return "";
+  return String(sec).toUpperCase().replace(/^SECTION[\s_-]*/i, "").replace(/^SEC[\s_-]*/i, "").trim() || sec;
+};
+
 export default function AllExamList() {
   const router = useRouter();
   const [exams, setExams] = useState<ExamItem[]>([]);
@@ -409,7 +414,7 @@ export default function AllExamList() {
                       </td>
                       <td className="py-3.5 px-4">
                         <span className="font-semibold text-slate-800">
-                          {exam.className}{exam.section ? ` (Sec ${exam.section})` : ""}
+                          {exam.className}{exam.section ? ` (Sec ${formatSection(exam.section)})` : ""}
                         </span>
                       </td>
                       <td className="py-3.5 px-4 text-slate-600">
@@ -548,7 +553,7 @@ export default function AllExamList() {
                 <div>
                   <span className="text-xs text-slate-400 font-medium">Target Class & Section</span>
                   <p className="font-bold text-slate-800">
-                    {viewExam.className}{viewExam.section ? ` (Section ${viewExam.section})` : ""}
+                    {viewExam.className}{viewExam.section ? ` (Section ${formatSection(viewExam.section)})` : ""}
                   </p>
                 </div>
               </div>
@@ -643,7 +648,7 @@ export default function AllExamList() {
                   for{" "}
                   <span className="font-medium text-slate-800">
                     {deleteExamTarget?.className}
-                    {deleteExamTarget?.section ? ` (Section ${deleteExamTarget.section})` : ""}
+                    {deleteExamTarget?.section ? ` (Section ${formatSection(deleteExamTarget.section)})` : ""}
                   </span>
                   ? This will permanently remove the exam schedule and its configuration. This action cannot be undone.
                 </p>

@@ -56,6 +56,18 @@ const computeGradeAndGpa = (marks: number, total = 100) => {
   return { grade: "F", gpa: 0.0 };
 };
 
+// Normalizes Section format (e.g. "sec-a", "SEC-A", "Section A", "a" -> "A")
+const formatSection = (sec?: string): string => {
+  if (!sec) return "A";
+  return (
+    String(sec)
+      .toUpperCase()
+      .replace(/^SECTION[\s_-]*/i, "")
+      .replace(/^SEC[\s_-]*/i, "")
+      .trim() || "A"
+  );
+};
+
 export default function AdminEnterMarks() {
   const [exams, setExams] = useState<ExamOption[]>([]);
   const [selectedExamId, setSelectedExamId] = useState<string>("");
@@ -90,7 +102,7 @@ export default function AdminEnterMarks() {
           setSelectedExamId(firstExam._id || firstExam.examName);
           setSelectedClass(firstExam.className || "");
           setSelectedStream(firstExam.stream || firstExam.group || "");
-          setSelectedSection(firstExam.section ? firstExam.section.toUpperCase().replace("SECTION", "").trim() : "A");
+          setSelectedSection(formatSection(firstExam.section));
           setSelectedSubject(firstExam.subject || "");
         } else {
           setExams([]);
@@ -114,9 +126,7 @@ export default function AdminEnterMarks() {
     if (currentExam) {
       setSelectedClass(currentExam.className || "");
       setSelectedStream(currentExam.stream || currentExam.group || "");
-      setSelectedSection(
-        currentExam.section ? currentExam.section.toUpperCase().replace("SECTION", "").trim() : "A"
-      );
+      setSelectedSection(formatSection(currentExam.section));
       setSelectedSubject(currentExam.subject || "");
     }
   }, [currentExam]);

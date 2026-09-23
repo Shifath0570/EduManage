@@ -1,47 +1,21 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   PencilLine,
   CheckCircle2,
   AlertCircle,
-
-
-
-
-
-
-
-  // hdfjsdghjfghjf
   Save,
   Layers,
   ChevronDown,
   Loader2,
   Check,
-  Lock
+  Lock,
+  Users
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "@/app/lib/auth-client";
-
-interface JwtResponse {
-  token?: string;
-  message?: string;
-}
-
-const getJwt = async (): Promise<string> => {
-  const response = await fetch("/api/auth/token", {
-    credentials: "include",
-    headers: { Accept: "application/json" },
-  });
-  const result: JwtResponse = await response.json().catch(() => ({}));
-
-  if (!response.ok || !result.token) {
-    throw new Error(result.message || "You must be signed in to perform this action.");
-  }
-
-  return result.token;
-};
 
 interface ExamOption {
   _id?: string;
@@ -61,7 +35,8 @@ interface ExamOption {
 
 interface StudentItem {
   _id?: string;
-  studentId: string;
+  stuId?: string;
+  studentId?: string;
   name: string;
   roll: string;
   className: string;
@@ -80,6 +55,18 @@ interface StudentMarkRow {
   gpa: number;
   remarks: string;
 }
+
+// Normalizes Section format (e.g. "sec-a", "SEC-A", "Section A", "a" -> "A")
+const formatSection = (sec?: string): string => {
+  if (!sec) return "A";
+  return (
+    String(sec)
+      .toUpperCase()
+      .replace(/^SECTION[\s_-]*/i, "")
+      .replace(/^SEC[\s_-]*/i, "")
+      .trim() || "A"
+  );
+};
 
 // Helper to calculate Grade & GPA live in UI
 const computeGradeAndGpa = (marks: number, total = 100) => {
@@ -117,7 +104,7 @@ export default function TeacherEnterMarks() {
   const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
   // Check if logged-in teacher is creator / owner of a specific exam
-  const isOwner = (examItem: ExamOption | null) => {
+  const isOwner = useCallback((examItem: ExamOption | null) => {
     if (!examItem) return false;
     if (user?.role === "admin") return true;
 
@@ -130,29 +117,29 @@ export default function TeacherEnterMarks() {
       return true;
     }
     return false;
-  };
+  }, [user]);
 
   // Partition exams into owned vs other exams
   const myExams = useMemo(() => {
     return exams.filter((e) => isOwner(e));
-  }, [exams, user]);
+  }, [exams, isOwner]);
 
   const otherExams = useMemo(() => {
     return exams.filter((e) => !isOwner(e));
-  }, [exams, user]);
+  }, [exams, isOwner]);
 
   // Load Exams from API on mount
   useEffect(() => {
     async function fetchExams() {
       setLoadingExams(true);
       try {
-        const token = await getJwt();
-        const res = await fetch(`${API_BASE}/api/exams`, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          }
-        });
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (user?.email) {
+          headers["x-user-email"] = user.email;
+          headers["x-user-role"] = "teacher";
+        }
+
+        const res = await fetch(`${API_BASE}/api/exams`, { headers });
         const data = await res.json();
         if (data.success && Array.isArray(data.data) && data.data.length > 0) {
           setExams(data.data);
@@ -173,7 +160,7 @@ export default function TeacherEnterMarks() {
             setSelectedExamId(target._id || target.examName);
             setSelectedClass(target.className || "");
             setSelectedStream(target.stream || target.group || "");
-            setSelectedSection(target.section ? target.section.toUpperCase().replace("SECTION", "").trim() : "A");
+            setSelectedSection(formatSection(target.section));
             setSelectedSubject(target.subject || "");
             setExamTotalMarks(target.totalMarks || 100);
           }
@@ -199,99 +186,133 @@ export default function TeacherEnterMarks() {
     return exams.find((ex) => ex._id === selectedExamId || ex.examName === selectedExamId) || null;
   }, [exams, selectedExamId]);
 
-  // Is current exam authorized?
+  // Keep selectedExamId valid and prefer teacher's own exam when available
+  useEffect(() => {
+    if (exams.length > 0 && (!selectedExamId || !exams.some((e) => e._id === selectedExamId || e.examName === selectedExamId))) {
+      const preferred = myExams[0] || exams[0];
+      if (preferred) {
+        setSelectedExamId(preferred._id || preferred.examName);
+      }
+    }
+  }, [exams, myExams, selectedExamId]);
+
+  // Is current exam authorized? (Strict rule: only the teacher who created this exam can enter marks)
   const isAuthorized = useMemo(() => {
     return currentExam ? isOwner(currentExam) : false;
-  }, [currentExam, user]);
+  }, [currentExam, isOwner]);
 
-  // Constrain Class, Stream, Section, and Subject whenever the selected Exam changes
+  // Synchronize Class, Stream, Section, Subject whenever selected Exam changes
   useEffect(() => {
     if (currentExam) {
       setSelectedClass(currentExam.className || "");
       setSelectedStream(currentExam.stream || currentExam.group || "");
-      setSelectedSection(
-        currentExam.section ? currentExam.section.toUpperCase().replace("SECTION", "").trim() : "A"
-      );
+      setSelectedSection(formatSection(currentExam.section));
       setSelectedSubject(currentExam.subject || "");
       setExamTotalMarks(currentExam.totalMarks || 100);
     }
   }, [currentExam]);
 
-  // Load student roster matching exam and prefill marks
+  // Load student roster matching exam's Class + Section + Stream without JWT
   useEffect(() => {
-    if (!currentExam || !selectedClass || !selectedSection) {
+    if (!currentExam) {
       setStudentRows([]);
       return;
     }
 
     const examItem = currentExam;
+    const targetClass = examItem.className;
+    const targetSection = formatSection(examItem.section);
+    const targetStream = examItem.stream || examItem.group || "";
+    const targetSubject = examItem.subject || "";
+
+    if (!targetClass || !targetSection) {
+      setStudentRows([]);
+      return;
+    }
 
     async function loadStudentRosterAndMarks() {
       setLoadingRoster(true);
       setFeedback(null);
       try {
-        // 1. Fetch students strictly for target Class + Section + Stream
-        let stuUrl = `${API_BASE}/api/students?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}`;
-        if (selectedStream) {
-          stuUrl += `&stream=${encodeURIComponent(selectedStream)}`;
+        // 1. Fetch students for target Class + Section (+ Stream if SSC class)
+        let stuUrl = `${API_BASE}/api/students?className=${encodeURIComponent(targetClass)}&section=${encodeURIComponent(targetSection)}`;
+        if (targetStream && targetStream.toLowerCase() !== "general" && targetStream.toLowerCase() !== "none" && targetStream !== "N/A") {
+          stuUrl += `&stream=${encodeURIComponent(targetStream)}`;
         }
 
         const stuRes = await fetch(stuUrl);
         const stuData = await stuRes.json();
         const rawStudents: StudentItem[] = stuData.success && Array.isArray(stuData.data) ? stuData.data : [];
 
-        // 2. Fetch existing marks for selected Exam + Class + Section + Subject + Stream
-        let markUrl = `${API_BASE}/api/marks?className=${encodeURIComponent(selectedClass)}&section=${encodeURIComponent(selectedSection)}&exam=${encodeURIComponent(examItem.examName)}&subject=${encodeURIComponent(selectedSubject)}`;
-        if (examItem._id) {
-          markUrl += `&examId=${encodeURIComponent(examItem._id)}`;
-        }
-        if (selectedStream) {
-          markUrl += `&stream=${encodeURIComponent(selectedStream)}`;
-        }
+        // 2. Prepare initial student mark rows immediately
+        const tMarks = examItem.totalMarks || 100;
+        let rows: StudentMarkRow[] = rawStudents.map((s) => {
+          const stuId = s.studentId || s.stuId || s._id || "";
+          return {
+            studentId: stuId,
+            studentName: s.name,
+            roll: s.roll,
+            marksObtained: "",
+            totalMarks: tMarks,
+            grade: "-",
+            gpa: 0.0,
+            remarks: ""
+          };
+        });
 
-        const markRes = await fetch(markUrl);
-        const markData = await markRes.json();
-        const existingMarksMap: Record<string, { marksObtained: number; grade: string; gpa: number; remarks?: string }> = {};
+        // 3. Optionally fetch existing marks to prefill (non-blocking)
+        try {
+          let markUrl = `${API_BASE}/api/marks?className=${encodeURIComponent(targetClass)}&section=${encodeURIComponent(targetSection)}&exam=${encodeURIComponent(examItem.examName)}&subject=${encodeURIComponent(targetSubject)}`;
+          if (examItem._id) {
+            markUrl += `&examId=${encodeURIComponent(examItem._id)}`;
+          }
+          if (targetStream) {
+            markUrl += `&stream=${encodeURIComponent(targetStream)}`;
+          }
 
-        if (markData.success && Array.isArray(markData.data)) {
-          markData.data.forEach((m: { studentId: string; marksObtained: number; grade: string; gpa: number; remarks?: string }) => {
-            existingMarksMap[m.studentId] = m;
-          });
-        }
+          const markHeaders: Record<string, string> = {};
+          if (user?.email) {
+            markHeaders["x-user-email"] = user.email;
+            markHeaders["x-user-role"] = "teacher";
+          }
 
-        // 3. Merge student roster with existing marks
-        if (rawStudents.length > 0) {
-          const tMarks = examItem.totalMarks || 100;
-          const rows: StudentMarkRow[] = rawStudents.map((s) => {
-            const stuId = s.studentId || s._id || "";
-            const existing = existingMarksMap[stuId];
-            const marksVal = existing !== undefined ? existing.marksObtained : "";
-            const computed = marksVal !== "" ? computeGradeAndGpa(Number(marksVal), tMarks) : { grade: "-", gpa: 0.0 };
+          const markRes = await fetch(markUrl, { headers: markHeaders });
+          const markData = await markRes.json();
 
-            return {
-              studentId: stuId,
-              studentName: s.name,
-              roll: s.roll,
-              marksObtained: marksVal,
-              totalMarks: tMarks,
-              grade: existing?.grade || computed.grade,
-              gpa: existing?.gpa !== undefined ? existing.gpa : computed.gpa,
-              remarks: existing?.remarks || ""
-            };
-          });
+          if (markData.success && Array.isArray(markData.data) && markData.data.length > 0) {
+            const existingMarksMap: Record<string, { marksObtained: number; grade: string; gpa: number; remarks?: string }> = {};
+            markData.data.forEach((m: { studentId: string; marksObtained: number; grade: string; gpa: number; remarks?: string }) => {
+              if (m.studentId) existingMarksMap[m.studentId] = m;
+            });
 
-          setStudentRows(rows);
-          if (Object.keys(existingMarksMap).length > 0) {
+            rows = rows.map((row) => {
+              const existing = existingMarksMap[row.studentId];
+              if (existing) {
+                const marksVal = existing.marksObtained !== undefined ? existing.marksObtained : "";
+                const computed = marksVal !== "" ? computeGradeAndGpa(Number(marksVal), tMarks) : { grade: "-", gpa: 0.0 };
+                return {
+                  ...row,
+                  marksObtained: marksVal,
+                  grade: existing.grade || computed.grade,
+                  gpa: existing.gpa !== undefined ? existing.gpa : computed.gpa,
+                  remarks: existing.remarks || ""
+                };
+              }
+              return row;
+            });
+
             setFeedback({
               type: "info",
               text: `Loaded existing marks for ${Object.keys(existingMarksMap).length} students.`
             });
           }
-        } else {
-          setStudentRows([]);
+        } catch (markErr) {
+          console.warn("Existing marks fetch skipped or not available:", markErr);
         }
+
+        setStudentRows(rows);
       } catch (err) {
-        console.error("Error fetching students and marks:", err);
+        console.error("Error fetching students:", err);
         setFeedback({
           type: "error",
           text: "Failed to connect to backend server for student roster."
@@ -303,7 +324,7 @@ export default function TeacherEnterMarks() {
     }
 
     loadStudentRosterAndMarks();
-  }, [currentExam, selectedClass, selectedStream, selectedSection, selectedSubject, API_BASE]);
+  }, [currentExam, API_BASE, user?.email]);
 
   // Handle Mark input change per student
   const handleMarkChange = (studentId: string, value: string) => {
@@ -356,7 +377,7 @@ export default function TeacherEnterMarks() {
     );
   };
 
-  // Submit and save marks to database (with strict backend verification)
+  // Submit and save marks to database
   const handleSaveMarks = async () => {
     if (!currentExam) {
       toast.error("Please select an Exam first.");
@@ -364,7 +385,7 @@ export default function TeacherEnterMarks() {
     }
 
     if (!isAuthorized) {
-      toast.error("Forbidden: You can only enter marks for your assigned class, section, and subject.");
+      toast.error("Forbidden: You can only enter marks for examinations you created.");
       return;
     }
 
@@ -392,7 +413,7 @@ export default function TeacherEnterMarks() {
         exam: examItem.examName,
         className: selectedClass,
         stream: selectedStream || null,
-        section: selectedSection,
+        section: formatSection(selectedSection),
         subject: selectedSubject,
         teacherEmail: user?.email,
         teacherRole: "teacher",
@@ -406,12 +427,10 @@ export default function TeacherEnterMarks() {
         }))
       };
 
-      const token = await getJwt();
       const res = await fetch(`${API_BASE}/api/marks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
           "x-user-email": user?.email || "",
           "x-user-role": "teacher"
         },
@@ -425,7 +444,7 @@ export default function TeacherEnterMarks() {
       }
 
       const streamBadge = selectedStream ? ` (${selectedStream})` : "";
-      const successMsg = `Successfully saved marks for ${data.count} students in ${selectedClass}${streamBadge} Section ${selectedSection} (${selectedSubject})!`;
+      const successMsg = `Successfully saved marks for ${data.count} students in ${selectedClass}${streamBadge} Section ${formatSection(selectedSection)} (${selectedSubject})!`;
       toast.success(successMsg);
       setFeedback({
         type: "success",
@@ -465,11 +484,11 @@ export default function TeacherEnterMarks() {
         {/* Header */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+            <div className="flex items-center gap-2.5">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
                 <PencilLine className="h-4 w-4" />
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
+              <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-800">
                 Enter Student Marks
               </h1>
             </div>
@@ -480,11 +499,13 @@ export default function TeacherEnterMarks() {
         </div>
 
         {/* Filter Selection Card */}
-        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-xs space-y-4">
-          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
-            <Layers className="h-4 w-4 text-blue-600" />
-            Exam & Target Scope Selection
-          </h2>
+        <div className="rounded-3xl border border-slate-200/80 bg-white p-5 sm:p-6 shadow-xs space-y-4">
+          <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+            <Layers className="h-4 w-4 text-emerald-600" />
+            <h2 className="text-xs font-bold uppercase tracking-wider text-slate-600">
+              Exam & Target Scope Selection
+            </h2>
+          </div>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
             {/* Exam Selector */}
@@ -497,7 +518,7 @@ export default function TeacherEnterMarks() {
                   value={selectedExamId}
                   onChange={(e) => setSelectedExamId(e.target.value)}
                   disabled={loadingExams}
-                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 cursor-pointer"
+                  className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 disabled:bg-slate-100 cursor-pointer"
                 >
                   {loadingExams ? (
                     <option value="">Loading exams...</option>
@@ -511,7 +532,7 @@ export default function TeacherEnterMarks() {
                             <option key={ex._id} value={ex._id}>
                               ✓ {ex.examName} ({ex.className}
                               {ex.stream ? ` - ${ex.stream}` : ""}
-                              {ex.section ? ` Sec ${ex.section}` : ""}) - {ex.subject}
+                              {ex.section ? ` Sec ${formatSection(ex.section)}` : ""}) - {ex.subject}
                             </option>
                           ))}
                         </optgroup>
@@ -522,7 +543,7 @@ export default function TeacherEnterMarks() {
                             <option key={ex._id} value={ex._id}>
                               🔒 {ex.examName} ({ex.className}
                               {ex.stream ? ` - ${ex.stream}` : ""}
-                              {ex.section ? ` Sec ${ex.section}` : ""}) - {ex.subject}
+                              {ex.section ? ` Sec ${formatSection(ex.section)}` : ""}) - {ex.subject}
                             </option>
                           ))}
                         </optgroup>
@@ -543,7 +564,7 @@ export default function TeacherEnterMarks() {
                 type="text"
                 readOnly
                 value={selectedClass || "N/A"}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none cursor-not-allowed"
+                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
               />
             </div>
 
@@ -556,7 +577,7 @@ export default function TeacherEnterMarks() {
                 type="text"
                 readOnly
                 value={selectedStream || "General / None"}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none cursor-not-allowed"
+                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
               />
             </div>
 
@@ -568,8 +589,8 @@ export default function TeacherEnterMarks() {
               <input
                 type="text"
                 readOnly
-                value={selectedSection ? `Section ${selectedSection}` : "N/A"}
-                className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm font-semibold text-slate-700 outline-none cursor-not-allowed"
+                value={selectedSection ? `Section ${formatSection(selectedSection)}` : "N/A"}
+                className="w-full rounded-xl border border-slate-200/80 bg-slate-50/80 px-3.5 py-2.5 text-sm font-bold text-slate-800 outline-none cursor-not-allowed"
               />
             </div>
           </div>
@@ -583,14 +604,14 @@ export default function TeacherEnterMarks() {
               </span>
               <span className="text-slate-300">|</span>
               <span className="font-semibold text-slate-500">Max Marks:</span>
-              <span className="font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+              <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded border border-emerald-200/80">
                 {examTotalMarks}
               </span>
             </div>
 
             <div>
               {isAuthorized ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-700 border border-teal-200/80">
                   <Check size={13} /> You Created This Exam • Mark Entry Enabled
                 </span>
               ) : (
@@ -605,12 +626,12 @@ export default function TeacherEnterMarks() {
         {/* Feedback Alert */}
         {feedback && (
           <div
-            className={`flex items-center gap-3 rounded-xl p-4 text-sm font-medium border ${
+            className={`flex items-center gap-3 rounded-2xl p-4 text-sm font-medium border ${
               feedback.type === "success"
                 ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                 : feedback.type === "error"
                 ? "bg-rose-50 text-rose-800 border-rose-200"
-                : "bg-blue-50 text-blue-800 border-blue-200"
+                : "bg-teal-50 text-teal-800 border-teal-200"
             }`}
           >
             {feedback.type === "success" ? (
@@ -618,7 +639,7 @@ export default function TeacherEnterMarks() {
             ) : feedback.type === "error" ? (
               <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
             ) : (
-              <AlertCircle className="h-5 w-5 text-blue-600 shrink-0" />
+              <AlertCircle className="h-5 w-5 text-teal-600 shrink-0" />
             )}
             <span>{feedback.text}</span>
           </div>
@@ -627,23 +648,23 @@ export default function TeacherEnterMarks() {
         {/* Live Statistics Cards */}
         {studentRows.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
               <span className="text-xs font-medium text-slate-500">Total Enrolled</span>
               <div className="text-xl font-bold text-slate-900 mt-1">{stats.total}</div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
               <span className="text-xs font-medium text-slate-500">Marks Entered</span>
-              <div className="text-xl font-bold text-blue-600 mt-1">
+              <div className="text-xl font-bold text-emerald-600 mt-1">
                 {stats.entered} / {stats.total}
               </div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
               <span className="text-xs font-medium text-slate-500">Average Score</span>
-              <div className="text-xl font-bold text-purple-600 mt-1">{stats.avgScore}</div>
+              <div className="text-xl font-bold text-teal-600 mt-1">{stats.avgScore}</div>
             </div>
-            <div className="bg-white p-4 rounded-xl border border-slate-200/80 shadow-xs">
+            <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
               <span className="text-xs font-medium text-slate-500">Passed Students</span>
-              <div className="text-xl font-bold text-emerald-600 mt-1">
+              <div className="text-xl font-bold text-emerald-700 mt-1">
                 {stats.passed} <span className="text-xs text-slate-400 font-normal">({stats.total > 0 ? Math.round((stats.passed / stats.total) * 100) : 0}%)</span>
               </div>
             </div>
@@ -651,10 +672,11 @@ export default function TeacherEnterMarks() {
         )}
 
         {/* Student Roster Marks Table */}
-        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-xs">
-          <div className="p-4 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/40">
+        <div className="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-xs">
+          <div className="p-4 sm:p-5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/40">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">
+              <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                <Users className="h-4 w-4 text-emerald-600" />
                 Student Marks Roster
               </h3>
               <p className="text-xs text-slate-500">
@@ -663,13 +685,13 @@ export default function TeacherEnterMarks() {
             </div>
 
             {/* Quick autofill helper */}
-            {isAuthorized && (
+            {isAuthorized && studentRows.length > 0 && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="text-slate-400">Fill empty:</span>
                 <button
                   type="button"
                   onClick={() => handleSetDefaultMarks(0)}
-                  className="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition cursor-pointer"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold transition cursor-pointer"
                 >
                   Set 0
                 </button>
@@ -698,7 +720,7 @@ export default function TeacherEnterMarks() {
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-slate-400">
                       <div className="flex flex-col items-center justify-center gap-2">
-                        <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                        <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
                         <span>Loading student roster for {selectedClass}...</span>
                       </div>
                     </td>
@@ -707,14 +729,11 @@ export default function TeacherEnterMarks() {
                   <tr>
                     <td colSpan={8} className="py-12 text-center text-slate-400">
                       No students found enrolled in {selectedClass}
-                      {selectedStream ? ` (${selectedStream})` : ""} Section {selectedSection}.
+                      {selectedStream ? ` (${selectedStream})` : ""} Section {formatSection(selectedSection)}.
                     </td>
                   </tr>
                 ) : (
                   studentRows.map((row, index) => {
-                    const numMarks = Number(row.marksObtained);
-                    const isPass = !isNaN(numMarks) && numMarks >= (currentExam?.passMarks || 40);
-
                     return (
                       <tr key={row.studentId || index} className="hover:bg-slate-50/60 transition">
                         <td className="py-3 px-4 text-center font-medium text-slate-400">
@@ -738,16 +757,16 @@ export default function TeacherEnterMarks() {
                             value={row.marksObtained}
                             onChange={(e) => handleMarkChange(row.studentId, e.target.value)}
                             disabled={!isAuthorized}
-                            className="w-24 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-center text-sm font-bold text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                            className="w-24 rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-center text-sm font-bold text-slate-800 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 disabled:bg-slate-100 disabled:cursor-not-allowed"
                           />
                         </td>
                         <td className="py-3 px-4 text-center">
                           <span
-                            className={`inline-block px-2 py-0.5 rounded text-xs font-bold border ${
+                            className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold border ${
                               row.grade === "A+" || row.grade === "A"
                                 ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                 : row.grade === "A-" || row.grade === "B"
-                                ? "bg-blue-50 text-blue-700 border-blue-200"
+                                ? "bg-teal-50 text-teal-700 border-teal-200"
                                 : row.grade === "C" || row.grade === "D"
                                 ? "bg-amber-50 text-amber-700 border-amber-200"
                                 : row.grade === "F"
@@ -768,7 +787,7 @@ export default function TeacherEnterMarks() {
                             value={row.remarks}
                             onChange={(e) => handleRemarkChange(row.studentId, e.target.value)}
                             disabled={!isAuthorized}
-                            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none transition focus:border-blue-500 disabled:bg-slate-100 disabled:cursor-not-allowed"
+                            className="w-full rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-700 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 disabled:bg-slate-100 disabled:cursor-not-allowed"
                           />
                         </td>
                       </tr>
@@ -781,7 +800,7 @@ export default function TeacherEnterMarks() {
 
           {/* Footer Save Button */}
           {studentRows.length > 0 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 p-4 bg-slate-50/40">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 p-4 sm:p-5 bg-slate-50/40">
               <span className="text-xs text-slate-500">
                 {isAuthorized ? (
                   `${studentRows.length} student record(s) ready to be saved.`
@@ -796,11 +815,11 @@ export default function TeacherEnterMarks() {
                 type="button"
                 onClick={handleSaveMarks}
                 disabled={saving || !isAuthorized}
-                className="flex items-center gap-2 rounded-xl bg-[#03204C] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1556a7] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-sm px-6 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 {saving ? (
                   <>
-                    <Loader2 size={16} className="animate-spin" />
+                    <Loader2 size={16} className="animate-spin text-white" />
                     Saving Marks...
                   </>
                 ) : (

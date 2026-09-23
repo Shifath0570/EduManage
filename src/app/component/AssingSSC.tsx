@@ -254,13 +254,17 @@ const AssingSSC = () => {
       const assignedBy = user?.id ? String(user.id) : "admin";
 
       // 2. Prepare assignment payload
+      const cleanSectionId = formData.sectionId
+        ? String(formData.sectionId).toUpperCase().replace(/^SECTION[\s_-]*/i, "").replace(/^SEC[\s_-]*/i, "").trim() || "A"
+        : "A";
+
       const payload = {
         teacherName,
         teacherEmail,
         teacherId: String(resolvedTeacherId),
         assignedBy,
         classId: formData.classId,
-        sectionId: formData.sectionId,
+        sectionId: cleanSectionId,
         subjectId: formData.subjectId,
         academicYear: formData.academicYear,
         groupId: isGroupRequired ? formData.groupId : "N/A",
@@ -385,9 +389,10 @@ const AssingSSC = () => {
                   <option value="" disabled>
                     Select Section
                   </option>
-                  <option value="sec-a">Section A</option>
-                  <option value="sec-b">Section B</option>
-                  <option value="sec-c">Section C</option>
+                  <option value="A">Section A</option>
+                  <option value="B">Section B</option>
+                  <option value="C">Section C</option>
+                  <option value="D">Section D</option>
                 </select>
                 <ChevronDown className="pointer-events-none absolute right-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
               </div>

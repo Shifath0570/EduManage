@@ -203,7 +203,12 @@ const initialFormData: ExamFormData = {
   description: ""
 };
 
-const sectionOptions = ["A", "B", "C"];
+const sectionOptions = ["A", "B", "C", "D"];
+
+const formatSectionName = (sec?: string) => {
+  if (!sec) return "A";
+  return String(sec).toUpperCase().replace(/^SECTION[\s_-]*/i, "").replace(/^SEC[\s_-]*/i, "").trim() || "A";
+};
 
 const classOptions = [
   { label: "Class 1", value: "Class 1" },
@@ -430,7 +435,7 @@ export default function AdminCreateExam() {
       examName: formData.examName.trim(),
       examType: formData.examType,
       className: formData.className,
-      section: formData.section,
+      section: formatSectionName(formData.section),
       stream: requiresGroup ? formData.stream : null,
       subject: formData.subject,
       totalMarks: Number(formData.totalMarks),
