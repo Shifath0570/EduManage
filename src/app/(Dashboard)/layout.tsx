@@ -16,7 +16,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
   const { data: session } = useSession();
-  const user = session?.user as { name?: string; email?: string; image?: string; role?: string } | undefined;
+  const user = session?.user as
+    | { name?: string; email?: string; image?: string; role?: string }
+    | undefined;
   const role = user?.role || "user";
 
   useEffect(() => {
@@ -24,9 +26,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   }, [pathname]);
 
   return (
-    <div className="flex min-h-screen w-full flex-col overflow-x-hidden bg-slate-50/60 md:flex-row">
+    <div className="flex h-screen w-full flex-col overflow-hidden bg-slate-50/60 md:flex-row">
       {/* Mobile Top Navigation Bar */}
-      <header className="sticky top-0 z-30 flex h-16 w-full items-center justify-between border-b border-emerald-100/80 bg-white/90 px-4 backdrop-blur-xl shadow-xs md:hidden">
+      <header className="sticky top-0 z-30 flex h-16 w-full shrink-0 items-center justify-between border-b border-emerald-100/80 bg-white/90 px-4 backdrop-blur-xl shadow-xs md:hidden">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -73,15 +75,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         />
       )}
 
-      {/* Sidebar (Responsive: drawer on mobile, static on md+) */}
-      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      {/* Sidebar Container - Sticky / Fixed height on desktop */}
+      <div className="shrink-0 md:h-screen md:sticky md:top-0">
+        <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      </div>
 
-      {/* Main Content Area */}
-      <main className="flex-1 min-w-0 max-w-full overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 lg:p-8 text-slate-800">
+      {/* Main Content Area - Only this scrolls vertically */}
+      <main className="flex-1 min-w-0 max-w-full h-[calc(100vh-4rem)] md:h-screen overflow-y-auto overflow-x-hidden p-3 sm:p-5 md:p-6 lg:p-8 text-slate-800">
         {children}
       </main>
     </div>
   );
 }
+
+
+
 
 

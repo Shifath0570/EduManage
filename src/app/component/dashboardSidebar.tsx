@@ -37,7 +37,7 @@ export interface NavItem {
 export type UserRole = "teacher" | "admin" | "student";
 
 const teacherNavItems: NavItem[] = [
-  { id: "overview", href: "/teacher", label: "Overview", icon: <LayoutDashboard className="w-4 h-4" /> },
+  { id: "overview", href: "/teacher", label: "Teacher Profile", icon: <LayoutDashboard className="w-4 h-4" /> },
   { id: "takeAttendance", href: "/teacher/takeAttendance", label: "Take Attendance", icon: <UserCheck className="w-4 h-4" /> },
   { id: "viewAttendance", href: "/teacher/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-4 h-4" /> },
   { id: "createExam", href: "/teacher/createExam", label: "Create Exam", icon: <GraduationCap className="w-4 h-4" /> },
@@ -58,7 +58,7 @@ const adminNavItems: NavItem[] = [
   { id: "createExam", href: "/admin/createExam", label: "Create Exam", icon: <GraduationCap className="w-4 h-4" /> },
   { id: "allExams", href: "/admin/allExams", label: "All Exam List", icon: <ListOrdered className="w-4 h-4" /> },
   { id: "leaveManagement", href: "/admin/leaveManagement", label: "Leave Management", icon: <ListOrdered className="w-4 h-4" /> },
-  { id: "viewNotice", href: "/admin/viewNotice", label: "Notice", icon: <Megaphone className="w-4 h-4" /> },
+  { id: "viewNotice", href: "/admin/viewNotice", label: "Manage Notice", icon: <Megaphone className="w-4 h-4" /> },
   { id: "manageBlogs", href: "/admin/manageBlogs", label: "Manage Blogs", icon: <BookOpen className="w-4 h-4" /> },
   { id: "contactMessages", href: "/admin/contactMessages", label: "Contact Messages", icon: <Mail className="w-4 h-4" /> },
   { id: "feeCollection", href: "/admin/feeCollection", label: "Fee Collection", icon: <CreditCard className="w-4 h-4" /> },
@@ -66,7 +66,7 @@ const adminNavItems: NavItem[] = [
 ];
 
 const studentNavItems: NavItem[] = [
-  { id: "overview", href: "/student", label: "Overview", icon: <LayoutDashboard className="w-4 h-4" /> },
+  { id: "overview", href: "/student", label: "Student Profile", icon: <LayoutDashboard className="w-4 h-4" /> },
   { id: "viewAttendance", href: "/student/viewAttendance", label: "View Attendance", icon: <ClipboardList className="w-4 h-4" /> },
   { id: "viewResuls", href: "/student/viewResuls", label: "View Results", icon: <Award className="w-4 h-4" /> },
   { id: "leaveRequest", href: "/student/leaveRequest", label: "Leave Request", icon: <Award className="w-4 h-4" /> },
