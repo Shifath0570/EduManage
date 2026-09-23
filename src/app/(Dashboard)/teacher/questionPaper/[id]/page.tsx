@@ -23,7 +23,10 @@ import {
   ShieldAlert,
   Loader2,
   Lock,
-  Check
+  Check,
+  ArrowRight,
+  Calculator,
+  ListOrdered
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { useSession } from "@/app/lib/auth-client";
@@ -319,7 +322,7 @@ export default function TeacherQuestionPaperPage() {
     } finally {
       setLoading(false);
     }
-  }, [examId, API_BASE]);
+  }, [examId, API_BASE, user?.email]);
 
   useEffect(() => {
     fetchData();
@@ -395,50 +398,66 @@ export default function TeacherQuestionPaperPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100/70 p-4 sm:p-6 lg:p-8 font-sans text-slate-800 print:bg-white print:p-0">
+    <div className="min-h-screen bg-slate-50/70 p-4 sm:p-6 lg:p-8 font-sans text-slate-800 print:bg-white print:p-0">
       <Toaster position="top-right" reverseOrder={false} />
 
       {/* Screen-Only Header & Action Toolbar */}
       <div className="mx-auto max-w-5xl space-y-4 mb-6 print:hidden">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+          <div className="flex items-center gap-3.5">
             <button
               type="button"
               onClick={() => router.push("/teacher/allExams")}
-              className="p-2 rounded-xl bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+              className="p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
               title="Back to All Exams"
             >
               <ArrowLeft size={18} />
             </button>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
-                  <Sparkles className="h-4 w-4" />
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-md shadow-emerald-500/20 ring-4 ring-emerald-50">
+                  <Sparkles className="h-4 w-4 fill-white text-white" />
                 </span>
-                <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">
+                <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-800">
                   AI Question Paper Generator
                 </h1>
               </div>
-              <p className="text-xs text-slate-500 mt-0.5">
-                {exam
-                  ? `${exam.examName} • ${exam.className} ${exam.stream ? `(${exam.stream})` : ""} • Sec ${exam.section || "A"} • ${exam.subject}`
-                  : "Loading examination details..."}
-              </p>
+              <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-500">
+                {exam ? (
+                  <>
+                    <span className="font-bold text-slate-800">{exam.examName}</span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-md border border-emerald-200/80">
+                      {exam.className} {exam.stream ? `(${exam.stream})` : ""}
+                    </span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 bg-teal-50 text-teal-700 font-bold px-2 py-0.5 rounded-md border border-teal-200/80">
+                      Sec {exam.section || "A"}
+                    </span>
+                    <span>•</span>
+                    <span className="font-semibold text-slate-700">{exam.subject}</span>
+                  </>
+                ) : (
+                  <span>Loading examination details...</span>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2.5 flex-wrap">
             {/* Configure Blueprint Button */}
             <button
               type="button"
               onClick={() => setShowConfigModal(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+              className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-white border border-emerald-200/80 text-emerald-700 hover:bg-emerald-50/60 transition-all cursor-pointer shadow-xs active:scale-[0.98]"
             >
-              <Settings2 size={15} className="text-purple-600" />
+              <Settings2 size={15} className="text-emerald-600" />
               <span>Blueprint Config</span>
               <span
-                className={`ml-1 px-1.5 py-0.5 rounded text-[10px] font-bold ${
-                  isConfigMatched ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
+                className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${
+                  isConfigMatched
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300/80"
+                    : "bg-amber-50 text-amber-800 border-amber-300/80"
                 }`}
               >
                 {configuredGrandTotal}/{targetExamMarks}M
@@ -450,10 +469,10 @@ export default function TeacherQuestionPaperPage() {
               <button
                 type="button"
                 onClick={() => setShowAnswerKey(!showAnswerKey)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold border transition cursor-pointer shadow-xs ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl text-xs font-bold border transition-all cursor-pointer shadow-xs active:scale-[0.98] ${
                   showAnswerKey
-                    ? "bg-amber-500 border-amber-600 text-white"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                    ? "bg-amber-500 border-amber-600 text-white shadow-md shadow-amber-500/20"
+                    : "bg-white border-slate-200/90 text-slate-700 hover:bg-slate-50 hover:text-slate-900"
                 }`}
               >
                 <HelpCircle size={15} />
@@ -466,7 +485,7 @@ export default function TeacherQuestionPaperPage() {
               <button
                 type="button"
                 onClick={handlePrint}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-xs"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-[#03204C] hover:bg-[#1556a7] text-white transition-all cursor-pointer shadow-md shadow-slate-900/10 active:scale-[0.98]"
               >
                 <Printer size={15} />
                 <span>Print / Save PDF</span>
@@ -479,7 +498,7 @@ export default function TeacherQuestionPaperPage() {
                 type="button"
                 onClick={() => handleGenerate(Boolean(questionPaper))}
                 disabled={generating}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white shadow-md shadow-purple-600/20 transition cursor-pointer disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs px-5 py-2.5 shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {generating ? (
                   <>
@@ -493,7 +512,7 @@ export default function TeacherQuestionPaperPage() {
                   </>
                 ) : (
                   <>
-                    <Sparkles size={15} className="text-amber-300" />
+                    <Sparkles size={15} className="fill-amber-300 text-amber-300" />
                     <span>Generate Question Paper</span>
                   </>
                 )}
@@ -502,7 +521,7 @@ export default function TeacherQuestionPaperPage() {
               <button
                 disabled
                 title="You can only generate question papers for your assigned courses"
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-200 text-slate-400 cursor-not-allowed"
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-semibold bg-slate-200 text-slate-400 cursor-not-allowed"
               >
                 <Lock size={15} />
                 <span>Generation Restricted</span>
@@ -513,18 +532,21 @@ export default function TeacherQuestionPaperPage() {
 
         {/* Authorization Status Alert */}
         {!isAuthorized && exam && (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-900 flex items-center gap-2.5 shadow-xs">
-            <ShieldAlert size={18} className="text-amber-600 shrink-0" />
-            <div>
-              <span className="font-bold">Access Restricted: </span>
-              This examination is for {exam.className}{exam.stream ? ` (${exam.stream})` : ""} Section {exam.section || "A"} ({exam.subject}). You can view existing question papers, but AI generation and modification are restricted to the assigned faculty member.
+          <div className="rounded-2xl border border-amber-200/80 bg-amber-50/80 p-4 text-xs text-amber-900 flex items-start gap-3 shadow-xs">
+            <ShieldAlert size={18} className="text-amber-600 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <span className="font-bold text-sm text-amber-950">Access Restricted</span>
+              <p className="text-amber-800 leading-relaxed">
+                This examination is for <strong>{exam.className}{exam.stream ? ` (${exam.stream})` : ""} Section {exam.section || "A"} ({exam.subject})</strong>.
+                You can view existing question papers, but AI generation and blueprint modifications are restricted to the assigned faculty member.
+              </p>
             </div>
           </div>
         )}
 
         {/* Error Feedback */}
         {error && (
-          <div className="flex items-center gap-3 rounded-xl p-4 text-sm font-medium border bg-rose-50 text-rose-800 border-rose-200">
+          <div className="flex items-center gap-3 rounded-2xl p-4 text-sm font-medium border bg-rose-50 text-rose-800 border-rose-200 shadow-xs">
             <AlertCircle className="h-5 w-5 text-rose-600 shrink-0" />
             <span>{error}</span>
           </div>
@@ -534,82 +556,164 @@ export default function TeacherQuestionPaperPage() {
       {/* Main Content Area */}
       <div className="mx-auto max-w-4xl">
         {loading ? (
-          <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs">
-            <Loader2 className="h-8 w-8 animate-spin text-purple-600 mx-auto mb-3" />
-            <p className="text-sm font-medium text-slate-600">Loading examination data and question blueprint...</p>
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-16 text-center shadow-xs space-y-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 mx-auto">
+              <Loader2 className="h-6 w-6 animate-spin text-emerald-600" />
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-slate-800">Loading Examination Blueprint</h3>
+              <p className="text-xs text-slate-500 mt-1">Retrieving curriculum structures and existing question papers...</p>
+            </div>
           </div>
         ) : !questionPaper ? (
           /* Empty State - Prompt user to generate question paper */
-          <div className="bg-white rounded-2xl border border-slate-200 p-8 sm:p-12 text-center shadow-xs space-y-6 print:hidden">
-            <div className="mx-auto w-16 h-16 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-700">
-              <FileText size={32} />
+          <div className="bg-white rounded-3xl border border-slate-200/80 p-8 sm:p-12 text-center shadow-xs space-y-8 print:hidden">
+            <div className="mx-auto w-20 h-20 rounded-3xl bg-gradient-to-tr from-teal-600/10 via-emerald-500/15 to-emerald-400/20 border border-emerald-200/80 flex items-center justify-center text-emerald-600 shadow-xs">
+              <FileText size={36} />
             </div>
 
             <div className="max-w-md mx-auto space-y-2">
-              <h2 className="text-xl font-bold text-slate-900">No Question Paper Generated Yet</h2>
+              <h2 className="text-2xl font-black text-slate-800 tracking-tight">No Question Paper Generated Yet</h2>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Click below to generate a curriculum-aligned examination paper with Gemini AI according to your blueprint configuration.
+                Configure your question structure below and click Generate to create an institutional, curriculum-aligned examination paper with Gemini AI.
               </p>
             </div>
 
-            {/* Blueprint Overview */}
-            <div className="max-w-md mx-auto bg-slate-50 p-4 rounded-xl border border-slate-200/80 text-left space-y-3">
-              <div className="flex items-center justify-between text-xs font-bold text-slate-700">
-                <span>Active Marks Blueprint</span>
+            {/* Visual Blueprint Flow: Type -> Count -> Marks -> Total */}
+            <div className="max-w-2xl mx-auto rounded-2xl border border-emerald-200/80 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white p-5 sm:p-6 text-left space-y-4 shadow-xs">
+              <div className="flex items-center justify-between border-b border-emerald-100 pb-3">
+                <div className="flex items-center gap-2">
+                  <Sparkles size={16} className="fill-emerald-500 text-emerald-500" />
+                  <span className="text-xs font-extrabold uppercase tracking-wider text-slate-800">
+                    Question Paper Blueprint Breakdown
+                  </span>
+                </div>
                 {isAuthorized && (
                   <button
                     type="button"
                     onClick={() => setShowConfigModal(true)}
-                    className="text-purple-600 hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-xs font-bold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 cursor-pointer transition hover:underline"
                   >
                     <Settings2 size={13} /> Edit Config
                   </button>
                 )}
               </div>
 
-              <div className="grid grid-cols-3 gap-2 text-xs">
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
-                  <div className="font-bold text-slate-800">MCQ</div>
-                  <div className="text-[11px] text-slate-500">{questionConfig.mcq.count} Qs × {questionConfig.mcq.marksPerQuestion}M</div>
-                  <div className="font-bold text-purple-700 mt-0.5">{mcqTotal} Marks</div>
+              {/* 3 Step Config Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+                {/* 1. MCQ Card */}
+                <div className="bg-white rounded-xl p-4 border border-emerald-100/80 shadow-2xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">1. MCQ / Objective</span>
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
+                      {mcqTotal} Marks
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Questions:</span>
+                      <strong className="text-slate-800">{questionConfig.mcq.count} Qs</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Marks per Q:</span>
+                      <strong className="text-slate-800">{questionConfig.mcq.marksPerQuestion} Mark</strong>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 text-[11px] font-bold text-center text-emerald-700 bg-emerald-50/50 rounded-lg py-1">
+                    {questionConfig.mcq.count} × {questionConfig.mcq.marksPerQuestion} = {mcqTotal}M
+                  </div>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
-                  <div className="font-bold text-slate-800">Short</div>
-                  <div className="text-[11px] text-slate-500">{questionConfig.short.count} Qs × {questionConfig.short.marksPerQuestion}M</div>
-                  <div className="font-bold text-purple-700 mt-0.5">{shortTotal} Marks</div>
+
+                {/* 2. Short Questions Card */}
+                <div className="bg-white rounded-xl p-4 border border-emerald-100/80 shadow-2xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">2. Short Questions</span>
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
+                      {shortTotal} Marks
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Questions:</span>
+                      <strong className="text-slate-800">{questionConfig.short.count} Qs</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Marks per Q:</span>
+                      <strong className="text-slate-800">{questionConfig.short.marksPerQuestion} Marks</strong>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 text-[11px] font-bold text-center text-emerald-700 bg-emerald-50/50 rounded-lg py-1">
+                    {questionConfig.short.count} × {questionConfig.short.marksPerQuestion} = {shortTotal}M
+                  </div>
                 </div>
-                <div className="bg-white p-2.5 rounded-lg border border-slate-200 text-center">
-                  <div className="font-bold text-slate-800">Creative</div>
-                  <div className="text-[11px] text-slate-500">{questionConfig.creative.count} Qs × {questionConfig.creative.marksPerQuestion}M</div>
-                  <div className="font-bold text-purple-700 mt-0.5">{creativeTotal} Marks</div>
+
+                {/* 3. Creative / Broad Questions Card */}
+                <div className="bg-white rounded-xl p-4 border border-emerald-100/80 shadow-2xs space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-800">3. Creative / Broad</span>
+                    <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 border border-emerald-200/80">
+                      {creativeTotal} Marks
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-slate-500 space-y-1">
+                    <div className="flex justify-between">
+                      <span>Questions:</span>
+                      <strong className="text-slate-800">{questionConfig.creative.count} Qs</strong>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Marks per Q:</span>
+                      <strong className="text-slate-800">{questionConfig.creative.marksPerQuestion} Marks</strong>
+                    </div>
+                  </div>
+                  <div className="pt-2 border-t border-slate-100 text-[11px] font-bold text-center text-emerald-700 bg-emerald-50/50 rounded-lg py-1">
+                    {questionConfig.creative.count} × {questionConfig.creative.marksPerQuestion} = {creativeTotal}M
+                  </div>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between text-xs pt-1 border-t border-slate-200">
-                <span className="font-semibold text-slate-600">Total Configured:</span>
-                <span className={`font-bold ${isConfigMatched ? "text-emerald-600" : "text-amber-600"}`}>
-                  {configuredGrandTotal} / {targetExamMarks} Marks
-                </span>
+              {/* Total Summary Row */}
+              <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-emerald-100 text-xs font-bold">
+                <div className="text-slate-600">
+                  Target Exam Total: <span className="font-extrabold text-slate-900">{targetExamMarks} Marks</span>
+                </div>
+                <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg border ${
+                  isConfigMatched
+                    ? "bg-emerald-50 text-emerald-800 border-emerald-200/80"
+                    : "bg-amber-50 text-amber-900 border-amber-200/80"
+                }`}>
+                  {isConfigMatched ? (
+                    <>
+                      <CheckCircle2 size={14} className="text-emerald-600" />
+                      <span>Blueprint matches Exam Total ({configuredGrandTotal}M)</span>
+                    </>
+                  ) : (
+                    <>
+                      <AlertCircle size={14} className="text-amber-600" />
+                      <span>Difference: {marksDiff} Marks {configuredGrandTotal > targetExamMarks ? "exceeded" : "missing"}</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
 
             {isAuthorized && (
-              <div>
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => handleGenerate(false)}
                   disabled={generating}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold bg-purple-700 hover:bg-purple-800 text-white shadow-lg shadow-purple-600/30 transition cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-2xl text-sm font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {generating ? (
                     <>
                       <Loader2 size={18} className="animate-spin text-amber-300" />
-                      <span>Crafting Examination Paper...</span>
+                      <span>Crafting Examination Paper with Gemini AI...</span>
                     </>
                   ) : (
                     <>
-                      <Sparkles size={18} className="text-amber-300" />
+                      <Sparkles size={18} className="fill-amber-300 text-amber-300" />
                       <span>Generate AI Question Paper</span>
+                      <ArrowRight size={16} />
                     </>
                   )}
                 </button>
@@ -618,45 +722,47 @@ export default function TeacherQuestionPaperPage() {
           </div>
         ) : (
           /* Printable A4 Question Paper Document */
-          <div className="bg-white shadow-xl rounded-2xl border border-slate-200 p-8 sm:p-12 print:shadow-none print:border-none print:p-0 text-slate-900 font-serif leading-relaxed">
+          <div className="bg-white shadow-xl rounded-3xl border border-slate-200/80 p-8 sm:p-14 print:shadow-none print:border-none print:p-0 text-slate-900 font-serif leading-relaxed">
             {/* School Header */}
-            <div className="text-center border-b-2 border-slate-900 pb-4 space-y-1">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-wide uppercase">EduManage Model School & College</h1>
-              <p className="text-xs uppercase tracking-widest text-slate-600 font-sans font-semibold">
+            <div className="text-center border-b-2 border-slate-900 pb-5 space-y-1.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold tracking-wide uppercase font-serif">
+                EduManage Model School & College
+              </h1>
+              <p className="text-xs uppercase tracking-widest text-slate-600 font-sans font-bold">
                 {questionPaper.academicYear || "Academic Session 2025 - 2026"}
               </p>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 pt-1">
+              <h2 className="text-lg sm:text-xl font-bold text-slate-900 pt-1 font-serif">
                 {questionPaper.examName}
               </h2>
             </div>
 
             {/* Exam Meta Info */}
-            <div className="grid grid-cols-2 text-xs font-sans font-semibold py-3 border-b border-slate-300 text-slate-800 gap-y-1">
+            <div className="grid grid-cols-2 text-xs font-sans font-semibold py-3.5 border-b border-slate-300 text-slate-800 gap-y-1.5">
               <div>
-                <span>Class: </span>
-                <span className="font-bold">{questionPaper.className}</span>
-                {questionPaper.stream && <span className="ml-1 font-bold">({questionPaper.stream})</span>}
-                {questionPaper.section && <span className="ml-1">Sec: {questionPaper.section}</span>}
+                <span className="text-slate-500">Class: </span>
+                <span className="font-bold text-slate-900">{questionPaper.className}</span>
+                {questionPaper.stream && <span className="ml-1 font-bold text-slate-900">({questionPaper.stream})</span>}
+                {questionPaper.section && <span className="ml-1 text-slate-700">• Sec: {questionPaper.section}</span>}
               </div>
               <div className="text-right">
-                <span>Time: </span>
-                <span className="font-bold">{questionPaper.duration || "2 Hours 30 Minutes"}</span>
+                <span className="text-slate-500">Time: </span>
+                <span className="font-bold text-slate-900">{questionPaper.duration || "2 Hours 30 Minutes"}</span>
               </div>
               <div>
-                <span>Subject: </span>
-                <span className="font-bold">{questionPaper.subject}</span>
+                <span className="text-slate-500">Subject: </span>
+                <span className="font-bold text-slate-900">{questionPaper.subject}</span>
               </div>
               <div className="text-right">
-                <span>Full Marks: </span>
-                <span className="font-bold text-slate-950">{questionPaper.totalMarks}</span>
+                <span className="text-slate-500">Full Marks: </span>
+                <span className="font-extrabold text-slate-950">{questionPaper.totalMarks}</span>
               </div>
             </div>
 
             {/* General Instructions */}
             {questionPaper.generalInstructions && questionPaper.generalInstructions.length > 0 && (
-              <div className="py-3 border-b border-dashed border-slate-300 text-xs font-sans text-slate-700 italic space-y-1">
+              <div className="py-3.5 border-b border-dashed border-slate-300 text-xs font-sans text-slate-700 italic space-y-1 bg-slate-50/50 p-3 rounded-xl my-3 print:bg-transparent print:p-0">
                 <span className="font-bold not-italic text-slate-900">General Instructions:</span>
-                <ul className="list-disc list-inside space-y-0.5 pl-1">
+                <ul className="list-disc list-inside space-y-0.5 pl-1 text-[11px] not-italic text-slate-600">
                   {questionPaper.generalInstructions.map((ins, i) => (
                     <li key={i}>{ins}</li>
                   ))}
@@ -667,20 +773,23 @@ export default function TeacherQuestionPaperPage() {
             {/* Sections */}
             <div className="py-6 space-y-8">
               {questionPaper.sections?.map((sec, secIdx) => {
-                const isMcqSection = sec.title?.toLowerCase().includes("objective") || sec.title?.toLowerCase().includes("mcq") || sec.questions?.some(q => q.options && q.options.length > 0);
+                const isMcqSection =
+                  sec.title?.toLowerCase().includes("objective") ||
+                  sec.title?.toLowerCase().includes("mcq") ||
+                  sec.questions?.some((q) => q.options && q.options.length > 0);
 
                 return (
                   <div key={secIdx} className="space-y-4">
                     {/* Section Header */}
                     <div className="text-center font-sans">
                       <div className="inline-block border-b-2 border-slate-900 pb-0.5 px-4">
-                        <span className="font-bold text-sm sm:text-base uppercase tracking-wider">
+                        <span className="font-extrabold text-sm sm:text-base uppercase tracking-wider text-slate-900">
                           {sec.title || sec.sectionTitle || `Section ${String.fromCharCode(65 + secIdx)}`}
                         </span>
                       </div>
-                      <div className="flex justify-between items-center text-xs text-slate-600 font-semibold mt-1 px-1">
+                      <div className="flex justify-between items-center text-xs text-slate-600 font-semibold mt-2 px-1">
                         <span className="italic">{sec.instructions}</span>
-                        <span className="font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded print:bg-transparent">
+                        <span className="font-bold text-slate-900 bg-slate-100 px-2.5 py-0.5 rounded-md print:bg-transparent">
                           Marks: {sec.sectionMarks}
                         </span>
                       </div>
@@ -696,10 +805,10 @@ export default function TeacherQuestionPaperPage() {
                             {/* Question Header & Prompt */}
                             <div className="flex items-start justify-between gap-2">
                               <div className="flex items-start gap-1.5 flex-1">
-                                <span className="font-bold font-sans">{q.questionNumber || qIdx + 1}.</span>
+                                <span className="font-bold font-sans text-slate-900">{q.questionNumber || qIdx + 1}.</span>
                                 <span className="leading-snug text-slate-900 font-medium">{qText}</span>
                               </div>
-                              <span className="font-sans font-bold text-xs text-slate-800 shrink-0 ml-2">
+                              <span className="font-sans font-bold text-xs text-slate-800 shrink-0 ml-2 bg-slate-50 px-1.5 py-0.5 rounded print:bg-transparent">
                                 [{q.marks}]
                               </span>
                             </div>
@@ -714,11 +823,11 @@ export default function TeacherQuestionPaperPage() {
                                   return (
                                     <div
                                       key={optIdx}
-                                      className={`flex items-start gap-1.5 p-1 rounded transition ${
+                                      className={`flex items-start gap-1.5 p-1 rounded-lg transition ${
                                         isCorrect ? "bg-emerald-100 text-emerald-950 font-bold border border-emerald-300" : ""
                                       }`}
                                     >
-                                      <span className="font-semibold">({optLabel})</span>
+                                      <span className="font-semibold text-slate-600">({optLabel})</span>
                                       <span>{opt}</span>
                                     </div>
                                   );
@@ -728,20 +837,20 @@ export default function TeacherQuestionPaperPage() {
 
                             {/* Creative / Structured Sub-questions */}
                             {q.subQuestions && q.subQuestions.length > 0 && (
-                              <div className="pl-5 space-y-1.5 font-sans text-xs">
+                              <div className="pl-5 space-y-2 font-sans text-xs">
                                 {q.subQuestions.map((sub, subIdx) => (
-                                  <div key={subIdx} className="space-y-0.5">
+                                  <div key={subIdx} className="space-y-1">
                                     <div className="flex items-start justify-between gap-2">
-                                      <div className="flex items-start gap-1 text-slate-800">
-                                        <span className="font-bold">({sub.label || String.fromCharCode(97 + subIdx)})</span>
+                                      <div className="flex items-start gap-1.5 text-slate-800">
+                                        <span className="font-bold text-slate-900">({sub.label || String.fromCharCode(97 + subIdx)})</span>
                                         <span>{sub.text || sub.question}</span>
                                       </div>
                                       <span className="font-bold text-slate-700 shrink-0">[{sub.marks}]</span>
                                     </div>
                                     {showAnswerKey && sub.suggestedAnswer && (
-                                      <div className="bg-amber-50 border border-amber-200 p-2 rounded text-[11px] text-amber-900 mt-1">
+                                      <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-[11px] text-amber-900 mt-1 space-y-0.5">
                                         <span className="font-bold">Suggested Solution: </span>
-                                        {sub.suggestedAnswer}
+                                        <p>{sub.suggestedAnswer}</p>
                                       </div>
                                     )}
                                   </div>
@@ -751,9 +860,9 @@ export default function TeacherQuestionPaperPage() {
 
                             {/* Suggested Answer for Broad / Short Questions */}
                             {showAnswerKey && q.suggestedAnswer && !q.subQuestions?.length && (
-                              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-lg text-xs text-amber-900 font-sans mt-1">
+                              <div className="bg-amber-50 border border-amber-200 p-2.5 rounded-xl text-xs text-amber-900 font-sans mt-1">
                                 <span className="font-bold">Suggested Solution: </span>
-                                {q.suggestedAnswer}
+                                <p className="mt-0.5">{q.suggestedAnswer}</p>
                               </div>
                             )}
                           </div>
@@ -766,7 +875,7 @@ export default function TeacherQuestionPaperPage() {
             </div>
 
             {/* Document Footer */}
-            <div className="mt-8 pt-4 border-t border-slate-300 text-center text-xs font-sans text-slate-500">
+            <div className="mt-10 pt-4 border-t border-slate-300 text-center text-xs font-sans text-slate-400 uppercase tracking-wider font-semibold">
               <p>*** END OF QUESTION PAPER ***</p>
             </div>
           </div>
@@ -775,34 +884,43 @@ export default function TeacherQuestionPaperPage() {
 
       {/* Blueprint Configuration Modal */}
       {showConfigModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-xs p-4 print:hidden">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl border border-slate-200 space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 print:hidden">
+          <div className="w-full max-w-xl rounded-3xl bg-white p-6 sm:p-7 shadow-2xl border border-slate-200/90 space-y-5 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3.5">
+              <div className="flex items-center gap-2.5">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-teal-600 via-emerald-500 to-emerald-400 text-white shadow-xs">
                   <Settings2 className="h-4 w-4" />
                 </span>
-                <h3 className="text-lg font-bold text-slate-900">Question Paper Blueprint</h3>
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Question Paper Blueprint</h3>
+                  <p className="text-xs text-slate-500">Configure exact question count and marks per category.</p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setShowConfigModal(false)}
-                className="text-slate-400 hover:text-slate-600 font-bold p-1 rounded-lg hover:bg-slate-100 cursor-pointer"
+                className="text-slate-400 hover:text-slate-600 font-bold p-1.5 rounded-xl hover:bg-slate-100 transition cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
+            {/* Visual Guide: Question Type -> Number -> Marks per Q -> Total */}
             <div className="space-y-4 text-xs">
-              {/* MCQ Config */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+              {/* MCQ Config Card */}
+              <div className="p-4 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white rounded-2xl border border-emerald-200/80 space-y-3 shadow-xs">
                 <div className="flex items-center justify-between font-bold text-slate-900">
-                  <span>1. Multiple Choice Questions (MCQ)</span>
-                  <span className="text-purple-700 font-bold">{mcqTotal} Marks</span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-black">1</span>
+                    <span>Multiple Choice Questions (MCQ)</span>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200/80">
+                    {mcqTotal} Marks
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Number of Questions</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Number of Questions</label>
                     <input
                       type="number"
                       min={0}
@@ -814,11 +932,11 @@ export default function TeacherQuestionPaperPage() {
                           mcq: { ...questionConfig.mcq, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Marks Per Question</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Marks Per Question</label>
                     <input
                       type="number"
                       min={0}
@@ -830,21 +948,29 @@ export default function TeacherQuestionPaperPage() {
                           mcq: { ...questionConfig.mcq, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
                 </div>
+                <div className="text-[11px] text-slate-400 text-center font-semibold pt-1 border-t border-emerald-100/60">
+                  {questionConfig.mcq.count} Questions × {questionConfig.mcq.marksPerQuestion} Marks = {mcqTotal} Marks
+                </div>
               </div>
 
-              {/* Short Questions Config */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+              {/* Short Questions Config Card */}
+              <div className="p-4 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white rounded-2xl border border-emerald-200/80 space-y-3 shadow-xs">
                 <div className="flex items-center justify-between font-bold text-slate-900">
-                  <span>2. Short Questions</span>
-                  <span className="text-purple-700 font-bold">{shortTotal} Marks</span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-black">2</span>
+                    <span>Short Questions</span>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200/80">
+                    {shortTotal} Marks
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Number of Questions</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Number of Questions</label>
                     <input
                       type="number"
                       min={0}
@@ -856,11 +982,11 @@ export default function TeacherQuestionPaperPage() {
                           short: { ...questionConfig.short, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Marks Per Question</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Marks Per Question</label>
                     <input
                       type="number"
                       min={0}
@@ -872,21 +998,29 @@ export default function TeacherQuestionPaperPage() {
                           short: { ...questionConfig.short, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
                 </div>
+                <div className="text-[11px] text-slate-400 text-center font-semibold pt-1 border-t border-emerald-100/60">
+                  {questionConfig.short.count} Questions × {questionConfig.short.marksPerQuestion} Marks = {shortTotal} Marks
+                </div>
               </div>
 
-              {/* Creative / Broad Questions Config */}
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200/80 space-y-2">
+              {/* Creative / Broad Questions Config Card */}
+              <div className="p-4 bg-gradient-to-b from-emerald-50/40 via-teal-50/20 to-white rounded-2xl border border-emerald-200/80 space-y-3 shadow-xs">
                 <div className="flex items-center justify-between font-bold text-slate-900">
-                  <span>3. Creative / Broad Questions</span>
-                  <span className="text-purple-700 font-bold">{creativeTotal} Marks</span>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-emerald-100 text-emerald-800 text-[11px] font-black">3</span>
+                    <span>Creative / Broad Questions</span>
+                  </div>
+                  <span className="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 border border-emerald-200/80">
+                    {creativeTotal} Marks
+                  </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Number of Questions</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Number of Questions</label>
                     <input
                       type="number"
                       min={0}
@@ -898,11 +1032,11 @@ export default function TeacherQuestionPaperPage() {
                           creative: { ...questionConfig.creative, count: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-slate-600 font-semibold mb-1">Marks Per Question</label>
+                    <label className="block text-slate-600 font-semibold mb-1 text-[11px]">Marks Per Question</label>
                     <input
                       type="number"
                       min={0}
@@ -914,45 +1048,49 @@ export default function TeacherQuestionPaperPage() {
                           creative: { ...questionConfig.creative, marksPerQuestion: Math.max(0, Number(e.target.value) || 0) }
                         })
                       }
-                      className="w-full px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold outline-none focus:border-purple-500"
+                      className="w-full px-3.5 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/15 transition-all"
                     />
                   </div>
+                </div>
+                <div className="text-[11px] text-slate-400 text-center font-semibold pt-1 border-t border-emerald-100/60">
+                  {questionConfig.creative.count} Questions × {questionConfig.creative.marksPerQuestion} Marks = {creativeTotal} Marks
                 </div>
               </div>
 
               {/* Grand Total Comparison */}
               <div
-                className={`p-3 rounded-xl border flex items-center justify-between text-xs font-bold ${
+                className={`p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 text-xs font-bold shadow-xs ${
                   isConfigMatched
-                    ? "bg-emerald-50 text-emerald-900 border-emerald-200"
-                    : "bg-amber-50 text-amber-900 border-amber-200"
+                    ? "bg-emerald-50 text-emerald-900 border-emerald-200/90"
+                    : "bg-amber-50 text-amber-900 border-amber-200/90"
                 }`}
               >
                 <div>
-                  <div>Target Exam Marks: {targetExamMarks}</div>
-                  <div className="font-normal text-[11px]">
-                    Blueprint Sum: {mcqTotal} + {shortTotal} + {creativeTotal} = {configuredGrandTotal} Marks
+                  <div className="text-sm font-extrabold">Target Exam Marks: {targetExamMarks}M</div>
+                  <div className="font-medium text-[11px] text-slate-600 mt-0.5">
+                    Blueprint Sum: {mcqTotal} (MCQ) + {shortTotal} (Short) + {creativeTotal} (Creative) ={" "}
+                    <strong>{configuredGrandTotal} Marks</strong>
                   </div>
                 </div>
-                <div className="text-right">
+                <div>
                   {isConfigMatched ? (
-                    <span className="inline-flex items-center gap-1 text-emerald-700">
-                      <CheckCircle2 size={14} /> Exact Match
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-emerald-800 rounded-xl border border-emerald-300 shadow-2xs">
+                      <CheckCircle2 size={14} className="text-emerald-600" /> Exact Match
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-amber-700">
-                      <AlertCircle size={14} /> Difference: {marksDiff}M
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white text-amber-900 rounded-xl border border-amber-300 shadow-2xs">
+                      <AlertCircle size={14} className="text-amber-600" /> Difference: {marksDiff}M {configuredGrandTotal > targetExamMarks ? "exceeded" : "missing"}
                     </span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
               <button
                 type="button"
                 onClick={() => setShowConfigModal(false)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 transition cursor-pointer"
+                className="px-4 py-2.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-slate-900 transition cursor-pointer shadow-xs active:scale-[0.98]"
               >
                 Close
               </button>
@@ -961,15 +1099,15 @@ export default function TeacherQuestionPaperPage() {
                   type="button"
                   onClick={() => handleGenerate(Boolean(questionPaper))}
                   disabled={generating || !isConfigMatched}
-                  className="px-4 py-2 rounded-xl text-xs font-bold bg-purple-700 hover:bg-purple-800 text-white flex items-center gap-1.5 shadow-sm transition cursor-pointer disabled:opacity-50"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white shadow-lg shadow-emerald-500/25 ring-2 ring-emerald-500/20 transition-all duration-200 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {generating ? (
                     <>
-                      <Loader2 size={14} className="animate-spin text-amber-300" /> Generating...
+                      <Loader2 size={14} className="animate-spin text-amber-300" /> Generating with AI...
                     </>
                   ) : (
                     <>
-                      <Sparkles size={14} className="text-amber-300" /> Apply & Generate Paper
+                      <Sparkles size={14} className="fill-amber-300 text-amber-300" /> Apply & Generate Paper
                     </>
                   )}
                 </button>
