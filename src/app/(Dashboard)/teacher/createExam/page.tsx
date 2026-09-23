@@ -118,6 +118,12 @@ const formatGroupName = (groupId: string) => {
   return groupId;
 };
 
+// Normalizes Section format (e.g. "sec-a", "SEC-A", "Section A" -> "A")
+const formatSectionName = (sec?: string) => {
+  if (!sec) return "A";
+  return String(sec).toUpperCase().replace(/^SECTION[\s_-]*/i, "").replace(/^SEC[\s_-]*/i, "").trim() || "A";
+};
+
 export default function TeacherCreateExam() {
   const router = useRouter();
   const { data: session, isPending: sessionPending } = useSession();
@@ -159,7 +165,7 @@ export default function TeacherCreateExam() {
           const autoClass = formatClassName(firstAssign.classId);
           const autoGroup = formatGroupName(firstAssign.groupId || "");
           const autoSub = firstAssign.subjectId || "";
-          const autoSec = firstAssign.sectionId ? firstAssign.sectionId.toUpperCase().replace("SECTION", "").trim() : "A";
+          const autoSec = formatSectionName(firstAssign.sectionId);
 
           setFormData((prev) => ({
             ...prev,
@@ -271,6 +277,9 @@ export default function TeacherCreateExam() {
         if (matchingAssign) {
           updated.stream = formatGroupName(matchingAssign.groupId || "");
           updated.subject = matchingAssign.subjectId || "";
+          if (matchingAssign.sectionId) {
+            updated.section = formatSectionName(matchingAssign.sectionId);
+          }
         } else {
           updated.stream = "";
           updated.subject = "";
@@ -352,7 +361,7 @@ export default function TeacherCreateExam() {
         examType: formData.examType,
         className: formData.className,
         stream: isSSCClass ? formData.stream : null,
-        section: formData.section ? formData.section.toUpperCase().replace("SECTION", "").trim() : "A",
+        section: formatSectionName(formData.section),
         subject: formData.subject,
         totalMarks: Number(formData.totalMarks),
         passMarks: Number(formData.passMarks),

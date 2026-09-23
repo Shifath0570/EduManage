@@ -64,6 +64,17 @@ interface ExamItem {
   createdAt?: string;
 }
 
+const formatSection = (sec?: string): string => {
+  if (!sec) return "A";
+  return (
+    String(sec)
+      .toUpperCase()
+      .replace(/^SECTION[\s_-]*/i, "")
+      .replace(/^SEC[\s_-]*/i, "")
+      .trim() || "A"
+  );
+};
+
 interface JwtResponse {
   token?: string;
   message?: string;
@@ -583,7 +594,7 @@ export default function TeacherAllExams() {
                       <td className="py-3.5 px-4">
                         <div className="font-semibold text-slate-800">
                           {exam.className}
-                          {exam.section ? ` (Sec ${exam.section})` : ""}
+                          {exam.section ? ` (Sec ${formatSection(exam.section)})` : ""}
                         </div>
                         {exam.stream && (
                           <span className="inline-block px-1.5 py-0.5 rounded bg-teal-50 text-teal-700 text-[10px] font-bold border border-teal-200/80 mt-0.5">
