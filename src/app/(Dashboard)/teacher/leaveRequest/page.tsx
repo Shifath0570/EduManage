@@ -1,4 +1,4 @@
-// feath done
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -88,7 +88,8 @@ export default function TeacherLeaveRequestPage() {
     return result.token;
   };
 
-  const BACKEND_API_URL = "http://localhost:5000/api/teacher-leave-requests";
+  const apiURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+  const BACKEND_API_URL = `${apiURL}/api/teacher-leave-requests`;
 
   // Sync session user attributes
   useEffect(() => {
