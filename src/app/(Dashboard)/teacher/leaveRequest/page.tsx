@@ -1,4 +1,4 @@
-// iuytditgitiidtti
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useSession } from "@/app/lib/auth-client";
 
-type UserRole = "TEACHER" | "ADMIN" | "PRINCIPAL" | string;
+type UserRole = "TEACHER" | "ADMIN" | string;
 
 interface LeaveRequestItem {
   _id: string;
@@ -35,9 +35,9 @@ interface LeaveRequestItem {
   createdAt: string;
 }
 
-interface JwtResponse { 
-  token?: string; 
-  message?: string; 
+interface JwtResponse {
+  token?: string;
+  message?: string;
 }
 
 export default function TeacherLeaveRequestPage() {
@@ -75,49 +75,28 @@ export default function TeacherLeaveRequestPage() {
   const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected">("pending");
   const [isLoadingRequests, setIsLoadingRequests] = useState(true);
 
-  const getJwt = async (): Promise<string> => { 
-    const response = await fetch("/api/auth/token", { 
-      credentials: "include", 
-      headers: { Accept: "application/json" }, 
-    }); 
-    const result: JwtResponse = await response.json().catch(() => ({})); 
+  const getJwt = async (): Promise<string> => {
+    const response = await fetch("/api/auth/token", {
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    const result: JwtResponse = await response.json().catch(() => ({}));
 
-    if (!response.ok || !result.token) { 
-      throw new Error(result.message || "You must be signed in to perform this action."); 
-    } 
-    return result.token; 
+    if (!response.ok || !result.token) {
+      throw new Error(result.message || "You must be signed in to perform this action.");
+    }
+    return result.token;
   };
 
   const BACKEND_API_URL = "http://localhost:5000/api/teacher-leave-requests";
 
-  // Fetch extra teacher profile details if user ID is available
+  // Sync session user attributes
   useEffect(() => {
-    const fetchTeacherProfile = async () => {
-      const teacherId = user?.id;
-      if (!teacherId) return;
-
-      try {
-        const token = await getJwt(); 
-        const apiURL = process.env.NEXT_PUBLIC_API_URL || "";
-        const res = await fetch(`${apiURL}/api/teachers/by-user/${teacherId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setTeacherData({
-            name: data.name || user?.name || "Teacher",
-            department: data.department || user?.department || user?.role || "Faculty",
-          });
-        }
-      } catch (err) {
-        console.error("Failed to fetch teacher profile:", err);
-      }
-    };
-
     if (user) {
-      fetchTeacherProfile();
+      setTeacherData({
+        name: user.name || "Teacher",
+        department: user.department || user.role || "Faculty",
+      });
     }
   }, [user]);
 
@@ -140,7 +119,7 @@ export default function TeacherLeaveRequestPage() {
       }
     } catch (err) {
       console.error("Failed to load requests:", err);
-    } {
+    } finally {
       setIsLoadingRequests(false);
     }
   };
@@ -158,6 +137,7 @@ export default function TeacherLeaveRequestPage() {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Safe handler to call AI route with non-JSON 404/500 parsing guards
   const handleGenerateAI = async () => {
     if (!form.purpose.trim()) {
       alert("Please state the purpose of your leave first.");
@@ -170,11 +150,12 @@ export default function TeacherLeaveRequestPage() {
       const token = await getJwt();
       const res = await fetch("/api/leave/generate", {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
+          role: "teacher",
           teacherName: teacherData.name,
           department: teacherData.department,
           leaveType: form.leaveType,
@@ -184,11 +165,15 @@ export default function TeacherLeaveRequestPage() {
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        throw new Error(data.error || "Failed to generate draft from AI.");
+        const errorHtmlOrText = await res.text();
+        console.error("Server API returned an error:", errorHtmlOrText);
+        throw new Error(
+          `API endpoint returned status ${res.status}. Verify route file exists at 'app/api/leave/teacher/route.ts'`
+        );
       }
+
+      const data = await res.json();
 
       if (data.applicationLetter) {
         setForm((prev) => ({ ...prev, applicationText: data.applicationLetter }));
@@ -230,7 +215,7 @@ export default function TeacherLeaveRequestPage() {
       const token = await getJwt();
       const res = await fetch(BACKEND_API_URL, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
@@ -345,7 +330,6 @@ export default function TeacherLeaveRequestPage() {
   return (
     <div className="min-h-screen bg-slate-50/80 p-4 lg:p-8 text-slate-800">
       <div className="w-full lg:w-[92%] xl:w-[85%] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
         {/* LEFT COLUMN: Request Leave Form */}
         <div className="lg:col-span-7 relative bg-white/90 backdrop-blur-xl border border-emerald-100/80 rounded-[2rem] shadow-xl shadow-emerald-950/5 p-6 sm:p-8 overflow-hidden">
           <div className="pointer-events-none absolute -top-20 -left-20 h-56 w-56 rounded-full bg-emerald-200/20 blur-3xl" />
@@ -373,7 +357,9 @@ export default function TeacherLeaveRequestPage() {
                 <span className="text-slate-400 block font-bold uppercase tracking-wider text-[10px]">
                   Department / Role
                 </span>
-                <span className="font-extrabold text-emerald-700 capitalize">{teacherData.department}</span>
+                <span className="font-extrabold text-emerald-700 capitalize">
+                  {teacherData.department}
+                </span>
               </div>
               {user?.email && (
                 <div className="col-span-2 sm:col-span-1">
@@ -553,7 +539,7 @@ export default function TeacherLeaveRequestPage() {
               {filteredRequests.map((item) => (
                 <div
                   key={item._id}
-                  className="border border-slate-200/80 rounded-2xl p-4.5 hover:border-emerald-300 transition-all bg-white shadow-xs group"
+                  className="border border-slate-200/80 rounded-2xl p-4 hover:border-emerald-300 transition-all bg-white shadow-xs group"
                 >
                   <div className="flex items-start justify-between gap-2 mb-3">
                     <div>
@@ -610,17 +596,10 @@ export default function TeacherLeaveRequestPage() {
             </div>
           )}
         </div>
-
       </div>
     </div>
   );
 }
-
-
-
-
-
-
 
 
 
