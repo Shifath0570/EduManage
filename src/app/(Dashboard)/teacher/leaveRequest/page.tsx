@@ -141,7 +141,7 @@ export default function TeacherLeaveRequestPage() {
   // Safe handler to call AI route with non-JSON 404/500 parsing guards
   const handleGenerateAI = async () => {
     if (!form.purpose.trim()) {
-      alert("Please state the purpose of your leave first.");
+     alert("Please state the purpose of your leave first.");
       return;
     }
 
