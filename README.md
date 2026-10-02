@@ -1,175 +1,1227 @@
-vercel link : https://edu-manage-umber-two.vercel.app/
+# 🎓 EduManage — School Management Platform
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Project-EduManage-2563EB?style=for-the-badge" alt="EduManage" />
+  <img src="https://img.shields.io/badge/Next.js-Framework-black?style=for-the-badge&logo=next.js" alt="Next.js" />
+  <img src="https://img.shields.io/badge/TypeScript-Language-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-Styling-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB" />
+</p>
 
-EduManage — School Management Platform
-Project Name: EduManage: School Management Platform
-Team Name: Endgame_Warrior
-Team Code: EG-1302.2
-Live Application: Live link
-Frontend  Repository:  GitHub_Client
-Backend  Repository:  GitHub_Server
+<p align="center">
+  <strong>A Modern, AI-Powered School Management Platform</strong>
+</p>
 
+<p align="center">
+  EduManage is a cloud-based school management platform designed to connect administrators, teachers, students, and parents through a centralized digital ecosystem.
+</p>
 
-Developers
-1.	Kazi Mohammad Shariful Amin Shifath
-2.	Md Maksumul Haque Emon
-3.	Md. Osman Goni
-4.	Obaydur Rahman Ayon
+---
 
-1.	Executive Summary & Purpose
+## 🌐 Live Application
 
+**Live Website:**
+https://edu-manage-umber-two.vercel.app/
 
-Purpose
-This Software Requirements Specification (SRS) documents the detailed functional, non-functional, and architectural requirements for EduManage, a cloud-based web application built to streamline school administration, AI-driven academic intervention, across public visitors, students, teachers, and administrators.
+**Frontend Repository:**
+GitHub_Client
 
+**Backend Repository:**
+GitHub_Server
 
+---
 
-2.	User Roles & Access Control Matrix
+# 📌 Project Information
 
-Role							Access Permissions
+| Information          | Details                                |
+| -------------------- | -------------------------------------- |
+| **Project Name**     | EduManage — School Management Platform |
+| **Team Name**        | Endgame_Warrior                        |
+| **Team Code**        | EG-1302.2                              |
+| **Project Type**     | Full-Stack School Management Platform  |
+| **Application Type** | Cloud-Based Web Application            |
+| **Frontend**         | Next.js, React, TypeScript             |
+| **Backend**          | Node.js, Express.js                    |
+| **Database**         | MongoDB, Mongoose                      |
+| **Authentication**   | JWT, Better Auth                       |
+| **AI Integration**   | OpenAI API / Gemini API                |
+| **Deployment**       | Vercel / Node Environment              |
+| **Version Control**  | GitHub                                 |
 
-Public / Visitor	Access to Home page, About, Routine, Notice, Blog, EduChat, Contact,
+---
 
-Student	Access to Student Dashboard, Student  Profile, View Attendance, View Results, Leave Request, Fee Collection.
+# 📖 About EduManage
 
-Teacher	Access to Teacher Dashboard, Teacher  Profile, Take Attendance, View Attendance, Create Exam, All Exam List, Enter Marks, View Results, Leave Request, Teacher Salary.
+EduManage is a modern school management platform designed to simplify everyday educational administration and create a connected learning environment.
 
-Admin	Access to Admin Dashboard, Overview, Create Student, Create Teacher, Manage Teachers, Manage Students, View Attendance, Create Exam, All Exam List, Leave Management, Manage Notice, Manage Blogs, Contact Messages, Fee Collection, Teacher Salary.
+The platform brings important school operations into one centralized system, including:
 
+* Student management
+* Teacher management
+* Class and subject assignment
+* Attendance management
+* Examination management
+* Result and marks management
+* Leave management
+* Fee collection
+* Teacher salary management
+* Notice management
+* Blog management
+* AI-powered academic interventions
+* AI-generated leave applications
+* AI notice generation
+* Reports and analytics
 
-3.	Functional Requirements
+The public-facing application also provides **Home, About, Notice Board, Latest Blog, and Contact Us** sections for visitors.
 
-•	Navigation Elements & Dynamic Header: Positioned the EduManage platform logo on the far left of the header, Structured centered links for public routes, Integrated Better Auth state handling, Unauthenticated State Displays a direct Login button at the right end. Authenticated State Replaces the login button with a user profile avatar and a Logout button.
-•	Create Student Registration Form : Built a profile picture upload component alongside personal profile initials, Integrated inputs for Name, Email, Phone, Date of Birth, Gender, and Address, Added input fields for Guardian Name, Guardian Phone, dropdown selectors for Class and Section, and text inputs for Student ID, Roll Number, and Admission Date, Integrated a button for Spark AI Data to Excel and a primary action button to Create Student & Export Excel.
+---
 
-•	Create Teacher Registration Form : Built input fields for Full Name, Email, Phone, Date of Birth, Gender, Blood Group, and Profile Photo upload,  Added inputs for Qualifications, Subject Specialization dropdown, Experience (Years), Joining Date, and Employee ID, Created fields capturing fullAddress, CityState/Province, Post Code, Guardian Name,Guardian Phone, and Emergency Contact, Integrated Export AI Data to Excel and a submit button to Add Teacher & Export Excel.
+# 🎯 Purpose
 
-•	Manage Teachers Portal : Added a top search bar filtering by name, email, or phone, alongside an All Subjects dropdown filter, Reset control, and a total record indicator, Structured columns for Teacher Info (avatar, name, email, phone number), Subject(s) (badge indicator like Physics, Chemistry, Biology), Status (Active), and row-level Actions (view, assing, active). Included bottom pagination with page navigation controls.
+The primary purpose of EduManage is to reduce manual school-management work by providing a centralized digital platform where administrators, teachers, and students can manage their academic and administrative activities efficiently.
 
-•	Manage Students Portal : Implemented a unified search bar (by name, roll, or email), All Classes and All Sections dropdown filters, a Reset button, and a total record count badge, Formatted columns displaying #, Student Info (avatar, student name, roll number, email address), Class, Section, status badge (Active), and row-level action icons (view, active, delete), Added bottom pagination controls with an configurable Per page dropdown menu and page selection buttons.
+The platform focuses on:
 
-•	Edit Student Details : Comprehensive input form allowing administrators to update personal fields (Name, Email, Phone, DOB, Gender, Address), guardian information (Name, Phone), and academic fields (Class, Section, Student ID, Roll Number, Admission Date),Preview: Features a Change Profile Picture action and a preview list of Auto-assigned Subjects.
+* Centralized school administration
+* Secure role-based access
+* Academic management
+* Attendance tracking
+* Examination and result management
+* Financial management
+* AI-assisted workflows
+* Real-time dashboards and analytics
+* Responsive user experience
 
-•	Edit Teacher Details : Full update interface covering personal attributes, qualifications, specialization dropdown, experience years, employee ID, location details, guardian info, and emergency contact numbers. Includes a Change Profile Picture feature and form action buttons (Cancel, Save Changes).
+---
 
-•	Teacher Subject & Class Assignment Module : Displays profile details for the selected teacher (name, email, phone, subject), Form panel allowing administrators to select Class, Section, Subject (dynamically dependent on class selection), and set the Academic Year. Shows active mapped courses with a row-level Delete action to remove allocations. Multiple assignments per teacher are supported.
+# 👥 Development Team
 
-•	Conditional Operational Task Workflow : Implemented business logic requiring teachers to have active class/subject assignments before unlocking functional modules, Unassigned teachers are prevented from executing operational routines, such as taking/viewing attendance, creating exams, or entering student marks/results until assigned to an active class.
+### Team — Endgame_Warrior
 
-•	Attendance Management : The system shall allow Teachers to dynamically mark students as Present or Absent for given dates and subjects.The system shall calculate individual student attendance percentages automatically upon data submission.The Admin role shall only have Read access to attendance records across all classes and departments.
+1. **Kazi Mohammad Shariful Amin Shifath**
+2. **Md Maksumul Haque Emon**
+3. **Md. Osman Goni**
+4. **Obaydur Rahman Ayon**
 
-•	AI-Powered Interventions : The system shall flag any student whose cumulative attendance drops below 75%.Teachers shall be able to trigger an AI analysis request that generates a tailored academic warning based on attendance records. AI-generated warnings shall be delivered to the target student's personal dashboard notification feed.
+> **Team Code:** EG-1302.2
 
-•	Content Management & AI Blogging : The system shall allow Admins to publish blog posts manually or via AI text generation.The system shall provide a client-side or backend-driven search bar for real-time blog filtering.
+---
 
-•	Communication & System Messaging : Public users shall be able to submit messages via the "Contact Us" form. Successful form submissions shall emit a notification indicator on the Admin Dashboard. Admins shall be able to read, inspect, and organize incoming contact messages inside a dedicated portal view.
+# 🔐 User Roles & Access Control
 
-•	Dynamic Attendance & Analytics : Interactive UI for Teachers to record and track daily attendance across classes. Role-restricted institutional attendance monitoring for System Administrators. Student portal displaying individual attendance summaries and real-time attendance percentage metrics. Automatic system flagging for students falling below the 75% attendance threshold or accumulating critical absences.
+EduManage provides role-based access control to ensure that users can only access the features relevant to their responsibilities.
 
-•	Teacher & Student AI Leave Request Page : Automatically populates active applicant metadata, including name, role, and official email address, Provides fields to set the Leave Type (e.g., Sick Leave, Maternity/Paternity Leave), Start Date, End Date, and Purpose of Leave subject line, Features an automated Generate Application engine that uses AI to draft a formal application letter in the Generated Application Preview window, Includes a Submit Leave Application action alongside a Submitted Requests panel to track application statuses (Pending, Approved, Rejected) and view submitted letters.
+| Role                    | Main Access                                                                  |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| 🌐 **Public / Visitor** | Home, About, Routine, Notice, Blog, EduChat, Contact                         |
+| 🎓 **Student**          | Dashboard, Profile, Attendance, Results, Leave Request, Fee Collection       |
+| 👨‍🏫 **Teacher**       | Dashboard, Profile, Attendance, Exams, Marks, Results, Leave Request, Salary |
+| 👨‍💼 **Admin**         | Complete administration, management, academic, finance, and content modules  |
 
-•	Admin Portal Leave Management : Toggle controls to switch views between Teachers and Students alongside metric cards for Pending Approval, Approved Requests, and Rejected Requests, Features a search bar (by name or reason) and dynamic status filter chips (Pending, Approved, Rejected, All), Displays structured records showing Applicant name, Type / Reason, date Duration, status indicators (Pending, Approved, Rejected), and action links to View full details.
+---
+
+# ✨ Core Features
 
-•	Finance Modules: Provisioned dedicated workflows for Student Fee Collection and Teacher Salary.
+## 🌐 Public Website
 
-•	AI Notice Writer: Built prompt-based automated notice content generator.
+The public platform provides:
 
-•	Fee Calculations: Enhanced accuracy of client-side fee calculations and data binding.
+* Modern landing page
+* About EduManage
+* Notice Board
+* Latest Blog
+* Contact Us
+* Routine
+* EduChat
+* Platform Features
+* Campus Statistics
+* Responsive navigation
+* Dynamic content sections
 
-•	PDF Voucher Engine: Built client/server export mechanism for fee receipts and salary slips.
+The live homepage highlights Student Management, Teacher Management, Attendance, Examination & Results, Notice & Communication, and Reports & Analytics.
 
-•	Student Receipts: Completed end-to-end payment confirmation and PDF voucher downloading.
+---
 
-•	Initial Academic Module Development : Teacher Result workflow, Teacher Enter Marks functionality,  Admin/Teacher marks management, Exam-based student selection, Class and Subject based filtering, Student list for marks entry, Marks save/update workflow, Initial result management structure.
+# 👨‍🎓 Student Management
 
-•	Result Management & Exam Structure : Admin View Result, Teacher View Result, Student View Result structure, Result filtering, Exam-based result viewing, Subject-wise result display, Student-wise academic information, Total marks and GPA/result information.
+Administrators can create and manage student records through a detailed registration system.
 
-•	Admin Examination Management : Admin Create Exam, Admin All Exam List, Admin Enter Mark, Admin View Result, Exam creation form, Exam information management, Exam API integration, Class and Section based student filtering, Exam target validation.
+### Student Registration
 
-•	Teacher Module, AI Features & Routine : Implemented the Teacher Create Exam functionality with the required restrictions based on the teacher's assigned academic information, All Exams, My Exams, Exam viewing, Own exam management, Edit functionality, Delete functionality.
+The registration form supports:
 
+* Profile picture
+* Student name
+* Email
+* Phone
+* Date of birth
+* Gender
+* Address
+* Guardian name
+* Guardian phone
+* Class
+* Section
+* Student ID
+* Roll number
+* Admission date
 
+### AI Data Export
 
+The platform also provides:
 
-4.	 Non-Functional Requirements
+> **Spark AI Data → Excel**
 
-•	Hero & Landing Interface: Built core UI components and public landing hero section.
+Administrators can generate structured student information and export it as an Excel file.
 
-•	Notice Marquee Component: Built an animated horizontal scrolling announcement bar tagged with a green NOTICE badge to highlight live campus updates.
+### Manage Students
 
-•	Platform Features Static Section: Implemented a 6-card feature grid detailing core platform capabilities, Student Management, Teacher Management, Attendance System, Examination & Results, Notice & Communication, Reports & Analytics.
+Features include:
 
-•	Campus Statistics Static Section: Developed a key metrics section displaying core campus statistics in icon cards, Total Students, Teachers, Classes, Subjects, Attendance Rate, Exams Conducted.
+* Search by name
+* Search by roll
+* Search by email
+* Class filtering
+* Section filtering
+* Reset filters
+* Total student count
+* Student profile
+* Edit student
+* Activate/deactivate
+* Delete student
+* Pagination
+* Configurable records per page
 
-•	Notice Board Architecture: Designed layout structure for notice feeds and dynamic blogs.
+---
 
-•	Student Portal Student Profile : Built dedicated student portal sidebar containing quick navigation items, Integrates a top banner featuring an AI Academic Insight motivational component along with thefull student profile view.
+# 👨‍🏫 Teacher Management
 
-•	Teacher Portal Teacher Profile : Integrated portal sidebar for faculty members with routes, Presents detailed teacher profile information, professional metrics, experience, address details, and emergency contacts within the teacher portal frame.
+EduManage provides a complete teacher management workflow.
 
-•	Dynamic Admin Overview Dashboard : Top dynamic stats showing real-time counts and percentage growth indicators, Dynamic distribution showing gender demographics, Real-time daily tracker, Weekly percentage tracking over time, Live feed displaying recent enrollments with name, class, email, and active status,
+### Teacher Registration
 
-•	Admin Dashboard Overview: Populated administrative metrics with real-time dynamic visualizers.
+Teacher profiles can include:
 
-•	Interface & Responsiveness : The application interface shall be 100% responsive, passing WCAG view standards across mobile (768px), tablet (768px - 1024px), and desktop (1024px).
+* Full name
+* Email
+* Phone
+* Date of birth
+* Gender
+* Blood group
+* Profile photo
+* Qualifications
+* Subject specialization
+* Experience
+* Joining date
+* Employee ID
+* Address
+* City
+* State/Province
+* Post code
+* Guardian information
+* Emergency contact
 
+### Teacher Management
 
-4.1	Security Hardening & Vulnerability Remediation 
+Administrators can:
 
-•	UI/UX Modernization: Overhauled the complete application UI to deliver a modern, responsive user experience with updated layouts, improved navigation, and dynamic UI components.
+* Search teachers
+* Filter by subject
+* View teacher profiles
+* Edit teacher information
+* Assign classes
+* Assign subjects
+* Activate/deactivate teachers
+* Manage multiple academic assignments
 
-•	JWT Protection on Core Operations: Implemented JSON Web Token (JWT) authentication across all protected API endpoints, securing all management systems.
+---
 
-•	Role-Based Security & Access Control: Applied role-based token validation across all sensitive actions to systematically block unauthenticated or unauthorized requests.
+# 🏫 Teacher Class & Subject Assignment
 
+The assignment module allows administrators to connect teachers with their academic responsibilities.
 
-5.	 Technologies Used
+Administrators can assign:
 
-5.1	Frontend Stack
+* Class
+* Section
+* Subject
+* Academic Year
 
-•	Framework G Libraries: Next.js, React Router DOM (SPAs navigation)
+Multiple assignments can be created for a single teacher.
 
-•	Styling G UI Components: Tailwind CSS / CSS Modules, Responsive Grid & Flexbox
+### Conditional Workflow
 
-•	Icons G UI Utilities: Lucide React / React Icons
+A teacher must have an active class and subject assignment before accessing operational academic features.
 
-•	HTTP Client: Fetch API
+For example, an unassigned teacher cannot:
 
-5.2	Backend Stack
+* Take attendance
+* Create examinations
+* Enter student marks
+* Perform result-related operations
 
-•	Runtime Environment: Node.js
-•	Web Framework: Express.js
-•	Database G ODM: MongoDB & Mongoose
-•	Authentication G Security: JSON Web Tokens (JWT), bcrypt (password hashing), CORS, Environment Configuration (dotenv)
+This business rule helps maintain academic data integrity.
 
-5.3	AI Integration
+---
 
-•	AI Models G Engine: OpenAI API / Gemini API  
+# 📝 Attendance Management
 
-5.4	Deployment & Infrastructure
+EduManage provides role-based attendance management.
 
-•	Frontend Hosting: Vercel
-•	Backend Hosting: Vercel / Render / Node Environment
-•	Version Control: GitHub (separate frontend and server repositories)
+### Teacher
 
+Teachers can:
 
-6.	Key Learnings & Project Takeaways
-Through the development of EduManage, I gained practical experience in full-stack 
-development, system security, AI integration, and collaborative software engineering. 
-My key learnings include:
-1.	Role-Based Access Control: Developed a deeper understanding of designing secure permission systems by defining clear responsibilities for each user role and ensuring that sensitive operations are accessible only to authorized users.
+* Select class
+* Select subject
+* Select date
+* View students
+* Mark Present/Absent
+* Submit attendance
+* View attendance records
 
-2.	API Security & Authentication: Gained practical experience in securing REST APIs using JWT authentication and authorization middleware. Learned how to identify exposed endpoints, prevent unauthorized requests, and strengthen overall API security.
+### Student
 
-3.	AI-Powered Application Development: Learned how to integrate AI services into real-world application workflows and use prompt-based automation to generate useful content and support academic management processes.
+Students can:
 
-4.	Full-Stack Development & API Integration: Strengthened my ability to connect frontend interfaces with backend REST APIs, manage data using MongoDB and Mongoose, and build dynamic features across the complete application stack.
+* View attendance history
+* View attendance percentage
+* Monitor attendance performance
 
-5.	Agile & Iterative Development: Learned how to work through an iterative development process, gradually transforming initial designs and requirements into functional, secure, and production-ready application features.
+### Admin
 
-6.	Responsive UI/UX Development: Improved my ability to create responsive and accessible interfaces using Next.js, Tailwind CSS, CSS Grid, and Flexbox for consistent experiences across mobile, tablet, and desktop devices.
+Administrators have **read-only access** to attendance information across classes and departments.
 
-7.	Problem-Solving & Debugging: Developed stronger debugging and problem-solving skills by identifying authentication issues, API vulnerabilities, integration errors, and frontend/backend inconsistencies during development.
+---
 
-8.	Team Collaboration: Gained practical experience working within a development team, coordinating tasks, discussing technical challenges, reviewing implementations, and contributing to a shared project roadmap.
+# 🤖 AI-Powered Attendance Intervention
+
+EduManage includes an AI-based academic intervention workflow.
+
+The system identifies students whose cumulative attendance falls below the defined **75% threshold**.
+
+Teachers can trigger an AI analysis that generates a personalized academic warning based on the student's attendance records.
+
+The generated warning can then appear in the student's dashboard notification feed.
+
+### Workflow
+
+```text
+Student Attendance
+        ↓
+Attendance Calculation
+        ↓
+Below 75%?
+        ↓
+AI Analysis
+        ↓
+Academic Warning
+        ↓
+Student Dashboard Notification
+```
+
+---
+
+# 📚 Examination Management
+
+EduManage provides complete examination workflows for administrators and teachers.
+
+### Admin Features
+
+* Create Exam
+* All Exam List
+* Enter Marks
+* View Results
+* Exam management
+* Class filtering
+* Section filtering
+* Student filtering
+* Exam target validation
+
+### Teacher Features
+
+* Create Exam
+* My Exams
+* All Exams
+* View Exam
+* Edit Exam
+* Delete Exam
+* Enter Marks
+
+Teacher exam operations are restricted according to their assigned class, section, and subject.
+
+---
+
+# 📊 Result & Marks Management
+
+The result system supports:
+
+* Exam-based result viewing
+* Student-wise results
+* Subject-wise results
+* Total marks
+* GPA/result information
+* Class filtering
+* Subject filtering
+* Student selection
+* Marks entry
+* Marks update
+* Result management
+
+### Result Access
+
+| Role    | Result Access                           |
+| ------- | --------------------------------------- |
+| Admin   | View & manage                           |
+| Teacher | View & manage assigned academic results |
+| Student | View personal results                   |
+
+---
+
+# 🤖 AI-Powered Leave Management
+
+One of the major AI features of EduManage is the intelligent leave-request system.
+
+Teachers and students can create leave applications using an AI-assisted workflow.
+
+### Leave Request
+
+Users can provide:
+
+* Applicant information
+* Leave type
+* Start date
+* End date
+* Purpose
+* Subject/reason
+
+The AI generates a formal leave application based on the provided information.
+
+### Workflow
+
+```text
+User Information
+       ↓
+Leave Type
+       ↓
+Date & Duration
+       ↓
+Purpose / Reason
+       ↓
+AI Generate Application
+       ↓
+Application Preview
+       ↓
+Submit Request
+       ↓
+Admin Review
+       ↓
+Pending / Approved / Rejected
+```
+
+---
+
+# 🧑‍💼 Admin Leave Management
+
+Administrators can manage both teacher and student leave requests.
+
+### Features
+
+* Teacher/Student toggle
+* Pending requests
+* Approved requests
+* Rejected requests
+* Search by applicant
+* Search by reason
+* Status filtering
+* View complete application
+* Approve request
+* Reject request
+* Track request status
+
+---
+
+# 💰 Finance Management
+
+EduManage includes dedicated finance workflows.
+
+## Student Fee Collection
+
+Features include:
+
+* Fee calculation
+* Payment confirmation
+* Payment records
+* Student receipts
+* PDF voucher generation
+* Voucher download
+
+## Teacher Salary
+
+The salary module supports:
+
+* Salary information
+* Salary management
+* Salary slip generation
+* PDF export
+
+---
+
+# 📄 PDF Voucher System
+
+A PDF export mechanism is implemented for financial documents.
+
+Supported documents include:
+
+* Student payment receipts
+* Fee vouchers
+* Teacher salary slips
+
+The system supports client/server-based document generation and downloading.
+
+---
+
+# 📢 Notice Management
+
+Administrators can create and manage school notices.
+
+The platform includes a dynamic notice board and announcement marquee for displaying important school updates.
+
+The live application currently exposes a dedicated Notice Board containing categorized notices and status information such as draft, published, expired, and archived.
+
+---
+
+# 🤖 AI Notice Writer
+
+EduManage includes an AI-powered notice generation feature.
+
+Administrators can provide a prompt or basic information and generate structured notice content automatically.
+
+### Example Workflow
+
+```text
+Admin Prompt
+     ↓
+AI Processing
+     ↓
+Generated Notice
+     ↓
+Admin Review
+     ↓
+Publish Notice
+```
+
+---
+
+# 📰 Blog Management
+
+Administrators can create and manage educational blog content.
+
+The public Blog section provides:
+
+* Article search
+* Topic/category filtering
+* Education articles
+* Technology articles
+* Teacher-related content
+* Student-life content
+* Educational updates
+* Newsletter subscription
+
+The live Blog page currently organizes content into categories such as Education, Technology, Teachers, and Student Life.
+
+---
+
+# 📈 Admin Dashboard & Analytics
+
+The Admin Dashboard provides centralized monitoring of school activities.
+
+### Dashboard Statistics
+
+* Total Students
+* Total Teachers
+* Total Classes
+* Total Subjects
+* Attendance Rate
+* Exams Conducted
+
+### Analytics
+
+The dashboard includes:
+
+* Gender distribution
+* Daily activity tracking
+* Weekly percentage tracking
+* Recent student enrollments
+* Student/class/email information
+* Active status
+* Dynamic statistics
+* Administrative insights
+
+---
+
+# 👨‍🎓 Student Portal
+
+The Student Portal provides a dedicated dashboard experience.
+
+### Student Features
+
+* Student Dashboard
+* Student Profile
+* Attendance
+* Results
+* Leave Request
+* Fee Collection
+* Notifications
+* AI Academic Insights
+
+The student profile area also provides an AI academic insight section designed to provide motivational and academic information.
+
+---
+
+# 👨‍🏫 Teacher Portal
+
+Teachers receive a dedicated portal containing:
+
+* Teacher Dashboard
+* Teacher Profile
+* Attendance Management
+* Exam Management
+* Marks Entry
+* Result Management
+* Leave Request
+* Salary Information
+* Assigned Class
+* Assigned Subjects
+
+The teacher profile provides professional information, experience, address, and emergency contact details.
+
+---
+
+# 🔒 Security & Authentication
+
+Security was an important part of the EduManage development process.
+
+## JWT Protection
+
+JSON Web Token authentication was implemented across protected API operations.
+
+JWT middleware is used to:
+
+* Verify authentication tokens
+* Protect API endpoints
+* Validate user identity
+* Prevent unauthorized operations
+
+## Role-Based Authorization
+
+Role-based validation is applied to sensitive operations.
+
+```text
+Public User
+    ↓
+Authentication
+    ↓
+JWT Verification
+    ↓
+Role Validation
+    ↓
+Authorized Feature
+```
+
+Supported roles include:
+
+* Admin
+* Teacher
+* Student
+
+---
+
+# 🛡️ Security Hardening
+
+The project also focused on vulnerability remediation and API security.
+
+Implemented security improvements include:
+
+* JWT-protected API endpoints
+* Role-based authorization
+* Password hashing with bcrypt
+* CORS configuration
+* Environment variables
+* Protected management operations
+* Restricted academic workflows
+* Authentication validation
+
+---
+
+# 🎨 UI/UX & Responsive Design
+
+EduManage was designed with a modern responsive interface.
+
+### Responsive Support
+
+The interface is designed for:
+
+* 📱 Mobile
+* 📱 Tablet
+* 💻 Desktop
+
+The project uses:
+
+* CSS Grid
+* Flexbox
+* Tailwind CSS
+* Responsive layouts
+* Dynamic UI components
+* Modern dashboard interfaces
+
+---
+
+# 🏠 Landing Page
+
+The landing page includes:
+
+* Hero section
+* Navigation
+* Notice marquee
+* Platform features
+* Campus statistics
+* Notice board
+* Latest blogs
+* Why Choose EduManage
+* Testimonials
+* Contact section
+* Footer
+
+The live homepage describes EduManage as a centralized platform for students, teachers, parents, and administrators and highlights its major management modules.
+
+---
+
+# 🧩 Platform Modules
+
+```text
+EduManage
+│
+├── Public Website
+│   ├── Home
+│   ├── About
+│   ├── Routine
+│   ├── Notice
+│   ├── Blog
+│   ├── EduChat
+│   └── Contact
+│
+├── Student Portal
+│   ├── Dashboard
+│   ├── Profile
+│   ├── Attendance
+│   ├── Results
+│   ├── Leave Request
+│   └── Fee Collection
+│
+├── Teacher Portal
+│   ├── Dashboard
+│   ├── Profile
+│   ├── Attendance
+│   ├── Exams
+│   ├── Marks
+│   ├── Results
+│   ├── Leave Request
+│   └── Salary
+│
+└── Admin Portal
+    ├── Dashboard
+    ├── Students
+    ├── Teachers
+    ├── Assignments
+    ├── Attendance
+    ├── Exams
+    ├── Results
+    ├── Leave Management
+    ├── Notices
+    ├── Blogs
+    ├── Contact Messages
+    ├── Fee Collection
+    └── Teacher Salary
+```
+
+---
+
+# 🛠️ Technologies Used
+
+## Frontend
+
+* Next.js
+* TypeScript
+* React Router DOM
+* Tailwind CSS
+* CSS Modules
+* CSS Grid
+* Flexbox
+* Lucide React
+* React Icons
+* Fetch API
+
+## Backend
+
+* Node.js
+* Express.js
+* REST API
+* MongoDB
+* Mongoose
+
+## Authentication & Security
+
+* JWT
+* Better Auth
+* bcrypt
+* CORS
+* dotenv
+* Role-Based Access Control
+
+## AI Integration
+
+* OpenAI API
+* Gemini API
+* Prompt-based AI workflows
+* AI-generated notices
+* AI leave applications
+* AI academic interventions
+
+## Deployment & Tools
+
+* Vercel
+* Node.js environment
+* Git
+* GitHub
+
+---
+
+# 🔄 Application Workflow
+
+```text
+                    EduManage
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+       Student       Teacher       Admin
+          │            │            │
+          ↓            ↓            ↓
+      Dashboard    Dashboard    Admin Panel
+          │            │            │
+     Attendance     Attendance    Management
+     Results        Exams         Students
+     Leave          Marks         Teachers
+     Fees           Results       Exams
+                    Leave         Results
+                    Salary        Finance
+                                  Notices
+                                  Blogs
+                                  Analytics
+```
+
+---
+
+# 🤖 AI Integration Architecture
+
+EduManage integrates AI into practical school-management workflows rather than using AI only as a standalone chatbot.
+
+### AI Features
+
+| AI Feature                 | Purpose                               |
+| -------------------------- | ------------------------------------- |
+| 🤖 Attendance Intervention | Generate academic warnings            |
+| 📝 AI Leave Application    | Generate formal leave letters         |
+| 📢 AI Notice Writer        | Generate school notices               |
+| 📊 Academic Insight        | Support student performance awareness |
+| 📄 AI Data Export          | Generate structured management data   |
+
+---
+
+# 📊 Key Project Requirements
+
+### Functional Requirements
+
+* Role-based authentication
+* Student registration
+* Teacher registration
+* Student management
+* Teacher management
+* Teacher assignment
+* Attendance management
+* Examination management
+* Marks management
+* Result management
+* Leave management
+* Fee collection
+* Teacher salary
+* Notice management
+* Blog management
+* Contact message management
+* AI integrations
+* PDF generation
+* Excel export
+
+### Non-Functional Requirements
+
+* Responsive UI
+* Secure authentication
+* Role-based authorization
+* API security
+* Maintainable architecture
+* Scalable database design
+* Responsive dashboard
+* Consistent UI/UX
+* Reliable data management
+
+---
+
+# 🧠 Key Learnings & Project Takeaways
+
+Through the development of EduManage, I gained practical experience in full-stack development, security, AI integration, API development, responsive UI/UX, and collaborative software engineering.
+
+## 1. Role-Based Access Control
+
+Developed a deeper understanding of designing secure permission systems by defining clear responsibilities for Admin, Teacher, and Student roles and ensuring sensitive operations are available only to authorized users.
+
+## 2. API Security & Authentication
+
+Gained practical experience securing REST APIs using JWT authentication and authorization middleware.
+
+Learned how to:
+
+* Protect API endpoints
+* Verify tokens
+* Validate user roles
+* Prevent unauthorized requests
+* Strengthen API security
+
+## 3. AI-Powered Application Development
+
+Learned how to integrate AI services into real-world application workflows.
+
+Implemented practical AI use cases such as:
+
+* Academic warnings
+* Leave applications
+* Notice generation
+* Academic insights
+
+## 4. Full-Stack Development & API Integration
+
+Strengthened my ability to connect frontend interfaces with backend REST APIs, manage MongoDB data through Mongoose, and build complete frontend-to-backend workflows.
+
+## 5. Agile & Iterative Development
+
+Learned how to work through an iterative development process by gradually transforming requirements and designs into functional application features.
+
+## 6. Responsive UI/UX Development
+
+Improved my ability to build responsive and accessible interfaces using:
+
+* Next.js
+* Tailwind CSS
+* CSS Grid
+* Flexbox
+
+for consistent experiences across mobile, tablet, and desktop devices.
+
+## 7. Problem-Solving & Debugging
+
+Developed stronger debugging skills by identifying and resolving:
+
+* Authentication problems
+* API vulnerabilities
+* Integration issues
+* Frontend/backend inconsistencies
+* Data-binding problems
+* Access-control issues
+
+## 8. Team Collaboration
+
+Gained practical experience working within a development team by:
+
+* Dividing development tasks
+* Coordinating implementation
+* Discussing technical problems
+* Reviewing features
+* Managing project requirements
+* Working toward shared milestones
+
+---
+
+# 🚀 Installation & Local Development
+
+## 1. Clone the Frontend Repository
+
+```bash
+git clone <frontend-repository-url>
+cd <frontend-project-folder>
+```
+
+## 2. Install Dependencies
+
+```bash
+npm install
+```
+
+## 3. Configure Environment Variables
+
+Create a `.env.local` file:
+
+```env
+NEXT_PUBLIC_API_URL=your_backend_api_url
+NEXT_PUBLIC_APP_URL=your_frontend_url
+
+MONGODB_URI=your_mongodb_connection_string
+
+JWT_SECRET=your_jwt_secret
+
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+```
+
+> Add only the environment variables actually required by your implementation.
+
+## 4. Run Development Server
+
+```bash
+npm run dev
+```
+
+The application will run locally on:
+
+```text
+http://localhost:3000
+```
+
+---
+
+# 🔧 Backend Setup
+
+```bash
+git clone <backend-repository-url>
+cd <backend-project-folder>
+npm install
+```
+
+Configure the backend environment variables:
+
+```env
+PORT=5000
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+OPENAI_API_KEY=your_openai_api_key
+GEMINI_API_KEY=your_gemini_api_key
+CLIENT_URL=your_frontend_url
+```
+
+Run the backend:
+
+```bash
+npm run dev
+```
+
+---
+
+# 📁 Suggested Project Architecture
+
+```text
+EduManage
+│
+├── Client
+│   ├── app/
+│   ├── components/
+│   ├── dashboard/
+│   ├── hooks/
+│   ├── lib/
+│   ├── services/
+│   ├── utils/
+│   └── public/
+│
+└── Server
+    ├── controllers/
+    ├── models/
+    ├── routes/
+    ├── middleware/
+    ├── services/
+    ├── utils/
+    ├── config/
+    └── server.js
+```
+
+> Adjust this structure to match the final repository structure.
+
+---
+
+# 🚀 Deployment
+
+### Frontend
+
+The frontend is deployed using **Vercel**.
+
+### Backend
+
+The backend can be deployed using a Node.js-compatible hosting environment such as:
+
+* Vercel
+* Render
+* Other Node.js hosting services
+
+### Database
+
+MongoDB is used as the primary database with Mongoose as the ODM layer.
+
+---
+
+# 🔮 Future Improvements
+
+Potential future improvements include:
+
+* 📱 Dedicated mobile application
+* 🔔 Real-time push notifications
+* 💬 Parent portal
+* 📅 Advanced timetable management
+* 📊 Advanced academic analytics
+* 🤖 AI-powered student performance prediction
+* 🧑‍🏫 AI teacher assistant
+* 📚 AI learning recommendations
+* 💳 Online payment gateway
+* 📧 Automated email notifications
+* 📱 SMS notification system
+* 📄 Advanced report generation
+* 🔍 Advanced global search
+* 🌍 Multi-school / multi-institution support
+
+---
+
+# 📸 Screenshots
+
+Add screenshots of the major interfaces here:
+
+```text
+screenshots/
+├── homepage.png
+├── admin-dashboard.png
+├── student-dashboard.png
+├── teacher-dashboard.png
+├── manage-students.png
+├── manage-teachers.png
+├── attendance.png
+├── examination.png
+├── results.png
+├── leave-management.png
+└── ai-features.png
+```
+
+Example:
+
+```md
+## 📸 Screenshots
+
+### Homepage
+![EduManage Homepage](./screenshots/homepage.png)
+
+### Admin Dashboard
+![Admin Dashboard](./screenshots/admin-dashboard.png)
+
+### Teacher Dashboard
+![Teacher Dashboard](./screenshots/teacher-dashboard.png)
+
+### Student Dashboard
+![Student Dashboard](./screenshots/student-dashboard.png)
+```
+
+---
+
+# 👨‍💻 Developers
+
+## Kazi Mohammad Shariful Amin Shifath
+
+**Software Engineer | Full Stack Developer**
+
+Contributed to the development of EduManage with a focus on:
+
+* Full-stack application development
+* Admin dashboard
+* Student management
+* Teacher management
+* Leave management
+* Attendance workflows
+* AI integrations
+* JWT authentication
+* API security
+* Responsive UI/UX
+* Database integration
+* Debugging and system improvements
+
+### Connect With Me
+
+* **GitHub:** `Shifath0570`
+* **LinkedIn:** Add your LinkedIn profile
+
+---
+
+# 👥 Team Endgame_Warrior
+
+| Developer                               | Role                               |
+| --------------------------------------- | ---------------------------------- |
+| **Kazi Mohammad Shariful Amin Shifath** | Full Stack Developer               |
+| **Md Maksumul Haque Emon**              | Full Stack Developer               |
+| **Md. Osman Goni**                      | Full Stack Developer               |
+| **Obaydur Rahman Ayon**                 | Full Stack Developer               |
+
+---
+
+# 📜 Project Status
+
+**Status:** ✅ Completed / Production Deployed
+
+EduManage is deployed as a live web application and demonstrates a complete full-stack school management workflow with role-based access, academic management, finance modules, AI-powered features, and responsive dashboards.
+
+---
+
+# ⭐ Project Highlights
+
+```text
+✓ Role-Based Access Control
+✓ Student Management
+✓ Teacher Management
+✓ Class & Subject Assignment
+✓ Attendance Management
+✓ 75% Attendance Warning System
+✓ Examination Management
+✓ Marks Entry
+✓ Result Management
+✓ AI Leave Application
+✓ AI Notice Writer
+✓ AI Academic Intervention
+✓ Fee Collection
+✓ Teacher Salary
+✓ PDF Voucher Generation
+✓ Excel Data Export
+✓ Notice Management
+✓ Blog Management
+✓ Contact Message Management
+✓ Admin Analytics Dashboard
+✓ JWT API Security
+✓ Responsive UI/UX
+✓ Full-Stack REST API Architecture
+```
+
+---
+
+# 📄 License
+
+This project was developed as a team software engineering project for educational and portfolio purposes.
+
+---
+
+<p align="center">
+  <strong>🎓 EduManage — Empowering Education Through Smart Technology</strong>
+</p>
+
+<p align="center">
+  Built with ❤️ by <strong>Endgame_Warrior</strong>
+</p>
+
 
